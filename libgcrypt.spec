@@ -1,10 +1,9 @@
 Name: libgcrypt
-Version: 1.2.0
-Release: 3
-Source0: ftp://ftp.gnupg.org:/pub/gcrypt/alpha/libgcrypt/libgcrypt-%{version}.tar.gz
-Source1: ftp://ftp.gnupg.org:/pub/gcrypt/alpha/libgcrypt/libgcrypt-%{version}.tar.gz.sig
+Version: 1.2.1
+Release: 1
+Source0: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2
+Source1: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2.sig
 Source2: wk@g10code.com
-Patch0: libgcrypt-1.1.7-splint.patch
 License: LGPL
 Summary: A general-purpose cryptography library.
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
@@ -29,11 +28,11 @@ applications using libgcrypt.
 
 %prep
 %setup -q
-#%patch0 -p0 -b .jbj
 
 %build
 %configure --disable-asm
 make
+make check
 
 %install
 rm -fr $RPM_BUILD_ROOT
@@ -78,6 +77,9 @@ fi
 %{_infodir}/gcrypt.info*
 
 %changelog
+* Wed Mar 16 2005 Nalin Dahyabhai <nalin@redhat.com>
+- update to 1.2.1
+
 * Fri Jul 30 2004 Florian La Roche <Florian.LaRoche@redhat.de>
 - another try to package the symlink
 
