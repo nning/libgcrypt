@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.2.0
-Release: 1
+Release: 2
 Source0: ftp://ftp.gnupg.org:/pub/gcrypt/alpha/libgcrypt/libgcrypt-%{version}.tar.gz
 Source1: ftp://ftp.gnupg.org:/pub/gcrypt/alpha/libgcrypt/libgcrypt-%{version}.tar.gz.sig
 Source2: wk@g10code.com
@@ -78,6 +78,9 @@ fi
 %{_infodir}/gcrypt.info*
 
 %changelog
+* Tue Jun 15 2004 Elliot Lee <sopwith@redhat.com>
+- rebuilt
+
 * Sun May  2 2004 Bill Nottingham <notting@redhat.com> - 1.2.0-1
 - update to official 1.2.0
 
