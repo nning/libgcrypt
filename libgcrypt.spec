@@ -1,6 +1,6 @@
 Name: libgcrypt
-Version: 1.1.12
-Release: 3.1
+Version: 1.2.0
+Release: 1
 Source0: ftp://ftp.gnupg.org:/pub/gcrypt/alpha/libgcrypt/libgcrypt-%{version}.tar.gz
 Source1: ftp://ftp.gnupg.org:/pub/gcrypt/alpha/libgcrypt/libgcrypt-%{version}.tar.gz.sig
 Source2: wk@g10code.com
@@ -8,12 +8,14 @@ Patch0: libgcrypt-1.1.7-splint.patch
 License: LGPL
 Summary: A general-purpose cryptography library.
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
+BuildRequires: libgpg-error-devel
 Group: System Environment/Libraries
 
 %package devel
 Summary: Development files for the %{name} package.
 Group: Development/Libraries
 PreReq: /sbin/install-info
+Requires: libgpg-error-devel
 Requires: %{name} = %{version}-%{release}
 
 %description
@@ -41,7 +43,7 @@ rm -fr $RPM_BUILD_ROOT
 mv	${RPM_BUILD_ROOT}%{_bindir}/*-libgcrypt-config \
 	${RPM_BUILD_ROOT}%{_bindir}/libgcrypt-config || :
 
-rm -f ${RPM_BUILD_ROOT}/%{_infodir}/dir
+rm -f ${RPM_BUILD_ROOT}/%{_infodir}/dir ${RPM_BUILD_ROOT}/%{_libdir}/*.la
 /sbin/ldconfig -n $RPM_BUILD_ROOT%{_libdir}
 
 %clean
@@ -69,7 +71,6 @@ fi
 %{_bindir}/%{name}-config
 %{_includedir}/*
 %{_libdir}/*.a
-%{_libdir}/*.la
 %{_libdir}/*.so
 %{_datadir}/aclocal/*
 #%{_datadir}/%{name}
@@ -77,6 +78,12 @@ fi
 %{_infodir}/gcrypt.info*
 
 %changelog
+* Sun May  2 2004 Bill Nottingham <notting@redhat.com> - 1.2.0-1
+- update to official 1.2.0
+
+* Fri Apr 16 2004 Bill Nottingham <notting@redhat.com> - 1.1.94-1
+- update to 1.1.94
+
 * Tue Mar 02 2004 Elliot Lee <sopwith@redhat.com>
 - rebuilt
 
