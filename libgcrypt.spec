@@ -1,9 +1,10 @@
 Name: libgcrypt
-Version: 1.1.7
-Release: 3
-Source: ftp://ftp.gnupg.org:/pub/gcrypt/alpha/libgcrypt/libgcrypt-%{version}.tar.gz
+Version: 1.1.12
+Release: 1.1
+Source0: ftp://ftp.gnupg.org:/pub/gcrypt/alpha/libgcrypt/libgcrypt-%{version}.tar.gz
+Source1: ftp://ftp.gnupg.org:/pub/gcrypt/alpha/libgcrypt/libgcrypt-%{version}.tar.gz.sig
+Source2: wk@g10code.com
 Patch0: libgcrypt-1.1.7-splint.patch
-Patch1: libgcrypt-1.1.7-alpha.patch
 License: LGPL
 Summary: A general-purpose cryptography library.
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
@@ -26,8 +27,7 @@ applications using libgcrypt.
 
 %prep
 %setup -q
-%patch0 -p0 -b .jbj
-%patch1 -p1 -b .alpha
+#%patch0 -p0 -b .jbj
 
 %build
 %configure --disable-asm
@@ -76,6 +76,12 @@ fi
 %{_infodir}/gcrypt.info*
 
 %changelog
+* Wed Jun 04 2003 Elliot Lee <sopwith@redhat.com>
+- rebuilt
+
+* Thu Mar 20 2003 Jeff Johnson <jbj@redhat.com> 1.1.12-1
+- upgrade to 1.1.12 (beta).
+
 * Fri Jun 21 2002 Tim Powers <timp@redhat.com>
 - automated rebuild
 
