@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.1.12
-Release: 1.1
+Release: 3.1
 Source0: ftp://ftp.gnupg.org:/pub/gcrypt/alpha/libgcrypt/libgcrypt-%{version}.tar.gz
 Source1: ftp://ftp.gnupg.org:/pub/gcrypt/alpha/libgcrypt/libgcrypt-%{version}.tar.gz.sig
 Source2: wk@g10code.com
@@ -42,6 +42,7 @@ mv	${RPM_BUILD_ROOT}%{_bindir}/*-libgcrypt-config \
 	${RPM_BUILD_ROOT}%{_bindir}/libgcrypt-config || :
 
 rm -f ${RPM_BUILD_ROOT}/%{_infodir}/dir
+/sbin/ldconfig -n $RPM_BUILD_ROOT%{_libdir}
 
 %clean
 rm -fr $RPM_BUILD_ROOT
@@ -76,6 +77,15 @@ fi
 %{_infodir}/gcrypt.info*
 
 %changelog
+* Tue Mar 02 2004 Elliot Lee <sopwith@redhat.com>
+- rebuilt
+
+* Sat Feb 21 2004 Florian La Roche <Florian.LaRoche@redhat.de>
+- add symlinks to shared libs at compile time
+
+* Fri Feb 13 2004 Elliot Lee <sopwith@redhat.com>
+- rebuilt
+
 * Wed Jun 04 2003 Elliot Lee <sopwith@redhat.com>
 - rebuilt
 
