@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.2.0
-Release: 2
+Release: 3
 Source0: ftp://ftp.gnupg.org:/pub/gcrypt/alpha/libgcrypt/libgcrypt-%{version}.tar.gz
 Source1: ftp://ftp.gnupg.org:/pub/gcrypt/alpha/libgcrypt/libgcrypt-%{version}.tar.gz.sig
 Source2: wk@g10code.com
@@ -44,7 +44,7 @@ mv	${RPM_BUILD_ROOT}%{_bindir}/*-libgcrypt-config \
 	${RPM_BUILD_ROOT}%{_bindir}/libgcrypt-config || :
 
 rm -f ${RPM_BUILD_ROOT}/%{_infodir}/dir ${RPM_BUILD_ROOT}/%{_libdir}/*.la
-/sbin/ldconfig -n $RPM_BUILD_ROOT%{_libdir}
+/sbin/ldconfig -n $RPM_BUILD_ROOT/%{_libdir}
 
 %clean
 rm -fr $RPM_BUILD_ROOT
@@ -63,7 +63,7 @@ fi
 
 %files
 %defattr(-,root,root)
-%{_libdir}/*.so.*.*
+%{_libdir}/*.so.*
 #%{_libdir}/%{name}
 
 %files devel
@@ -78,6 +78,9 @@ fi
 %{_infodir}/gcrypt.info*
 
 %changelog
+* Fri Jul 30 2004 Florian La Roche <Florian.LaRoche@redhat.de>
+- another try to package the symlink
+
 * Tue Jun 15 2004 Elliot Lee <sopwith@redhat.com>
 - rebuilt
 
