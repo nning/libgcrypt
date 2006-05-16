@@ -1,9 +1,10 @@
 Name: libgcrypt
 Version: 1.2.2
-Release: 1.2.1
+Release: 2
 Source0: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2
 Source1: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2.sig
 Source2: wk@g10code.com
+Patch0: libgcrypt-1.2.2-lib64.patch
 License: LGPL
 Summary: A general-purpose cryptography library.
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
@@ -28,6 +29,7 @@ applications using libgcrypt.
 
 %prep
 %setup -q
+#%patch0 -p1 -b .lib64
 
 %build
 %configure --disable-asm
@@ -38,9 +40,10 @@ make check
 rm -fr $RPM_BUILD_ROOT
 %makeinstall
 
-# XXX until %%configure is figgered
-mv	${RPM_BUILD_ROOT}%{_bindir}/*-libgcrypt-config \
-	${RPM_BUILD_ROOT}%{_bindir}/libgcrypt-config || :
+# Change /usr/lib64 back to /usr/lib.  This saves us from having to patch the
+# script to "know" that -L/usr/lib64 should be suppressed, and also removes
+# a file conflict between 32- and 64-bit versions of this package.
+sed -i -e 's,^libdir="/usr/lib.*"$,libdir="/usr/lib",g' $RPM_BUILD_ROOT/%{_bindir}/libgcrypt-config
 
 rm -f ${RPM_BUILD_ROOT}/%{_infodir}/dir ${RPM_BUILD_ROOT}/%{_libdir}/*.la
 /sbin/ldconfig -n $RPM_BUILD_ROOT/%{_libdir}
@@ -77,6 +80,11 @@ fi
 %{_infodir}/gcrypt.info*
 
 %changelog
+* Tue May 16 2006 Nalin Dahyabhai <nalin@redhat.com> 1.2.2-2
+- remove file conflicts in libgcrypt-config by making the 64-bit version
+  think the libraries are in /usr/lib (which is wrong, but which it also
+  prunes from the suggest --libs output, so no harm done, hopefully)
+
 * Fri Feb 10 2006 Jesse Keating <jkeating@redhat.com> - 1.2.2-1.2.1
 - bump again for double-long bug on ppc(64)
 

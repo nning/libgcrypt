@@ -1,0 +1,14 @@
+We should suppress an explicit -L on 64-bit arches, too.
+
+--- libgcrypt-1.2.2/src/libgcrypt-config.in	2006-05-16 18:50:43.000000000 -0400
++++ libgcrypt-1.2.2/src/libgcrypt-config.in	2006-05-16 18:50:50.000000000 -0400
+@@ -138,7 +138,8 @@
+     libs_final="$libs"
+ 
+     # Set up `libdirs'.
+-    if test "x$libdir" != "x/usr/lib" -a "x$libdir" != "x/lib"; then
++    if test "x$libdir" != "x/usr/lib"   -a "x$libdir" != "x/lib" -a \
++            "x$libdir" != "x/usr/lib64" -a "x$libdir" != "x/lib64"; then
+ 	libdirs="-L$libdir"
+     fi
+ 
