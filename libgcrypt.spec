@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.2.2
-Release: 2
+Release: 3
 Source0: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2
 Source1: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2.sig
 Source2: wk@g10code.com
@@ -8,7 +8,7 @@ Patch0: libgcrypt-1.2.2-lib64.patch
 License: LGPL
 Summary: A general-purpose cryptography library.
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
-BuildRequires: libgpg-error-devel
+BuildRequires: libgpg-error-devel pkgconfig
 Group: System Environment/Libraries
 
 %package devel
@@ -80,6 +80,9 @@ fi
 %{_infodir}/gcrypt.info*
 
 %changelog
+* Mon Jun 05 2006 Jesse Keating <jkeating@redhat.com> 1.2.2-3
+- Added missing buildreq pkgconfig
+
 * Tue May 16 2006 Nalin Dahyabhai <nalin@redhat.com> 1.2.2-2
 - remove file conflicts in libgcrypt-config by making the 64-bit version
   think the libraries are in /usr/lib (which is wrong, but which it also
