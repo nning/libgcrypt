@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.2.3
-Release: 1
+Release: 2
 Source0: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2
 Source1: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2.sig
 Source2: wk@g10code.com
@@ -57,11 +57,13 @@ rm -fr $RPM_BUILD_ROOT
 
 %post devel
 /sbin/install-info %{_infodir}/gcrypt.info.gz %{_infodir}/dir
+exit 0
 
 %preun devel
 if [ $1 = 0 ]; then
     /sbin/install-info --delete %{_infodir}/gcrypt.info.gz %{_infodir}/dir
 fi
+exit 0
 
 %files
 %defattr(-,root,root)
@@ -80,6 +82,9 @@ fi
 %{_infodir}/gcrypt.info*
 
 %changelog
+* Mon Jan 22 2007 Nalin Dahyabhai <nalin@redhat.com> - 1.2.3-2
+- make use of install-info more failsafe (Ville Skyttä, #223705)
+
 * Fri Sep  1 2006 Nalin Dahyabhai <nalin@redhat.com> - 1.2.3-1
 - update to 1.2.3
 
