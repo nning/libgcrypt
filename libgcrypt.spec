@@ -1,6 +1,6 @@
 Name: libgcrypt
-Version: 1.2.3
-Release: 2
+Version: 1.2.4
+Release: 1
 Source0: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2
 Source1: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2.sig
 Source2: wk@g10code.com
@@ -82,6 +82,9 @@ exit 0
 %{_infodir}/gcrypt.info*
 
 %changelog
+* Tue Feb  6 2007 Nalin Dahyabhai <nalin@redhat.com> - 1.2.4-1
+- update to 1.2.4
+
 * Mon Jan 22 2007 Nalin Dahyabhai <nalin@redhat.com> - 1.2.3-2
 - make use of install-info more failsafe (Ville Skyttä, #223705)
 
