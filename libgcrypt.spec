@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.2.4
-Release: 1
+Release: 2
 Source0: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2
 Source1: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2.sig
 Source2: wk@g10code.com
@@ -48,6 +48,31 @@ sed -i -e 's,^libdir="/usr/lib.*"$,libdir="/usr/lib",g' $RPM_BUILD_ROOT/%{_bindi
 rm -f ${RPM_BUILD_ROOT}/%{_infodir}/dir ${RPM_BUILD_ROOT}/%{_libdir}/*.la
 /sbin/ldconfig -n $RPM_BUILD_ROOT/%{_libdir}
 
+# Relocate the shared libraries to /%{_lib}.
+mkdir -p $RPM_BUILD_ROOT/%{_lib}
+for shlib in $RPM_BUILD_ROOT/%{_libdir}/*.so* ; do
+	if test -L "$shlib" ; then
+		rm "$shlib"
+	else
+		mv "$shlib" $RPM_BUILD_ROOT/%{_lib}/
+	fi
+done
+# Figure out where /%{_lib} is relative to %{_libdir}.
+touch $RPM_BUILD_ROOT/root_marker
+relroot=..
+while ! test -f $RPM_BUILD_ROOT/%{_libdir}/$relroot/root_marker ; do
+	relroot=$relroot/..
+done
+# Overwrite development symlinks.
+pushd $RPM_BUILD_ROOT/%{_libdir}
+for shlib in $relroot/%{_lib}/lib*.so.* ; do
+	shlib=`echo "$shlib" | sed -e 's,//,/,g'`
+	target=`basename "$shlib" | sed -e 's,\.so.*,,g'`.so
+	ln -sf $shlib $target
+done
+popd
+rm -f $RPM_BUILD_ROOT/root_marker
+
 %clean
 rm -fr $RPM_BUILD_ROOT
 
@@ -67,7 +92,7 @@ exit 0
 
 %files
 %defattr(-,root,root)
-%{_libdir}/*.so.*
+/%{_lib}/*.so.*
 #%{_libdir}/%{name}
 
 %files devel
@@ -82,6 +107,9 @@ exit 0
 %{_infodir}/gcrypt.info*
 
 %changelog
+* Fri Jul 27 2007 Nalin Dahyabhai <nalin@redhat.com> - 1.2.4-2
+- move libgcrypt shared library to /%{_lib} (#249815)
+
 * Tue Feb  6 2007 Nalin Dahyabhai <nalin@redhat.com> - 1.2.4-1
 - update to 1.2.4
 
