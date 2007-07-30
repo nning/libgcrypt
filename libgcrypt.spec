@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.2.4
-Release: 2
+Release: 3
 Source0: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2
 Source1: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2.sig
 Source2: wk@g10code.com
@@ -32,7 +32,7 @@ applications using libgcrypt.
 #%patch0 -p1 -b .lib64
 
 %build
-%configure --disable-asm
+%configure --disable-asm --disable-static
 make
 make check
 
@@ -99,7 +99,6 @@ exit 0
 %defattr(-,root,root)
 %{_bindir}/%{name}-config
 %{_includedir}/*
-%{_libdir}/*.a
 %{_libdir}/*.so
 %{_datadir}/aclocal/*
 #%{_datadir}/%{name}
@@ -107,6 +106,9 @@ exit 0
 %{_infodir}/gcrypt.info*
 
 %changelog
+* Mon Jul 30 2007 Nalin Dahyabhai <nalin@redhat.com> - 1.2.4-3
+- disable static libraries (part of #249815)
+
 * Fri Jul 27 2007 Nalin Dahyabhai <nalin@redhat.com> - 1.2.4-2
 - move libgcrypt shared library to /%{_lib} (#249815)
 
