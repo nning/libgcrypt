@@ -5,7 +5,7 @@ Source0: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2
 Source1: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2.sig
 Source2: wk@g10code.com
 Patch0: libgcrypt-1.2.2-lib64.patch
-License: LGPL
+License: LGPLv2+
 Summary: A general-purpose cryptography library.
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildRequires: libgpg-error-devel pkgconfig
@@ -32,7 +32,7 @@ applications using libgcrypt.
 #%patch0 -p1 -b .lib64
 
 %build
-%configure --disable-asm --disable-static
+%configure --disable-asm --disable-static --enable-random=linux
 make
 make check
 
@@ -106,6 +106,11 @@ exit 0
 %{_infodir}/gcrypt.info*
 
 %changelog
+* Thu Aug 16 2007 Nalin Dahyabhai <nalin@redhat.com> - 1.2.4-4
+- clarify license
+- force use of the linux /dev/random RNG, to avoid accidentally falling back
+  to others which would affect the license of the resulting library
+
 * Mon Jul 30 2007 Nalin Dahyabhai <nalin@redhat.com> - 1.2.4-3
 - disable static libraries (part of #249815)
 
