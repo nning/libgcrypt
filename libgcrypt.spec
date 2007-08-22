@@ -1,14 +1,13 @@
 Name: libgcrypt
 Version: 1.2.4
-Release: 4
+Release: 5
 Source0: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2
 Source1: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2.sig
 Source2: wk@g10code.com
-Patch0: libgcrypt-1.2.2-lib64.patch
 License: LGPLv2+
 Summary: A general-purpose cryptography library.
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
-BuildRequires: libgpg-error-devel pkgconfig
+BuildRequires: gawk libgpg-error-devel pkgconfig
 Group: System Environment/Libraries
 
 %package devel
@@ -29,10 +28,12 @@ applications using libgcrypt.
 
 %prep
 %setup -q
-#%patch0 -p1 -b .lib64
 
 %build
-%configure --disable-asm --disable-static --enable-random=linux
+%configure --disable-asm --disable-static --enable-noexecstack
+# Verify that RNG methods which aren't LGPL aren't enabled.
+grep '^#define USE_RNDUNIX 0$' config.h
+grep '^#define USE_RNDW32 0$' config.h
 make
 make check
 
@@ -106,6 +107,11 @@ exit 0
 %{_infodir}/gcrypt.info*
 
 %changelog
+* Wed Aug 22 2007 Nalin Dahyabhai <nalin@redhat.com> - 1.2.4-5
+- add missing gawk buildrequirement
+- switch from explicitly specifying the /dev/random RNG to just verifying
+  that the non-LGPL ones were disabled by the configure script
+
 * Thu Aug 16 2007 Nalin Dahyabhai <nalin@redhat.com> - 1.2.4-4
 - clarify license
 - force use of the linux /dev/random RNG, to avoid accidentally falling back
