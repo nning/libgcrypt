@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.2.4
-Release: 5
+Release: 6
 Source0: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2
 Source1: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2.sig
 Source2: wk@g10code.com
@@ -72,6 +72,8 @@ for shlib in $relroot/%{_lib}/lib*.so.* ; do
 	ln -sf $shlib $target
 done
 popd
+# Add soname symlink.
+/sbin/ldconfig -n $RPM_BUILD_ROOT/%{_lib}/
 rm -f $RPM_BUILD_ROOT/root_marker
 
 %clean
@@ -107,6 +109,10 @@ exit 0
 %{_infodir}/gcrypt.info*
 
 %changelog
+* Tue Oct 16 2007 Nalin Dahyabhai <nalin@redhat.com> - 1.2.4-6
+- use ldconfig to build the soname symlink for packaging along with the
+  shared library (#334731)
+
 * Wed Aug 22 2007 Nalin Dahyabhai <nalin@redhat.com> - 1.2.4-5
 - add missing gawk buildrequirement
 - switch from explicitly specifying the /dev/random RNG to just verifying
