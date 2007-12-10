@@ -1,6 +1,6 @@
 Name: libgcrypt
-Version: 1.2.4
-Release: 6
+Version: 1.4.0
+Release: 1
 Source0: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2
 Source1: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2.sig
 Source2: wk@g10code.com
@@ -30,11 +30,10 @@ applications using libgcrypt.
 %setup -q
 
 %build
-%configure --disable-asm --disable-static --enable-noexecstack
-# Verify that RNG methods which aren't LGPL aren't enabled.
-grep '^#define USE_RNDUNIX 0$' config.h
-grep '^#define USE_RNDW32 0$' config.h
+%configure --disable-static --enable-noexecstack
 make
+
+%check
 make check
 
 %install
@@ -58,12 +57,14 @@ for shlib in $RPM_BUILD_ROOT/%{_libdir}/*.so* ; do
 		mv "$shlib" $RPM_BUILD_ROOT/%{_lib}/
 	fi
 done
+
 # Figure out where /%{_lib} is relative to %{_libdir}.
 touch $RPM_BUILD_ROOT/root_marker
 relroot=..
 while ! test -f $RPM_BUILD_ROOT/%{_libdir}/$relroot/root_marker ; do
 	relroot=$relroot/..
 done
+
 # Overwrite development symlinks.
 pushd $RPM_BUILD_ROOT/%{_libdir}
 for shlib in $relroot/%{_lib}/lib*.so.* ; do
@@ -72,6 +73,7 @@ for shlib in $relroot/%{_lib}/lib*.so.* ; do
 	ln -sf $shlib $target
 done
 popd
+
 # Add soname symlink.
 /sbin/ldconfig -n $RPM_BUILD_ROOT/%{_lib}/
 rm -f $RPM_BUILD_ROOT/root_marker
@@ -101,6 +103,7 @@ exit 0
 %files devel
 %defattr(-,root,root)
 %{_bindir}/%{name}-config
+%{_bindir}/dumpsexp
 %{_includedir}/*
 %{_libdir}/*.so
 %{_datadir}/aclocal/*
@@ -109,6 +112,9 @@ exit 0
 %{_infodir}/gcrypt.info*
 
 %changelog
+* Mon Dec 10 2007 Nalin Dahyabhai <nalin@redhat.com> - 1.4.0-1
+- update to 1.4.0
+
 * Tue Oct 16 2007 Nalin Dahyabhai <nalin@redhat.com> - 1.2.4-6
 - use ldconfig to build the soname symlink for packaging along with the
   shared library (#334731)
