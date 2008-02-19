@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.4.0
-Release: 1
+Release: 2
 Source0: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2
 Source1: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2.sig
 Source2: wk@g10code.com
@@ -112,6 +112,9 @@ exit 0
 %{_infodir}/gcrypt.info*
 
 %changelog
+* Tue Feb 19 2008 Fedora Release Engineering <rel-eng@fedoraproject.org> - 1.4.0-2
+- Autorebuild for GCC 4.3
+
 * Mon Dec 10 2007 Nalin Dahyabhai <nalin@redhat.com> - 1.4.0-1
 - update to 1.4.0
 
