@@ -29,7 +29,7 @@ applications using libgcrypt.
 
 %prep
 %setup -q
-%patch0 -p1 -b .randinit
+%patch0 -p0 -b .randinit
 
 %build
 %configure --disable-static --enable-noexecstack
