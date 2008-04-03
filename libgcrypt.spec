@@ -1,9 +1,10 @@
 Name: libgcrypt
 Version: 1.4.0
-Release: 2
+Release: 3
 Source0: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2
 Source1: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2.sig
 Source2: wk@g10code.com
+Patch0: libgcrypt-1.4.0-randinit.patch
 License: LGPLv2+
 Summary: A general-purpose cryptography library.
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
@@ -28,6 +29,7 @@ applications using libgcrypt.
 
 %prep
 %setup -q
+%patch0 -p1 -b .randinit
 
 %build
 %configure --disable-static --enable-noexecstack
@@ -112,6 +114,10 @@ exit 0
 %{_infodir}/gcrypt.info*
 
 %changelog
+* Thu Apr  3 2008 Joe Orton <jorton@redhat.com> 1.4.0-3
+- add patch from upstream to fix severe performance regression
+  in entropy gathering
+
 * Tue Feb 19 2008 Fedora Release Engineering <rel-eng@fedoraproject.org> - 1.4.0-2
 - Autorebuild for GCC 4.3
 

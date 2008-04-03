@@ -1,0 +1,90 @@
+From gnutls-devel-bounces+joe=manyfish.co.uk@gnu.org Tue Jan 08 18:41:52 2008
+From: Werner Koch <wk@gnupg.org>
+To: Simon Josefsson <simon@josefsson.org>
+Mail-Followup-To: Simon Josefsson <simon@josefsson.org>,
+	Guus Sliepen <guus@debian.org>, gnutls-devel@gnu.org,
+	343085@bugs.debian.org, gcrypt-devel@gnupg.org
+Date: Tue, 08 Jan 2008 12:39:02 +0100
+Cc: Guus Sliepen <guus@debian.org>, gcrypt-devel@gnupg.org,
+	gnutls-devel@gnu.org, 343085@bugs.debian.org
+Subject: [patch] Re: Bug#448775: Uses too much entropy (Debian Bug #343085)
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8
+Status: RO
+
+On Tue,  8 Jan 2008 11:59, wk@gnupg.org said:
+
+> Anyway there 3000 calls to /dev/urandom are far too many for an initial
+> pool filling.  I need to check this.
+
+Found it.  The bug was introduced with libgcrypt 1.3.1.  Here is a patch:
+
+2008-01-08  Werner Koch  <wk@g10code.com>
+
+	* random.c (add_randomness): Do not just increment
+	POOL_FILLED_COUNTER but update it by the actual amount of data.
+
+Index: cipher/random.c
+===================================================================
+--- cipher/random.c	(revision 1277)
++++ cipher/random.c	(working copy)
+@@ -1115,6 +1115,7 @@
+ add_randomness (const void *buffer, size_t length, enum random_origins origin)
+ {
+   const unsigned char *p = buffer;
++  size_t count = 0;
+ 
+   assert (pool_is_locked);
+ 
+@@ -1123,6 +1124,7 @@
+   while (length-- )
+     {
+       rndpool[pool_writepos++] ^= *p++;
++      count++;
+       if (pool_writepos >= POOLSIZE )
+         {
+           /* It is possible that we are invoked before the pool is
+@@ -1132,7 +1134,9 @@
+              separately.  See also the remarks about the seed file. */
+           if (origin >= RANDOM_ORIGIN_SLOWPOLL && !pool_filled)
+             {
+-              if (++pool_filled_counter >= POOLSIZE)
++              pool_filled_counter += count;
++              count = 0;
++              if (pool_filled_counter >= POOLSIZE)
+                 pool_filled = 1;
+             }
+           pool_writepos = 0;
+
+
+Also commited to SVN.  Old and new stats:
+
+$ LD_PRELOAD=/usr/local/lib/libgcrypt.so ./benchmark --verbose random
+random       130ms    30ms
+random usage: poolsize=600 mixed=972 polls=3000/200 added=4200/378400
+              outmix=200 getlvl1=200/13600 getlvl2=0/0
+
+$ ./benchmark --verbose random
+random        40ms    30ms
+random usage: poolsize=600 mixed=377 polls=25/200 added=1225/21400
+              outmix=200 getlvl1=200/13600 getlvl2=0/0
+
+
+
+Shalom-Salam,
+
+   Werner
+
+
+
+-- 
+Die Gedanken sind frei.  Auschnahme regelt ein Bundeschgesetz.
+
+
+
+_______________________________________________
+Gnutls-devel mailing list
+Gnutls-devel@gnu.org
+http://lists.gnu.org/mailman/listinfo/gnutls-devel
+
