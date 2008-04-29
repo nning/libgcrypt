@@ -1,14 +1,14 @@
 Name: libgcrypt
-Version: 1.4.0
-Release: 3
+Version: 1.4.1
+Release: 1
 Source0: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2
 Source1: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2.sig
 Source2: wk@g10code.com
-Patch0: libgcrypt-1.4.0-randinit.patch
+# Technically LGPLv2.1+, but Fedora's table doesn't draw a distinction.
 License: LGPLv2+
 Summary: A general-purpose cryptography library.
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
-BuildRequires: gawk libgpg-error-devel pkgconfig
+BuildRequires: gawk, libgpg-error-devel >= 1.4, pkgconfig
 Group: System Environment/Libraries
 
 %package devel
@@ -29,7 +29,6 @@ applications using libgcrypt.
 
 %prep
 %setup -q
-%patch0 -p0 -b .randinit
 
 %build
 %configure --disable-static --enable-noexecstack
@@ -114,6 +113,11 @@ exit 0
 %{_infodir}/gcrypt.info*
 
 %changelog
+* Tue Apr 29 2008 Nalin Dahyabhai <nalin@redhat.com> 1.4.1-1
+- update to 1.4.1
+- bump libgpgerror-devel requirement to 1.4, matching the requirement enforced
+  by the configure script
+
 * Thu Apr  3 2008 Joe Orton <jorton@redhat.com> 1.4.0-3
 - add patch from upstream to fix severe performance regression
   in entropy gathering
