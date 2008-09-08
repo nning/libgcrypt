@@ -1,5 +1,5 @@
 Name: libgcrypt
-Version: 1.4.1
+Version: 1.4.2
 Release: 1
 Source0: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2
 Source1: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2.sig
@@ -105,6 +105,7 @@ exit 0
 %defattr(-,root,root)
 %{_bindir}/%{name}-config
 %{_bindir}/dumpsexp
+%{_bindir}/hmac256
 %{_includedir}/*
 %{_libdir}/*.so
 %{_datadir}/aclocal/*
@@ -113,6 +114,9 @@ exit 0
 %{_infodir}/gcrypt.info*
 
 %changelog
+* Mon Sep  8 2008 Nalin Dahyabhai <nalin@redhat.com> 1.4.2-1
+- update to 1.4.2
+
 * Tue Apr 29 2008 Nalin Dahyabhai <nalin@redhat.com> 1.4.1-1
 - update to 1.4.1
 - bump libgpgerror-devel requirement to 1.4, matching the requirement enforced
