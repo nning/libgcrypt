@@ -32,7 +32,7 @@ applications using libgcrypt.
 
 %build
 %configure --disable-static --enable-noexecstack
-make
+make %{?_smp_mflags}
 
 %check
 make check
@@ -114,6 +114,10 @@ exit 0
 %{_infodir}/gcrypt.info*
 
 %changelog
+* Mon Sep 15 2008 Nalin Dahyabhai <nalin@redhat.com>
+- invoke make with %%{?_smp_mflags} to build faster on multi-processor
+  systems (Steve Grubb)
+
 * Mon Sep  8 2008 Nalin Dahyabhai <nalin@redhat.com> 1.4.2-1
 - update to 1.4.2
 
