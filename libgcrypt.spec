@@ -1,12 +1,12 @@
 Name: libgcrypt
-Version: 1.4.2
-Release: 1
+Version: 1.4.3
+Release: 1%{?dist}
 Source0: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2
 Source1: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2.sig
 Source2: wk@g10code.com
 # Technically LGPLv2.1+, but Fedora's table doesn't draw a distinction.
 License: LGPLv2+
-Summary: A general-purpose cryptography library.
+Summary: A general-purpose cryptography library
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildRequires: gawk, libgpg-error-devel >= 1.4, pkgconfig
 Group: System Environment/Libraries
@@ -79,6 +79,10 @@ popd
 /sbin/ldconfig -n $RPM_BUILD_ROOT/%{_lib}/
 rm -f $RPM_BUILD_ROOT/root_marker
 
+# Create /etc/gcrypt (hardwired, not dependent on the configure invocation) so
+# that _someone_ owns it.
+mkdir -p -m 755 $RPM_BUILD_ROOT/etc/gcrypt
+
 %clean
 rm -fr $RPM_BUILD_ROOT
 
@@ -98,6 +102,7 @@ exit 0
 
 %files
 %defattr(-,root,root)
+%dir /etc/gcrypt
 /%{_lib}/*.so.*
 #%{_libdir}/%{name}
 
@@ -114,6 +119,10 @@ exit 0
 %{_infodir}/gcrypt.info*
 
 %changelog
+* Thu Sep 18 2008 Nalin Dahyabhai <nalin@redhat.com> 1.4.3-1
+- update to 1.4.3
+- own /etc/gcrypt
+
 * Mon Sep 15 2008 Nalin Dahyabhai <nalin@redhat.com>
 - invoke make with %%{?_smp_mflags} to build faster on multi-processor
   systems (Steve Grubb)
