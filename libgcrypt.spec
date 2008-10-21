@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.4.3
-Release: 1%{?dist}
+Release: 2%{?dist}
 Source0: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2
 Source1: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2.sig
 Source2: wk@g10code.com
@@ -31,7 +31,11 @@ applications using libgcrypt.
 %setup -q
 
 %build
-%configure --disable-static --enable-noexecstack
+%configure --disable-static \
+%ifarch sparc64
+     --disable-asm \
+%endif
+     --enable-noexecstack
 make %{?_smp_mflags}
 
 %check
@@ -119,6 +123,9 @@ exit 0
 %{_infodir}/gcrypt.info*
 
 %changelog
+* Mon Oct 20 2008 Dennis Gilmore <dennis@ausil.us> 1.4.3-2
+- disable asm on sparc64
+
 * Thu Sep 18 2008 Nalin Dahyabhai <nalin@redhat.com> 1.4.3-1
 - update to 1.4.3
 - own /etc/gcrypt
