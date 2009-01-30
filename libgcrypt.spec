@@ -1,9 +1,16 @@
 Name: libgcrypt
-Version: 1.4.3
-Release: 2%{?dist}
-Source0: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2
-Source1: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2.sig
+Version: 1.4.4
+Release: 1%{?dist}
+Source0: libgcrypt-%{version}-hobbled.tar.bz2
+# The original libgcrypt sources now contain potentially patented ECC
+# cipher support. We have to remove it in the tarball we ship with
+# the hobble-libgcrypt script.
+#Source0: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2
+#Source1: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2.sig
 Source2: wk@g10code.com
+Source3: hobble-libgcrypt
+Patch1: libgcrypt-1.4.4-fips-no-access.patch
+
 # Technically LGPLv2.1+, but Fedora's table doesn't draw a distinction.
 License: LGPLv2+
 Summary: A general-purpose cryptography library
@@ -29,13 +36,16 @@ applications using libgcrypt.
 
 %prep
 %setup -q
+%{SOURCE3}
+%patch1 -p1 -b .no-access
 
 %build
 %configure --disable-static \
 %ifarch sparc64
      --disable-asm \
 %endif
-     --enable-noexecstack
+     --enable-noexecstack \
+     --enable-pubkey-ciphers='dsa elgamal rsa'
 make %{?_smp_mflags}
 
 %check
@@ -123,6 +133,12 @@ exit 0
 %{_infodir}/gcrypt.info*
 
 %changelog
+* Fri Jan 30 2009 Tomas Mraz <tmraz@redhat.com> 1.4.4-1
+- update to 1.4.4
+- do not abort when the fips mode kernel flag is inaccessible
+  due to permissions (#470219)
+- hobble the library to drop the ECC support
+
 * Mon Oct 20 2008 Dennis Gilmore <dennis@ausil.us> 1.4.3-2
 - disable asm on sparc64
 
