@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.4.4
-Release: 2%{?dist}
+Release: 3%{?dist}
 Source0: libgcrypt-%{version}-hobbled.tar.bz2
 # The original libgcrypt sources now contain potentially patented ECC
 # cipher support. We have to remove it in the tarball we ship with
@@ -10,12 +10,14 @@ Source0: libgcrypt-%{version}-hobbled.tar.bz2
 Source2: wk@g10code.com
 Source3: hobble-libgcrypt
 Patch1: libgcrypt-1.4.4-fips-no-access.patch
+Patch2: libgcrypt-1.4.4-use-fipscheck.patch
 
 # Technically LGPLv2.1+, but Fedora's table doesn't draw a distinction.
 License: LGPLv2+
 Summary: A general-purpose cryptography library
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildRequires: gawk, libgpg-error-devel >= 1.4, pkgconfig
+BuildRequires: fipscheck
 Group: System Environment/Libraries
 
 %package devel
@@ -38,6 +40,7 @@ applications using libgcrypt.
 %setup -q
 %{SOURCE3}
 %patch1 -p1 -b .no-access
+%patch2 -p1 -b .use-fipscheck
 
 %build
 %configure --disable-static \
@@ -45,11 +48,21 @@ applications using libgcrypt.
      --disable-asm \
 %endif
      --enable-noexecstack \
+     --enable-hmac-binary-check \
      --enable-pubkey-ciphers='dsa elgamal rsa'
 make %{?_smp_mflags}
 
 %check
+fipshmac src/.libs/libgcrypt.so.??
 make check
+
+# Add generation of HMAC checksums of the final stripped binaries 
+%define __spec_install_post \
+    %{?__debug_package:%{__debug_install_post}} \
+    %{__arch_install_post} \
+    %{__os_install_post} \
+    fipshmac $RPM_BUILD_ROOT/%{_lib}/*.so.?? \
+%{nil}
 
 %install
 rm -fr $RPM_BUILD_ROOT
@@ -117,8 +130,8 @@ exit 0
 %files
 %defattr(-,root,root)
 %dir /etc/gcrypt
-/%{_lib}/*.so.*
-#%{_libdir}/%{name}
+/%{_lib}/libgcrypt.so.*
+/%{_lib}/.libgcrypt.so.*.hmac
 
 %files devel
 %defattr(-,root,root)
@@ -128,11 +141,13 @@ exit 0
 %{_includedir}/*
 %{_libdir}/*.so
 %{_datadir}/aclocal/*
-#%{_datadir}/%{name}
 
 %{_infodir}/gcrypt.info*
 
 %changelog
+* Tue Mar  3 2009 Tomas Mraz <tmraz@redhat.com> 1.4.4-3
+- add hmac FIPS integrity verification check
+
 * Wed Feb 25 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.4.4-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_11_Mass_Rebuild
 
