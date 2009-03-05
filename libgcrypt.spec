@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.4.4
-Release: 3%{?dist}
+Release: 4%{?dist}
 Source0: libgcrypt-%{version}-hobbled.tar.bz2
 # The original libgcrypt sources now contain potentially patented ECC
 # cipher support. We have to remove it in the tarball we ship with
@@ -145,6 +145,10 @@ exit 0
 %{_infodir}/gcrypt.info*
 
 %changelog
+* Thu Mar  5 2009 Tomas Mraz <tmraz@redhat.com> 1.4.4-4
+- with the integrity verification check the library needs to link to libdl
+  (#488702)
+
 * Tue Mar  3 2009 Tomas Mraz <tmraz@redhat.com> 1.4.4-3
 - add hmac FIPS integrity verification check
 

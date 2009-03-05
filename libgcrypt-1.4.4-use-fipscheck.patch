@@ -1,6 +1,6 @@
 diff -up libgcrypt-1.4.4/src/fips.c.use-fipscheck libgcrypt-1.4.4/src/fips.c
---- libgcrypt-1.4.4/src/fips.c.use-fipscheck	2009-03-03 18:10:49.000000000 +0100
-+++ libgcrypt-1.4.4/src/fips.c	2009-03-03 18:51:31.000000000 +0100
+--- libgcrypt-1.4.4/src/fips.c.use-fipscheck	2009-03-03 21:09:27.000000000 +0100
++++ libgcrypt-1.4.4/src/fips.c	2009-03-05 11:20:48.000000000 +0100
 @@ -570,23 +570,48 @@ run_random_selftests (void)
    return !!err;
  }
@@ -72,3 +72,15 @@ diff -up libgcrypt-1.4.4/src/fips.c.use-fipscheck libgcrypt-1.4.4/src/fips.c
                p = strrchr (fname, '/');
                if (p)
                  p++;
+diff -up libgcrypt-1.4.4/src/Makefile.use-fipscheck libgcrypt-1.4.4/src/Makefile
+--- libgcrypt-1.4.4/src/Makefile.use-fipscheck	2009-03-03 21:09:41.000000000 +0100
++++ libgcrypt-1.4.4/src/Makefile	2009-03-05 11:20:40.000000000 +0100
+@@ -337,7 +337,7 @@ libgcrypt_la_LIBADD = \
+ 	../cipher/libcipher.la \
+ 	../random/librandom.la \
+ 	../mpi/libmpi.la \
+-	 -lgpg-error
++	 -lgpg-error -ldl
+ 
+ dumpsexp_SOURCES = dumpsexp.c
+ dumpsexp_LDADD = 
