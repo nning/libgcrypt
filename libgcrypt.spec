@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.4.4
-Release: 4%{?dist}
+Release: 5%{?dist}
 Source0: libgcrypt-%{version}-hobbled.tar.bz2
 # The original libgcrypt sources now contain potentially patented ECC
 # cipher support. We have to remove it in the tarball we ship with
@@ -11,6 +11,7 @@ Source2: wk@g10code.com
 Source3: hobble-libgcrypt
 Patch1: libgcrypt-1.4.4-fips-no-access.patch
 Patch2: libgcrypt-1.4.4-use-fipscheck.patch
+Patch3: libgcrypt-1.4.4-padlock.patch
 
 # Technically LGPLv2.1+, but Fedora's table doesn't draw a distinction.
 License: LGPLv2+
@@ -145,6 +146,9 @@ exit 0
 %{_infodir}/gcrypt.info*
 
 %changelog
+* Wed Jun 17 2009 Tomas Mraz <tmraz@redhat.com> 1.4.4-5
+- fix VIA padlock RNG inline assembly call (#505724)
+
 * Thu Mar  5 2009 Tomas Mraz <tmraz@redhat.com> 1.4.4-4
 - with the integrity verification check the library needs to link to libdl
   (#488702)
