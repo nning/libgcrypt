@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.4.4
-Release: 5%{?dist}
+Release: 6%{?dist}
 Source0: libgcrypt-%{version}-hobbled.tar.bz2
 # The original libgcrypt sources now contain potentially patented ECC
 # cipher support. We have to remove it in the tarball we ship with
@@ -42,6 +42,7 @@ applications using libgcrypt.
 %{SOURCE3}
 %patch1 -p1 -b .no-access
 %patch2 -p1 -b .use-fipscheck
+%patch3 -p1 -b .padlock
 
 %build
 %configure --disable-static \
@@ -146,6 +147,9 @@ exit 0
 %{_infodir}/gcrypt.info*
 
 %changelog
+* Thu Jun 18 2009 Tomas Mraz <tmraz@redhat.com> 1.4.4-6
+- and now really apply the padlock patch
+
 * Wed Jun 17 2009 Tomas Mraz <tmraz@redhat.com> 1.4.4-5
 - fix VIA padlock RNG inline assembly call (#505724)
 
