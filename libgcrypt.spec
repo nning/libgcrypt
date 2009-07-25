@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.4.4
-Release: 6%{?dist}
+Release: 7%{?dist}
 Source0: libgcrypt-%{version}-hobbled.tar.bz2
 # The original libgcrypt sources now contain potentially patented ECC
 # cipher support. We have to remove it in the tarball we ship with
@@ -147,6 +147,9 @@ exit 0
 %{_infodir}/gcrypt.info*
 
 %changelog
+* Fri Jul 24 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.4.4-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_12_Mass_Rebuild
+
 * Thu Jun 18 2009 Tomas Mraz <tmraz@redhat.com> 1.4.4-6
 - and now really apply the padlock patch
 
