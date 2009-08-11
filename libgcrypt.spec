@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.4.4
-Release: 7%{?dist}
+Release: 8%{?dist}
 Source0: libgcrypt-%{version}-hobbled.tar.bz2
 # The original libgcrypt sources now contain potentially patented ECC
 # cipher support. We have to remove it in the tarball we ship with
@@ -120,11 +120,12 @@ rm -fr $RPM_BUILD_ROOT
 %postun -p /sbin/ldconfig
 
 %post devel
-/sbin/install-info %{_infodir}/gcrypt.info.gz %{_infodir}/dir
+[ -f %{_infodir}/gcrypt.info.gz ] && \
+    /sbin/install-info %{_infodir}/gcrypt.info.gz %{_infodir}/dir
 exit 0
 
 %preun devel
-if [ $1 = 0 ]; then
+if [ $1 = 0 -a -f %{_infodir}/gcrypt.info.gz ]; then
     /sbin/install-info --delete %{_infodir}/gcrypt.info.gz %{_infodir}/dir
 fi
 exit 0
@@ -147,6 +148,9 @@ exit 0
 %{_infodir}/gcrypt.info*
 
 %changelog
+* Tue Aug 11 2009 Tomas Mraz <tmraz@redhat.com> 1.4.4-8
+- fix warning when installed with --excludedocs (#515961)
+
 * Fri Jul 24 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.4.4-7
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_12_Mass_Rebuild
 
