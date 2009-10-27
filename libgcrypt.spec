@@ -22,7 +22,7 @@ BuildRequires: fipscheck
 Group: System Environment/Libraries
 
 %package devel
-Summary: Development files for the %{name} package.
+Summary: Development files for the %{name} package
 Group: Development/Libraries
 PreReq: /sbin/install-info
 Requires: libgpg-error-devel
