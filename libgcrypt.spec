@@ -1,6 +1,7 @@
 Name: libgcrypt
 Version: 1.4.4
-Release: 8%{?dist}
+Release: 9%{?dist}
+URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.bz2
 # The original libgcrypt sources now contain potentially patented ECC
 # cipher support. We have to remove it in the tarball we ship with
@@ -24,7 +25,8 @@ Group: System Environment/Libraries
 %package devel
 Summary: Development files for the %{name} package
 Group: Development/Libraries
-PreReq: /sbin/install-info
+Requires(pre): /sbin/install-info
+Requires(post): /sbin/install-info
 Requires: libgpg-error-devel
 Requires: %{name} = %{version}-%{release}
 
@@ -45,6 +47,9 @@ applications using libgcrypt.
 %patch3 -p1 -b .padlock
 
 %build
+%ifarch s390
+%global optflags %optflags -fno-schedule-insns
+%endif
 %configure --disable-static \
 %ifarch sparc64
      --disable-asm \
@@ -148,6 +153,11 @@ exit 0
 %{_infodir}/gcrypt.info*
 
 %changelog
+
+* Mon Dec 21 2009 Tomas Mraz <tmraz@redhat.com> 1.4.4-9
+- Workaround for build on S390 (#548825)
+- Spec file cleanups
+
 * Tue Aug 11 2009 Tomas Mraz <tmraz@redhat.com> 1.4.4-8
 - fix warning when installed with --excludedocs (#515961)
 
@@ -223,7 +233,7 @@ exit 0
 - disable static libraries (part of #249815)
 
 * Fri Jul 27 2007 Nalin Dahyabhai <nalin@redhat.com> - 1.2.4-2
-- move libgcrypt shared library to /%{_lib} (#249815)
+- move libgcrypt shared library to /%%{_lib} (#249815)
 
 * Tue Feb  6 2007 Nalin Dahyabhai <nalin@redhat.com> - 1.2.4-1
 - update to 1.2.4
