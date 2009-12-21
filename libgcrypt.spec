@@ -1,6 +1,6 @@
 Name: libgcrypt
-Version: 1.4.4
-Release: 9%{?dist}
+Version: 1.4.5
+Release: 1%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.bz2
 # The original libgcrypt sources now contain potentially patented ECC
@@ -10,9 +10,7 @@ Source0: libgcrypt-%{version}-hobbled.tar.bz2
 #Source1: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2.sig
 Source2: wk@g10code.com
 Source3: hobble-libgcrypt
-Patch1: libgcrypt-1.4.4-fips-no-access.patch
 Patch2: libgcrypt-1.4.4-use-fipscheck.patch
-Patch3: libgcrypt-1.4.4-padlock.patch
 
 # Technically LGPLv2.1+, but Fedora's table doesn't draw a distinction.
 License: LGPLv2+
@@ -42,9 +40,7 @@ applications using libgcrypt.
 %prep
 %setup -q
 %{SOURCE3}
-%patch1 -p1 -b .no-access
 %patch2 -p1 -b .use-fipscheck
-%patch3 -p1 -b .padlock
 
 %build
 %ifarch s390
@@ -56,7 +52,8 @@ applications using libgcrypt.
 %endif
      --enable-noexecstack \
      --enable-hmac-binary-check \
-     --enable-pubkey-ciphers='dsa elgamal rsa'
+     --enable-pubkey-ciphers='dsa elgamal rsa' \
+     --disable-O-flag-munging
 make %{?_smp_mflags}
 
 %check
@@ -153,10 +150,10 @@ exit 0
 %{_infodir}/gcrypt.info*
 
 %changelog
-
-* Mon Dec 21 2009 Tomas Mraz <tmraz@redhat.com> 1.4.4-9
-- Workaround for build on S390 (#548825)
-- Spec file cleanups
+* Mon Dec 21 2009 Tomas Mraz <tmraz@redhat.com> 1.4.5-1
+- workaround for build on S390 (#548825)
+- spec file cleanups
+- upgrade to new minor upstream release
 
 * Tue Aug 11 2009 Tomas Mraz <tmraz@redhat.com> 1.4.4-8
 - fix warning when installed with --excludedocs (#515961)
