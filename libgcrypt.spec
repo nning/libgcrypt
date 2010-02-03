@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.4.5
-Release: 1%{?dist}
+Release: 3%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.bz2
 # The original libgcrypt sources now contain potentially patented ECC
@@ -10,18 +10,22 @@ Source0: libgcrypt-%{version}-hobbled.tar.bz2
 #Source1: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2.sig
 Source2: wk@g10code.com
 Source3: hobble-libgcrypt
+# make FIPS hmac compatible with fipscheck - non upstreamable
 Patch2: libgcrypt-1.4.4-use-fipscheck.patch
 
 # Technically LGPLv2.1+, but Fedora's table doesn't draw a distinction.
+# Documentation and some utilities are GPLv2+ licensed. These files
+# are in the devel subpackage.
 License: LGPLv2+
 Summary: A general-purpose cryptography library
-BuildRoot: %{_tmppath}/%{name}-%{version}-root
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildRequires: gawk, libgpg-error-devel >= 1.4, pkgconfig
 BuildRequires: fipscheck
 Group: System Environment/Libraries
 
 %package devel
 Summary: Development files for the %{name} package
+License: LGPLv2+ and GPLv2+
 Group: Development/Libraries
 Requires(pre): /sbin/install-info
 Requires(post): /sbin/install-info
@@ -42,10 +46,10 @@ applications using libgcrypt.
 %{SOURCE3}
 %patch2 -p1 -b .use-fipscheck
 
+mv AUTHORS AUTHORS.iso88591
+iconv -f ISO-8859-1 -t UTF-8 AUTHORS.iso88591 >AUTHORS
+
 %build
-%ifarch s390
-%global optflags %optflags -fno-schedule-insns
-%endif
 %configure --disable-static \
 %ifarch sparc64
      --disable-asm \
@@ -70,7 +74,7 @@ make check
 
 %install
 rm -fr $RPM_BUILD_ROOT
-%makeinstall
+make install DESTDIR=$RPM_BUILD_ROOT
 
 # Change /usr/lib64 back to /usr/lib.  This saves us from having to patch the
 # script to "know" that -L/usr/lib64 should be suppressed, and also removes
@@ -133,13 +137,14 @@ fi
 exit 0
 
 %files
-%defattr(-,root,root)
+%defattr(-,root,root,-)
 %dir /etc/gcrypt
 /%{_lib}/libgcrypt.so.*
 /%{_lib}/.libgcrypt.so.*.hmac
+%doc COPYING.LIB AUTHORS NEWS THANKS
 
 %files devel
-%defattr(-,root,root)
+%defattr(-,root,root,-)
 %{_bindir}/%{name}-config
 %{_bindir}/dumpsexp
 %{_bindir}/hmac256
@@ -148,8 +153,13 @@ exit 0
 %{_datadir}/aclocal/*
 
 %{_infodir}/gcrypt.info*
+%doc COPYING
 
 %changelog
+* Wed Feb  3 2010 Tomas Mraz <tmraz@redhat.com> 1.4.5-3
+- drop the S390 build workaround as it is no longer needed
+- additional spec file cleanups for merge review (#226008)
+
 * Mon Dec 21 2009 Tomas Mraz <tmraz@redhat.com> 1.4.5-1
 - workaround for build on S390 (#548825)
 - spec file cleanups
