@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.4.5
-Release: 3%{?dist}
+Release: 4%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.bz2
 # The original libgcrypt sources now contain potentially patented ECC
@@ -12,6 +12,8 @@ Source2: wk@g10code.com
 Source3: hobble-libgcrypt
 # make FIPS hmac compatible with fipscheck - non upstreamable
 Patch2: libgcrypt-1.4.4-use-fipscheck.patch
+# fix ImplicitDSOLinking (missing -lgpg-error linkage in tests/), upstreamable
+Patch3: libgcrypt-1.4.5-ImplicitDSOLinking.patch
 
 # Technically LGPLv2.1+, but Fedora's table doesn't draw a distinction.
 # Documentation and some utilities are GPLv2+ licensed. These files
@@ -45,6 +47,7 @@ applications using libgcrypt.
 %setup -q
 %{SOURCE3}
 %patch2 -p1 -b .use-fipscheck
+%patch3 -p1 -b .ImplicitDSOLinking
 
 mv AUTHORS AUTHORS.iso88591
 iconv -f ISO-8859-1 -t UTF-8 AUTHORS.iso88591 >AUTHORS
@@ -156,6 +159,9 @@ exit 0
 %doc COPYING
 
 %changelog
+* Sun Feb 14 2010 Rex Dieter <rdieter@fedoraproject.org> 1.4.5-4
+- FTBFS libgcrypt-1.4.5-3.fc13: ImplicitDSOLinking (#564973)
+
 * Wed Feb  3 2010 Tomas Mraz <tmraz@redhat.com> 1.4.5-3
 - drop the S390 build workaround as it is no longer needed
 - additional spec file cleanups for merge review (#226008)
