@@ -1,0 +1,33 @@
+diff -up libgcrypt-1.4.5/random/random-fips.c.urandom libgcrypt-1.4.5/random/random-fips.c
+--- libgcrypt-1.4.5/random/random-fips.c.urandom	2009-04-02 11:25:34.000000000 +0200
++++ libgcrypt-1.4.5/random/random-fips.c	2011-02-01 11:33:59.000000000 +0100
+@@ -29,8 +29,8 @@
+ 
+    Generator                Seed and Key        Kernel entropy (init/reseed)
+    ------------------------------------------------------------
+-   GCRY_VERY_STRONG_RANDOM  /dev/random         256/128 bits
+-   GCRY_STRONG_RANDOM       /dev/random         256/128 bits
++   GCRY_VERY_STRONG_RANDOM  /dev/urandom        256/128 bits
++   GCRY_STRONG_RANDOM       /dev/urandom        256/128 bits
+    gcry_create_nonce        GCRY_STRONG_RANDOM  n/a
+ 
+    All random generators return their data in 128 bit blocks.  If the
+@@ -40,8 +40,7 @@
+    (SEED_TTL) output blocks; the re-seeding is disabled in test mode.
+ 
+    The GCRY_VERY_STRONG_RANDOM and GCRY_STRONG_RANDOM generators are
+-   keyed and seeded from the /dev/random device.  Thus these
+-   generators may block until the kernel has collected enough entropy.
++   keyed and seeded from the /dev/urandom device.
+ 
+    The gcry_create_nonce generator is keyed and seeded from the
+    GCRY_STRONG_RANDOM generator.  It may also block if the
+@@ -562,7 +561,7 @@ get_entropy (size_t nbytes)
+ #if USE_RNDLINUX
+   rc = _gcry_rndlinux_gather_random (entropy_collect_cb, 0,
+                                      X931_AES_KEYLEN,
+-                                     GCRY_VERY_STRONG_RANDOM);
++                                     GCRY_STRONG_RANDOM);
+ #elif USE_RNDW32
+   do 
+     {

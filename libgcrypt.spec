@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.4.5
-Release: 4%{?dist}
+Release: 5%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.bz2
 # The original libgcrypt sources now contain potentially patented ECC
@@ -14,6 +14,10 @@ Source3: hobble-libgcrypt
 Patch2: libgcrypt-1.4.4-use-fipscheck.patch
 # fix ImplicitDSOLinking (missing -lgpg-error linkage in tests/), upstreamable
 Patch3: libgcrypt-1.4.5-ImplicitDSOLinking.patch
+# use /dev/urandom in the FIPS mode
+Patch4: libgcrypt-1.4.5-urandom.patch
+# fix tests in the FIPS mode, fix the FIPS-186-3 DSA keygen
+Patch5: libgcrypt-1.4.5-tests.patch
 
 # Technically LGPLv2.1+, but Fedora's table doesn't draw a distinction.
 # Documentation and some utilities are GPLv2+ licensed. These files
@@ -48,6 +52,8 @@ applications using libgcrypt.
 %{SOURCE3}
 %patch2 -p1 -b .use-fipscheck
 %patch3 -p1 -b .ImplicitDSOLinking
+%patch4 -p1 -b .urandom
+%patch5 -p1 -b .tests
 
 mv AUTHORS AUTHORS.iso88591
 iconv -f ISO-8859-1 -t UTF-8 AUTHORS.iso88591 >AUTHORS
@@ -159,6 +165,11 @@ exit 0
 %doc COPYING
 
 %changelog
+* Tue Feb  1 2011 Tomas Mraz <tmraz@redhat.com> 1.4.5-5
+- use /dev/urandom for seeding in the FIPS mode
+- make the tests to pass in the FIPS mode also fixing
+  the FIPS-186-3 DSA keygen
+
 * Sun Feb 14 2010 Rex Dieter <rdieter@fedoraproject.org> 1.4.5-4
 - FTBFS libgcrypt-1.4.5-3.fc13: ImplicitDSOLinking (#564973)
 
