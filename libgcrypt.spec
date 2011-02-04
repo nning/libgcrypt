@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.4.5
-Release: 5%{?dist}
+Release: 6%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.bz2
 # The original libgcrypt sources now contain potentially patented ECC
@@ -165,6 +165,9 @@ exit 0
 %doc COPYING
 
 %changelog
+* Thu Feb  4 2011 Tomas Mraz <tmraz@redhat.com> 1.4.5-6
+- fix a bug in the fips-186-3 dsa parameter generation code
+
 * Tue Feb  1 2011 Tomas Mraz <tmraz@redhat.com> 1.4.5-5
 - use /dev/urandom for seeding in the FIPS mode
 - make the tests to pass in the FIPS mode also fixing
