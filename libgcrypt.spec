@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.4.5
-Release: 6%{?dist}
+Release: 7%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.bz2
 # The original libgcrypt sources now contain potentially patented ECC
@@ -165,6 +165,9 @@ exit 0
 %doc COPYING
 
 %changelog
+* Mon Feb 07 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.4.5-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_15_Mass_Rebuild
+
 * Thu Feb  4 2011 Tomas Mraz <tmraz@redhat.com> 1.4.5-6
 - fix a bug in the fips-186-3 dsa parameter generation code
 
