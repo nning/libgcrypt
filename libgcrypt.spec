@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.4.6
-Release: 1%{?dist}
+Release: 2%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.bz2
 # The original libgcrypt sources now contain potentially patented ECC
@@ -18,6 +18,8 @@ Patch3: libgcrypt-1.4.5-ImplicitDSOLinking.patch
 Patch4: libgcrypt-1.4.5-urandom.patch
 # fix tests in the FIPS mode, fix the FIPS-186-3 DSA keygen
 Patch5: libgcrypt-1.4.5-tests.patch
+# make the FIPS-186-3 DSA CAVS testable
+Patch6: libgcrypt-1.4.6-cavs.patch
 
 # Technically LGPLv2.1+, but Fedora's table doesn't draw a distinction.
 # Documentation and some utilities are GPLv2+ licensed. These files
@@ -165,6 +167,9 @@ exit 0
 %doc COPYING
 
 %changelog
+* Mon May 30 2011 Tomas Mraz <tmraz@redhat.com> 1.4.6-2
+- Make the FIPS-186-3 DSA implementation CAVS testable
+
 * Fri Feb 11 2011 Tomas Mraz <tmraz@redhat.com> 1.4.6-1
 - new upstream version with minor changes
 
