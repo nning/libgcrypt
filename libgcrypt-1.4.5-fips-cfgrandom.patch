@@ -1,0 +1,126 @@
+diff -up libgcrypt-1.4.5/random/random-fips.c.cfgrandom libgcrypt-1.4.5/random/random-fips.c
+--- libgcrypt-1.4.5/random/random-fips.c.cfgrandom	2011-05-06 10:58:55.000000000 +0200
++++ libgcrypt-1.4.5/random/random-fips.c	2011-05-06 10:58:55.000000000 +0200
+@@ -27,10 +27,10 @@
+    There are 3 random context which map to the different levels of
+    random quality:
+ 
+-   Generator                Seed and Key        Kernel entropy (init/reseed)
+-   ------------------------------------------------------------
+-   GCRY_VERY_STRONG_RANDOM  /dev/urandom        256/128 bits
+-   GCRY_STRONG_RANDOM       /dev/urandom        256/128 bits
++   Generator                Seed and Key                      Kernel entropy (init/reseed)
++   ---------------------------------------------------------------------------------------
++   GCRY_VERY_STRONG_RANDOM  /etc/gcrypt/rngseed+/dev/urandom  256/128 bits
++   GCRY_STRONG_RANDOM       /etc/gcrypt/rngseed+/dev/urandom  256/128 bits
+    gcry_create_nonce        GCRY_STRONG_RANDOM  n/a
+ 
+    All random generators return their data in 128 bit blocks.  If the
+@@ -40,7 +40,10 @@
+    (SEED_TTL) output blocks; the re-seeding is disabled in test mode.
+ 
+    The GCRY_VERY_STRONG_RANDOM and GCRY_STRONG_RANDOM generators are
+-   keyed and seeded from the /dev/urandom device.
++   keyed and seeded with data that is loaded from the /etc/gcrypt/rngseed
++   if the device or symlink to device exists xored with the data
++   from the /dev/urandom device. This allows the system administrator
++   to always seed the RNGs from /dev/random if it is required.
+ 
+    The gcry_create_nonce generator is keyed and seeded from the
+    GCRY_STRONG_RANDOM generator.  It may also block if the
+@@ -561,7 +564,7 @@ get_entropy (size_t nbytes)
+ #if USE_RNDLINUX
+   rc = _gcry_rndlinux_gather_random (entropy_collect_cb, 0,
+                                      X931_AES_KEYLEN,
+-                                     GCRY_STRONG_RANDOM);
++                                     -1);
+ #elif USE_RNDW32
+   do 
+     {
+diff -up libgcrypt-1.4.5/random/rndlinux.c.cfgrandom libgcrypt-1.4.5/random/rndlinux.c
+--- libgcrypt-1.4.5/random/rndlinux.c.cfgrandom	2009-04-02 11:25:34.000000000 +0200
++++ libgcrypt-1.4.5/random/rndlinux.c	2011-05-06 11:35:39.000000000 +0200
+@@ -35,7 +35,9 @@
+ #include "g10lib.h"
+ #include "rand-internal.h"
+ 
+-static int open_device ( const char *name );
++#define NAME_OF_CFG_RNGSEED "/etc/gcrypt/rngseed"
++
++static int open_device ( const char *name, int fatal );
+ 
+ 
+ static int
+@@ -56,13 +58,17 @@ set_cloexec_flag (int fd)
+  * Used to open the /dev/random devices (Linux, xBSD, Solaris (if it exists)).
+  */
+ static int
+-open_device ( const char *name )
++open_device ( const char *name, int fatal )
+ {
+   int fd;
+ 
+   fd = open ( name, O_RDONLY );
+   if ( fd == -1 )
+-    log_fatal ("can't open %s: %s\n", name, strerror(errno) );
++    {
++      if (! fatal)
++        return fd;
++      log_fatal ("can't open %s: %s\n", name, strerror(errno) );
++    }
+ 
+   if (set_cloexec_flag (fd))
+     log_error ("error setting FD_CLOEXEC on fd %d: %s\n",
+@@ -91,11 +97,13 @@ _gcry_rndlinux_gather_random (void (*add
+ {
+   static int fd_urandom = -1;
+   static int fd_random = -1;
++  static int fd_configured = -1;
+   int fd;
+   int n;
+   int warn=0;
+   byte buffer[768];
+   size_t n_hw;
++  size_t orig_length = length;
+ 
+   /* First read from a hardware source.  However let it account only
+      for up to 50% of the requested bytes.  */
+@@ -106,16 +114,26 @@ _gcry_rndlinux_gather_random (void (*add
+     length -= n_hw;
+ 
+   /* Open the requested device.  */
++
++  if (level == -1)
++    {
++      if (fd_configured == -1)
++        fd_configured = open_device ( NAME_OF_CFG_RNGSEED, 0 );
++      fd = fd_configured;
++      if (fd == -1)
++        level = 1;
++    }
++
+   if (level >= 2)
+     {
+       if( fd_random == -1 )
+-        fd_random = open_device ( NAME_OF_DEV_RANDOM );
++        fd_random = open_device ( NAME_OF_DEV_RANDOM, 1 );
+       fd = fd_random;
+     }
+-  else
++  else if (level != -1)
+     {
+       if( fd_urandom == -1 )
+-        fd_urandom = open_device ( NAME_OF_DEV_URANDOM );
++        fd_urandom = open_device ( NAME_OF_DEV_URANDOM, 1 );
+       fd = fd_urandom;
+     }
+ 
+@@ -163,5 +181,8 @@ _gcry_rndlinux_gather_random (void (*add
+     }
+   memset(buffer, 0, sizeof(buffer) );
+ 
++  if (level == -1)
++	_gcry_rndlinux_gather_random(add, origin, orig_length, 1);
++
+   return 0; /* success */
+ }
