@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.4.6
-Release: 2%{?dist}
+Release: 3%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.bz2
 # The original libgcrypt sources now contain potentially patented ECC
@@ -18,8 +18,10 @@ Patch3: libgcrypt-1.4.5-ImplicitDSOLinking.patch
 Patch4: libgcrypt-1.4.5-urandom.patch
 # fix tests in the FIPS mode, fix the FIPS-186-3 DSA keygen
 Patch5: libgcrypt-1.4.5-tests.patch
+# add configurable source of RNG seed in the FIPS mode
+Patch6: libgcrypt-1.4.5-fips-cfgrandom.patch
 # make the FIPS-186-3 DSA CAVS testable
-Patch6: libgcrypt-1.4.6-cavs.patch
+Patch7: libgcrypt-1.4.6-cavs.patch
 
 # Technically LGPLv2.1+, but Fedora's table doesn't draw a distinction.
 # Documentation and some utilities are GPLv2+ licensed. These files
@@ -56,6 +58,8 @@ applications using libgcrypt.
 %patch3 -p1 -b .ImplicitDSOLinking
 %patch4 -p1 -b .urandom
 %patch5 -p1 -b .tests
+%patch6 -p1 -b .cfgrandom
+%patch7 -p1 -b .cavs
 
 mv AUTHORS AUTHORS.iso88591
 iconv -f ISO-8859-1 -t UTF-8 AUTHORS.iso88591 >AUTHORS
@@ -167,8 +171,10 @@ exit 0
 %doc COPYING
 
 %changelog
-* Mon May 30 2011 Tomas Mraz <tmraz@redhat.com> 1.4.6-2
+* Mon May 30 2011 Tomas Mraz <tmraz@redhat.com> 1.4.6-3
 - Make the FIPS-186-3 DSA implementation CAVS testable
+- add configurable source of RNG seed /etc/gcrypt/rngseed
+  in the FIPS mode (#700388)
 
 * Fri Feb 11 2011 Tomas Mraz <tmraz@redhat.com> 1.4.6-1
 - new upstream version with minor changes
