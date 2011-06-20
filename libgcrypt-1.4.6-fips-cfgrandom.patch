@@ -1,6 +1,6 @@
-diff -up libgcrypt-1.4.5/random/random-fips.c.cfgrandom libgcrypt-1.4.5/random/random-fips.c
---- libgcrypt-1.4.5/random/random-fips.c.cfgrandom	2011-05-06 10:58:55.000000000 +0200
-+++ libgcrypt-1.4.5/random/random-fips.c	2011-05-06 10:58:55.000000000 +0200
+diff -up libgcrypt-1.4.6/random/random-fips.c.cfgrandom libgcrypt-1.4.6/random/random-fips.c
+--- libgcrypt-1.4.6/random/random-fips.c.cfgrandom	2011-06-20 21:13:38.000000000 +0200
++++ libgcrypt-1.4.6/random/random-fips.c	2011-06-20 21:32:47.000000000 +0200
 @@ -27,10 +27,10 @@
     There are 3 random context which map to the different levels of
     random quality:
@@ -28,18 +28,20 @@ diff -up libgcrypt-1.4.5/random/random-fips.c.cfgrandom libgcrypt-1.4.5/random/r
  
     The gcry_create_nonce generator is keyed and seeded from the
     GCRY_STRONG_RANDOM generator.  It may also block if the
-@@ -561,7 +564,7 @@ get_entropy (size_t nbytes)
+@@ -559,6 +562,10 @@ get_entropy (size_t nbytes)
+   entropy_collect_buffer_len = 0;
+ 
  #if USE_RNDLINUX
++  _gcry_rndlinux_gather_random (entropy_collect_cb, 0,
++                                     X931_AES_KEYLEN,
++                                     -1);
++  entropy_collect_buffer_len = 0;
    rc = _gcry_rndlinux_gather_random (entropy_collect_cb, 0,
                                       X931_AES_KEYLEN,
--                                     GCRY_STRONG_RANDOM);
-+                                     -1);
- #elif USE_RNDW32
-   do 
-     {
-diff -up libgcrypt-1.4.5/random/rndlinux.c.cfgrandom libgcrypt-1.4.5/random/rndlinux.c
---- libgcrypt-1.4.5/random/rndlinux.c.cfgrandom	2009-04-02 11:25:34.000000000 +0200
-+++ libgcrypt-1.4.5/random/rndlinux.c	2011-05-06 11:35:39.000000000 +0200
+                                      GCRY_STRONG_RANDOM);
+diff -up libgcrypt-1.4.6/random/rndlinux.c.cfgrandom libgcrypt-1.4.6/random/rndlinux.c
+--- libgcrypt-1.4.6/random/rndlinux.c.cfgrandom	2009-04-02 11:25:34.000000000 +0200
++++ libgcrypt-1.4.6/random/rndlinux.c	2011-06-20 21:34:09.000000000 +0200
 @@ -35,7 +35,9 @@
  #include "g10lib.h"
  #include "rand-internal.h"
@@ -96,7 +98,7 @@ diff -up libgcrypt-1.4.5/random/rndlinux.c.cfgrandom libgcrypt-1.4.5/random/rndl
 +        fd_configured = open_device ( NAME_OF_CFG_RNGSEED, 0 );
 +      fd = fd_configured;
 +      if (fd == -1)
-+        level = 1;
++        return -1;
 +    }
 +
    if (level >= 2)
@@ -115,12 +117,3 @@ diff -up libgcrypt-1.4.5/random/rndlinux.c.cfgrandom libgcrypt-1.4.5/random/rndl
        fd = fd_urandom;
      }
  
-@@ -163,5 +181,8 @@ _gcry_rndlinux_gather_random (void (*add
-     }
-   memset(buffer, 0, sizeof(buffer) );
- 
-+  if (level == -1)
-+	_gcry_rndlinux_gather_random(add, origin, orig_length, 1);
-+
-   return 0; /* success */
- }

@@ -51,7 +51,7 @@ diff -up libgcrypt-1.4.6/cipher/dsa.c.cavs libgcrypt-1.4.6/cipher/dsa.c
  
 diff -up libgcrypt-1.4.6/tests/cavs_driver.pl.cavs libgcrypt-1.4.6/tests/cavs_driver.pl
 --- libgcrypt-1.4.6/tests/cavs_driver.pl.cavs	2009-04-02 11:25:34.000000000 +0200
-+++ libgcrypt-1.4.6/tests/cavs_driver.pl	2011-05-27 21:32:14.000000000 +0200
++++ libgcrypt-1.4.6/tests/cavs_driver.pl	2011-06-20 20:00:13.000000000 +0200
 @@ -1,9 +1,11 @@
  #!/usr/bin/env perl
  #
@@ -178,22 +178,22 @@ diff -up libgcrypt-1.4.6/tests/cavs_driver.pl.cavs libgcrypt-1.4.6/tests/cavs_dr
  
 -sub libgcrypt_dsa_pqggen($) {
 +sub libgcrypt_dsa_pqggen($$$) {
- 	my $mod = shift;
++	my $mod = shift;
 +	my $qsize = shift;
 +	my $seed = shift;
 +
 +	my $program = "fipsdrv --keysize $mod --qsize $qsize dsa-pqg-gen";
 +	return pipe_through_program($seed, $program);
 +}
- 
--	my $program = "fipsdrv --keysize $mod dsa-pqg-gen";
++
 +sub libgcrypt_dsa_ggen($$$$) {
-+	my $mod = shift;
+ 	my $mod = shift;
 +	my $qsize = shift;
 +	my $p = shift;
 +	my $q = shift;
 +	my $domain = "(domain (p #$p#)(q #$q#))";
-+
+ 
+-	my $program = "fipsdrv --keysize $mod dsa-pqg-gen";
 +	my $program = "fipsdrv --keysize $mod --qsize $qsize --key \'$domain\' dsa-g-gen";
  	return pipe_through_program("", $program);
  }
@@ -303,7 +303,7 @@ diff -up libgcrypt-1.4.6/tests/cavs_driver.pl.cavs libgcrypt-1.4.6/tests/cavs_dr
  
  		# now change the counter to decimal as CAVS wants decimal
  		# counter value although all other is HEX
-@@ -1525,15 +1617,149 @@ sub dsa_pqggen_driver($$) {
+@@ -1525,15 +1617,166 @@ sub dsa_pqggen_driver($$) {
  
  		$out .= "P = $P\n";
  		$out .= "Q = $Q\n";
@@ -341,6 +341,23 @@ diff -up libgcrypt-1.4.6/tests/cavs_driver.pl.cavs libgcrypt-1.4.6/tests/cavs_dr
 +	return $out;
 +}
 +
++sub hexcomp($$) {
++	my $a = lc shift;
++	my $b = lc shift;
++
++	if (length $a < length $b) {
++		my $c = $a;
++		$a = $b;
++		$b = $a;
++	}
++
++	while (length $b < length $a) {
++		$b = "00$b";
++	}
++
++	return $a eq $b;
++}
++
 +# DSA PQVer test
 +# $1 modulus size
 +# $2 q size
@@ -369,7 +386,7 @@ diff -up libgcrypt-1.4.6/tests/cavs_driver.pl.cavs libgcrypt-1.4.6/tests/cavs_dr
 +	$out .= "Seed = $seed\n";
 +	$out .= "c = $c\n";
 +
-+	if ($P eq $p && $Q eq $q && $seed eq lc $seed2 && $c eq $c2) {
++	if (hexcomp($P, $p) && hexcomp($Q, $q) && hexcomp($seed, $seed2) && $c == $c2) {
 +		$out .= "Result = P\n\n";
 +	}
 +	else {
@@ -413,8 +430,8 @@ diff -up libgcrypt-1.4.6/tests/cavs_driver.pl.cavs libgcrypt-1.4.6/tests/cavs_dr
 +
 +	$c2 = hex($c2);
 +
-+	if ($P eq $p && $Q eq $q && $G eq $g && $seed eq lc $seed2 && 
-+	    $c eq $c2 && hex($h) == hex($h2)) {
++	if (hexcomp($P, $p) && hexcomp($Q, $q) && hexcomp($G, $g) && hexcomp($seed, $seed2) && 
++	    $c == $c2 && hex($h) == hex($h2)) {
 +		$out .= "Result = P\n\n";
 +	}
 +	else {
@@ -457,7 +474,7 @@ diff -up libgcrypt-1.4.6/tests/cavs_driver.pl.cavs libgcrypt-1.4.6/tests/cavs_dr
  
  # DSA SigGen test
  # $1: Message to be signed in hex form
-@@ -1658,12 +1884,16 @@ sub parse($$) {
+@@ -1658,12 +1901,16 @@ sub parse($$) {
  	my $klen = "";
  	my $tlen = "";
  	my $modulus = "";
@@ -474,7 +491,7 @@ diff -up libgcrypt-1.4.6/tests/cavs_driver.pl.cavs libgcrypt-1.4.6/tests/cavs_dr
  	my $xp1 = "";
  	my $xp2 = "";
  	my $Xp = "";
-@@ -1700,7 +1930,7 @@ sub parse($$) {
+@@ -1700,7 +1947,7 @@ sub parse($$) {
  
  		##### Extract cipher
  		# XXX there may be more - to be added
@@ -483,7 +500,7 @@ diff -up libgcrypt-1.4.6/tests/cavs_driver.pl.cavs libgcrypt-1.4.6/tests/cavs_dr
  			if ($tmpline    =~ /CBC/)   { $mode="cbc"; }
  			elsif ($tmpline =~ /ECB/)   { $mode="ecb"; }
  			elsif ($tmpline =~ /OFB/)   { $mode="ofb"; }
-@@ -1749,7 +1979,15 @@ sub parse($$) {
+@@ -1749,7 +1996,15 @@ sub parse($$) {
  
  			if ($tt == 0) {
  			##### Identify the test type
@@ -500,7 +517,7 @@ diff -up libgcrypt-1.4.6/tests/cavs_driver.pl.cavs libgcrypt-1.4.6/tests/cavs_dr
  					$tt = 13;
  					die "Interface function rsa_derive for RSA key generation not defined for tested library"
  						if (!defined($rsa_derive));
-@@ -1760,11 +1998,11 @@ sub parse($$) {
+@@ -1760,11 +2015,11 @@ sub parse($$) {
  				} elsif ($tmpline =~ /SigGen/ && $opt{'D'}) {
  					$tt = 11;
  					die "Interface function dsa_sign or gen_dsakey for DSA sign not defined for tested library"
@@ -514,7 +531,7 @@ diff -up libgcrypt-1.4.6/tests/cavs_driver.pl.cavs libgcrypt-1.4.6/tests/cavs_dr
  				} elsif ($tmpline =~ /Hash sizes tested/) {
  					$tt = 9;
  					die "Interface function hmac for HMAC testing not defined for tested library"
-@@ -1792,7 +2030,7 @@ sub parse($$) {
+@@ -1792,7 +2047,7 @@ sub parse($$) {
  				} elsif ($tmpline =~ /Monte|MCT|Carlo/) {
  					$tt = 2;
  					die "Interface function state_cipher for Stateful Cipher operation defined for tested library"
@@ -523,7 +540,7 @@ diff -up libgcrypt-1.4.6/tests/cavs_driver.pl.cavs libgcrypt-1.4.6/tests/cavs_dr
  				} elsif ($cipher =~ /^sha/) {
  					$tt = 3;
  					die "Interface function hash for Hashing not defined for tested library"
-@@ -1875,18 +2113,44 @@ sub parse($$) {
+@@ -1875,18 +2130,44 @@ sub parse($$) {
  			die "Msg/Seed seen twice - input file crap" if ($pt ne "");
  			$pt=$2;
  		}
@@ -572,7 +589,7 @@ diff -up libgcrypt-1.4.6/tests/cavs_driver.pl.cavs libgcrypt-1.4.6/tests/cavs_dr
  				# XXX maybe a secure temp file name is better here
  				# but since it is not run on a security sensitive
  				# system, I hope that this is fine
-@@ -1932,11 +2196,16 @@ sub parse($$) {
+@@ -1932,11 +2213,16 @@ sub parse($$) {
  				if ($tlen ne "");
  			$tlen=$1;
  		}
@@ -590,7 +607,7 @@ diff -up libgcrypt-1.4.6/tests/cavs_driver.pl.cavs libgcrypt-1.4.6/tests/cavs_dr
  		elsif ($line =~ /^P\s*=\s*(.*)/) { #DSA SigVer
  			die "P seen twice - check input file"
  				if ($capital_p);
-@@ -1965,6 +2234,16 @@ sub parse($$) {
+@@ -1965,6 +2251,16 @@ sub parse($$) {
  				if ($capital_r);
  			$capital_r = $1;
  		}
@@ -607,7 +624,7 @@ diff -up libgcrypt-1.4.6/tests/cavs_driver.pl.cavs libgcrypt-1.4.6/tests/cavs_dr
  		elsif ($line =~ /^xp1\s*=\s*(.*)/) { #RSA key gen
  			die "xp1 seen twice - check input file"
  				if ($xp1);
-@@ -2074,11 +2353,10 @@ sub parse($$) {
+@@ -2074,11 +2370,10 @@ sub parse($$) {
  			}
  		}
  		elsif ($tt == 10) {
@@ -623,7 +640,7 @@ diff -up libgcrypt-1.4.6/tests/cavs_driver.pl.cavs libgcrypt-1.4.6/tests/cavs_dr
  		}
  		elsif ($tt == 11) {
  			if ($pt ne "" && $dsa_keyfile ne "") {
-@@ -2141,6 +2419,74 @@ sub parse($$) {
+@@ -2141,6 +2436,74 @@ sub parse($$) {
  				$Xq = "";
  			}
  		}
@@ -698,7 +715,7 @@ diff -up libgcrypt-1.4.6/tests/cavs_driver.pl.cavs libgcrypt-1.4.6/tests/cavs_dr
  		elsif ($tt > 0) {
  			die "Test case $tt not defined";
  		}
-@@ -2199,7 +2545,9 @@ sub main() {
+@@ -2199,7 +2562,9 @@ sub main() {
  		$state_rng =	\&libgcrypt_state_rng;
  		$hmac =		\&libgcrypt_hmac;
  		$dsa_pqggen = 	\&libgcrypt_dsa_pqggen;
