@@ -1,6 +1,6 @@
 Name: libgcrypt
-Version: 1.4.6
-Release: 4%{?dist}
+Version: 1.5.0
+Release: 1%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.bz2
 # The original libgcrypt sources now contain potentially patented ECC
@@ -10,18 +10,17 @@ Source0: libgcrypt-%{version}-hobbled.tar.bz2
 #Source1: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2.sig
 Source2: wk@g10code.com
 Source3: hobble-libgcrypt
+# do not run the ecc curves test
+Patch1: libgcrypt-1.5.0-noecc.patch
 # make FIPS hmac compatible with fipscheck - non upstreamable
-Patch2: libgcrypt-1.4.4-use-fipscheck.patch
-# fix ImplicitDSOLinking (missing -lgpg-error linkage in tests/), upstreamable
-Patch3: libgcrypt-1.4.5-ImplicitDSOLinking.patch
-# use /dev/urandom in the FIPS mode
-Patch4: libgcrypt-1.4.5-urandom.patch
+Patch2: libgcrypt-1.5.0-use-fipscheck.patch
 # fix tests in the FIPS mode, fix the FIPS-186-3 DSA keygen
-Patch5: libgcrypt-1.4.5-tests.patch
-# add configurable source of RNG seed in the FIPS mode
-Patch6: libgcrypt-1.4.6-fips-cfgrandom.patch
+Patch5: libgcrypt-1.5.0-tests.patch
+# add configurable source of RNG seed and seed by default
+# from /dev/urandom in the FIPS mode
+Patch6: libgcrypt-1.5.0-fips-cfgrandom.patch
 # make the FIPS-186-3 DSA CAVS testable
-Patch7: libgcrypt-1.4.6-cavs.patch
+Patch7: libgcrypt-1.5.0-fips-cavs.patch
 
 # Technically LGPLv2.1+, but Fedora's table doesn't draw a distinction.
 # Documentation and some utilities are GPLv2+ licensed. These files
@@ -54,9 +53,8 @@ applications using libgcrypt.
 %prep
 %setup -q
 %{SOURCE3}
+%patch1 -p1 -b .noecc
 %patch2 -p1 -b .use-fipscheck
-%patch3 -p1 -b .ImplicitDSOLinking
-%patch4 -p1 -b .urandom
 %patch5 -p1 -b .tests
 %patch6 -p1 -b .cfgrandom
 %patch7 -p1 -b .cavs
@@ -171,6 +169,9 @@ exit 0
 %doc COPYING
 
 %changelog
+* Thu Jul 21 2011 Tomas Mraz <tmraz@redhat.com> 1.5.0-1
+- new upstream version
+
 * Mon Jun 20 2011 Tomas Mraz <tmraz@redhat.com> 1.4.6-4
 - Always xor seed from /dev/urandom over /etc/gcrypt/rngseed
 

@@ -1,7 +1,7 @@
-diff -up libgcrypt-1.4.6/cipher/dsa.c.cavs libgcrypt-1.4.6/cipher/dsa.c
---- libgcrypt-1.4.6/cipher/dsa.c.cavs	2011-05-26 22:03:17.000000000 +0200
-+++ libgcrypt-1.4.6/cipher/dsa.c	2011-05-26 22:03:18.000000000 +0200
-@@ -467,7 +467,6 @@ generate_fips186 (DSA_secret_key *sk, un
+diff -up libgcrypt-1.5.0/cipher/dsa.c.cavs libgcrypt-1.5.0/cipher/dsa.c
+--- libgcrypt-1.5.0/cipher/dsa.c.cavs	2011-07-21 14:56:35.000000000 +0200
++++ libgcrypt-1.5.0/cipher/dsa.c	2011-07-21 14:58:06.000000000 +0200
+@@ -479,7 +479,6 @@ generate_fips186 (DSA_secret_key *sk, un
              initial_seed.seed = gcry_sexp_nth_data (initial_seed.sexp, 1,
                                                      &initial_seed.seedlen);
          }
@@ -9,8 +9,8 @@ diff -up libgcrypt-1.4.6/cipher/dsa.c.cavs libgcrypt-1.4.6/cipher/dsa.c
        if (use_fips186_2)
          ec = _gcry_generate_fips186_2_prime (nbits, qbits, 
                                             initial_seed.seed, 
-@@ -475,13 +474,22 @@ generate_fips186 (DSA_secret_key *sk, un
-                                            &prime_q, &prime_p, 
+@@ -487,13 +486,22 @@ generate_fips186 (DSA_secret_key *sk, un
+                                            &prime_q, &prime_p,
                                             r_counter,
                                             r_seed, r_seedlen);
 -      else
@@ -33,7 +33,7 @@ diff -up libgcrypt-1.4.6/cipher/dsa.c.cavs libgcrypt-1.4.6/cipher/dsa.c
        gcry_sexp_release (initial_seed.sexp);
        if (ec)
          goto leave;
-@@ -772,13 +780,12 @@ dsa_generate_ext (int algo, unsigned int
+@@ -784,13 +792,12 @@ dsa_generate_ext (int algo, unsigned int
            gcry_sexp_release (l1);
            gcry_sexp_release (domainsexp);
  
@@ -49,9 +49,9 @@ diff -up libgcrypt-1.4.6/cipher/dsa.c.cavs libgcrypt-1.4.6/cipher/dsa.c
                return GPG_ERR_MISSING_VALUE;
              }
  
-diff -up libgcrypt-1.4.6/tests/cavs_driver.pl.cavs libgcrypt-1.4.6/tests/cavs_driver.pl
---- libgcrypt-1.4.6/tests/cavs_driver.pl.cavs	2009-04-02 11:25:34.000000000 +0200
-+++ libgcrypt-1.4.6/tests/cavs_driver.pl	2011-06-20 20:00:13.000000000 +0200
+diff -up libgcrypt-1.5.0/tests/cavs_driver.pl.cavs libgcrypt-1.5.0/tests/cavs_driver.pl
+--- libgcrypt-1.5.0/tests/cavs_driver.pl.cavs	2011-02-04 20:18:20.000000000 +0100
++++ libgcrypt-1.5.0/tests/cavs_driver.pl	2011-07-21 15:01:47.000000000 +0200
 @@ -1,9 +1,11 @@
  #!/usr/bin/env perl
  #
@@ -153,11 +153,11 @@ diff -up libgcrypt-1.4.6/tests/cavs_driver.pl.cavs libgcrypt-1.4.6/tests/cavs_dr
  
  # generate a new DSA key with the following properties:
  #	PEM format
--# $1 keyfile name 
+-# $1 keyfile name
 -# return: file created, hash with keys of P, Q, G in hex format
 +# $1: modulus size
 +# $2: q size
-+# $3 keyfile name 
++# $3 keyfile name
 +# return: file created with key, string with values of P, Q, G in hex format
  my $gen_dsakey;
  
@@ -165,7 +165,7 @@ diff -up libgcrypt-1.4.6/tests/cavs_driver.pl.cavs libgcrypt-1.4.6/tests/cavs_dr
 +#      PEM format
 +# $1: P in hex form
 +# $2: Q in hex form
-+# $3: G in hex form 
++# $3: G in hex form
 +# return: string with values of X, Y in hex format
 +my $gen_dsakey_domain;
 +
@@ -173,7 +173,7 @@ diff -up libgcrypt-1.4.6/tests/cavs_driver.pl.cavs libgcrypt-1.4.6/tests/cavs_dr
  # $1: data to be signed in hex form
  # $2: Key file in PEM format with the private key
 @@ -500,17 +560,32 @@ sub libgcrypt_hmac($$$$) {
- 	return pipe_through_program($msg, $program);	
+ 	return pipe_through_program($msg, $program);
  }
  
 -sub libgcrypt_dsa_pqggen($) {
@@ -313,11 +313,11 @@ diff -up libgcrypt-1.4.6/tests/cavs_driver.pl.cavs libgcrypt-1.4.6/tests/cavs_dr
 -		$out .= "H = $H\n\n";
 +		$out .= "domain_parameter_seed = $Seed\n";
 +		$out .= "counter = $c\n\n";
-+	}
-+
-+	return $out;
-+}
-+
+ 	}
+ 
+ 	return $out;
+ }
+ 
 +# DSA GGen test
 +# $1 modulus size
 +# $2 q size
@@ -436,11 +436,11 @@ diff -up libgcrypt-1.4.6/tests/cavs_driver.pl.cavs libgcrypt-1.4.6/tests/cavs_dr
 +	}
 +	else {
 +		$out .= "Result = F\n\n";
- 	}
- 
- 	return $out;
- }
- 
++	}
++
++	return $out;
++}
++
 +# DSA Keypair test
 +# $1 modulus size
 +# $2 q size
@@ -725,9 +725,9 @@ diff -up libgcrypt-1.4.6/tests/cavs_driver.pl.cavs libgcrypt-1.4.6/tests/cavs_dr
  		$dsa_sign =     \&libgcrypt_dsa_sign;
  		$dsa_verify =   \&libgcrypt_dsa_verify;
  		$dsa_genpubkey = \&libgcrypt_dsa_genpubkey;
-diff -up libgcrypt-1.4.6/tests/cavs_tests.sh.cavs libgcrypt-1.4.6/tests/cavs_tests.sh
---- libgcrypt-1.4.6/tests/cavs_tests.sh.cavs	2011-05-26 21:02:02.000000000 +0200
-+++ libgcrypt-1.4.6/tests/cavs_tests.sh	2011-05-26 22:20:20.000000000 +0200
+diff -up libgcrypt-1.5.0/tests/cavs_tests.sh.cavs libgcrypt-1.5.0/tests/cavs_tests.sh
+--- libgcrypt-1.5.0/tests/cavs_tests.sh.cavs	2011-02-04 20:18:20.000000000 +0100
++++ libgcrypt-1.5.0/tests/cavs_tests.sh	2011-07-21 15:02:16.000000000 +0200
 @@ -55,7 +55,7 @@ function run_one_test () {
      [ -d "$respdir" ] || mkdir "$respdir"
      [ -f "$rspfile" ] &&  rm "$rspfile"
@@ -735,12 +735,12 @@ diff -up libgcrypt-1.4.6/tests/cavs_tests.sh.cavs libgcrypt-1.4.6/tests/cavs_tes
 -    if echo "$reqfile" | grep '/DSA/req/' >/dev/null 2>/dev/null; then
 +    if echo "$reqfile" | grep '/DSA.\?/req/' >/dev/null 2>/dev/null; then
          dflag="-D"
-     fi 
-     
-diff -up libgcrypt-1.4.6/tests/fipsdrv.c.cavs libgcrypt-1.4.6/tests/fipsdrv.c
---- libgcrypt-1.4.6/tests/fipsdrv.c.cavs	2009-04-02 11:25:34.000000000 +0200
-+++ libgcrypt-1.4.6/tests/fipsdrv.c	2011-05-27 18:03:11.000000000 +0200
-@@ -893,9 +893,12 @@ print_mpi_line (gcry_mpi_t a, int no_lz)
+     fi
+ 
+diff -up libgcrypt-1.5.0/tests/fipsdrv.c.cavs libgcrypt-1.5.0/tests/fipsdrv.c
+--- libgcrypt-1.5.0/tests/fipsdrv.c.cavs	2011-02-04 20:18:20.000000000 +0100
++++ libgcrypt-1.5.0/tests/fipsdrv.c	2011-07-21 15:06:44.000000000 +0200
+@@ -893,6 +893,9 @@ print_mpi_line (gcry_mpi_t a, int no_lz)
      die ("gcry_mpi_aprint failed: %s\n", gpg_strerror (err));
  
    p = buf;
@@ -749,11 +749,7 @@ diff -up libgcrypt-1.4.6/tests/fipsdrv.c.cavs libgcrypt-1.4.6/tests/fipsdrv.c
 +  p = buf;
    if (no_lz && p[0] == '0' && p[1] == '0' && p[2])
      p += 2;
--    
-+
-   printf ("%s\n", p);
-   if (ferror (stdout))
-     writerr++;
+ 
 @@ -1675,14 +1678,14 @@ run_rsa_verify (const void *data, size_t
  /* Generate a DSA key of size KEYSIZE and return the complete
     S-expression.  */
@@ -764,7 +760,7 @@ diff -up libgcrypt-1.4.6/tests/fipsdrv.c.cavs libgcrypt-1.4.6/tests/fipsdrv.c
    gpg_error_t err;
    gcry_sexp_t keyspec, key;
  
-   err = gcry_sexp_build (&keyspec, NULL, 
+   err = gcry_sexp_build (&keyspec, NULL,
 -                         "(genkey (dsa (nbits %d)(use-fips186-2)))",
 -                         keysize);
 +                         "(genkey (dsa (nbits %d)(qbits %d)(use-fips186)))",
@@ -795,10 +791,16 @@ diff -up libgcrypt-1.4.6/tests/fipsdrv.c.cavs libgcrypt-1.4.6/tests/fipsdrv.c
    if (err)
      die ("gcry_sexp_build failed for DSA key generation: %s\n",
           gpg_strerror (err));
-@@ -1726,13 +1730,44 @@ dsa_gen_with_seed (int keysize, const vo
-   return key;
- }
- 
+@@ -1720,6 +1724,37 @@ dsa_gen_with_seed (int keysize, const vo
+   err = gcry_pk_genkey (&key, keyspec);
+   if (err)
+     die ("gcry_pk_genkey failed for DSA: %s\n", gpg_strerror (err));
++  
++  gcry_sexp_release (keyspec);
++
++  return key;
++}
++
 +/* Generate a DSA key with specified domain parameters and return the complete
 +   S-expression.  */
 +static gcry_sexp_t
@@ -812,7 +814,7 @@ diff -up libgcrypt-1.4.6/tests/fipsdrv.c.cavs libgcrypt-1.4.6/tests/fipsdrv.c
 +    die ("gcry_sexp_build failed for domain spec: %s\n",
 +         gpg_strerror (err));
 +
-+  err = gcry_sexp_build (&keyspec, NULL, 
++  err = gcry_sexp_build (&keyspec, NULL,
 +                         "(genkey"
 +                         "  (dsa"
 +                         "    (use-fips186)"
@@ -824,18 +826,13 @@ diff -up libgcrypt-1.4.6/tests/fipsdrv.c.cavs libgcrypt-1.4.6/tests/fipsdrv.c
 +  err = gcry_pk_genkey (&key, keyspec);
 +  if (err)
 +    die ("gcry_pk_genkey failed for DSA: %s\n", gpg_strerror (err));
-+  
-+  gcry_sexp_release (keyspec);
-+
-+  return key;
-+}
-+
  
- /* Print the domain parameter as well as the derive information.  KEY
-    is the complete key as returned by dsa_gen.  We print to stdout
+   gcry_sexp_release (keyspec);
+ 
+@@ -1732,7 +1767,7 @@ dsa_gen_with_seed (int keysize, const vo
     with one parameter per line in hex format using this order: p, q,
     g, seed, counter, h. */
- static void 
+ static void
 -print_dsa_domain_parameters (gcry_sexp_t key)
 +print_dsa_domain_parameters (gcry_sexp_t key, int print_misc)
  {
@@ -1127,7 +1124,7 @@ diff -up libgcrypt-1.4.6/tests/fipsdrv.c.cavs libgcrypt-1.4.6/tests/fipsdrv.c
      {
 -      int keysize;
 +      int keysize, qsize;
-       
+ 
        keysize = keysize_string? atoi (keysize_string) : 0;
        if (keysize < 1024 || keysize > 3072)
          die ("invalid keysize specified; needs to be 1024 .. 3072\n");
@@ -1140,7 +1137,7 @@ diff -up libgcrypt-1.4.6/tests/fipsdrv.c.cavs libgcrypt-1.4.6/tests/fipsdrv.c
 +  else if (!strcmp (mode_string, "dsa-g-gen"))
 +    {
 +      int keysize, qsize;
-+      
++
 +      keysize = keysize_string? atoi (keysize_string) : 0;
 +      if (keysize < 1024 || keysize > 3072)
 +        die ("invalid keysize specified; needs to be 1024 .. 3072\n");
@@ -1161,7 +1158,7 @@ diff -up libgcrypt-1.4.6/tests/fipsdrv.c.cavs libgcrypt-1.4.6/tests/fipsdrv.c
      {
 -      int keysize;
 +      int keysize, qsize;
-       
+ 
        keysize = keysize_string? atoi (keysize_string) : 0;
        if (keysize < 1024 || keysize > 3072)
          die ("invalid keysize specified; needs to be 1024 .. 3072\n");

@@ -1,20 +1,23 @@
-diff -up libgcrypt-1.4.5/cipher/dsa.c.tests libgcrypt-1.4.5/cipher/dsa.c
---- libgcrypt-1.4.5/cipher/dsa.c.tests	2009-08-21 10:18:30.000000000 +0200
-+++ libgcrypt-1.4.5/cipher/dsa.c	2011-02-04 09:06:02.000000000 +0100
-@@ -468,21 +468,20 @@ generate_fips186 (DSA_secret_key *sk, un
+diff -up libgcrypt-1.5.0/cipher/dsa.c.tests libgcrypt-1.5.0/cipher/dsa.c
+--- libgcrypt-1.5.0/cipher/dsa.c.tests	2011-06-13 12:24:46.000000000 +0200
++++ libgcrypt-1.5.0/cipher/dsa.c	2011-07-20 16:44:51.000000000 +0200
+@@ -479,22 +479,21 @@ generate_fips186 (DSA_secret_key *sk, un
+             initial_seed.seed = gcry_sexp_nth_data (initial_seed.sexp, 1,
                                                      &initial_seed.seedlen);
          }
-       
+-
 -      /* Fixme: Enable 186-3 after it has been approved and after fixing
 -         the generation function.  */
 -      /*   if (use_fips186_2) */
 -      (void)use_fips186_2;
--      ec = _gcry_generate_fips186_2_prime (nbits, qbits, 
+-      ec = _gcry_generate_fips186_2_prime (nbits, qbits,
+-                                           initial_seed.seed,
++      
 +      if (use_fips186_2)
 +        ec = _gcry_generate_fips186_2_prime (nbits, qbits, 
-                                            initial_seed.seed, 
++                                           initial_seed.seed, 
                                             initial_seed.seedlen,
-                                            &prime_q, &prime_p, 
+                                            &prime_q, &prime_p,
                                             r_counter,
                                             r_seed, r_seedlen);
 -      /*   else */
@@ -32,9 +35,9 @@ diff -up libgcrypt-1.4.5/cipher/dsa.c.tests libgcrypt-1.4.5/cipher/dsa.c
        gcry_sexp_release (initial_seed.sexp);
        if (ec)
          goto leave;
-diff -up libgcrypt-1.4.5/cipher/primegen.c.tests libgcrypt-1.4.5/cipher/primegen.c
---- libgcrypt-1.4.5/cipher/primegen.c.tests	2009-04-02 11:25:34.000000000 +0200
-+++ libgcrypt-1.4.5/cipher/primegen.c	2011-02-04 09:06:34.000000000 +0100
+diff -up libgcrypt-1.5.0/cipher/primegen.c.tests libgcrypt-1.5.0/cipher/primegen.c
+--- libgcrypt-1.5.0/cipher/primegen.c.tests	2011-03-28 14:19:52.000000000 +0200
++++ libgcrypt-1.5.0/cipher/primegen.c	2011-07-21 14:36:03.000000000 +0200
 @@ -1647,7 +1647,7 @@ _gcry_generate_fips186_3_prime (unsigned
    gpg_err_code_t ec;
    unsigned char seed_help_buffer[256/8];  /* Used to hold a generated SEED. */
@@ -47,7 +50,7 @@ diff -up libgcrypt-1.4.5/cipher/primegen.c.tests libgcrypt-1.4.5/cipher/primegen
 @@ -1737,7 +1737,7 @@ _gcry_generate_fips186_3_prime (unsigned
          }
        gcry_mpi_release (prime_q); prime_q = NULL;
-       ec = gpg_err_code (gcry_mpi_scan (&prime_q, GCRYMPI_FMT_USG, 
+       ec = gpg_err_code (gcry_mpi_scan (&prime_q, GCRYMPI_FMT_USG,
 -                                        value_u, sizeof value_u, NULL));
 +                                        value_u, qbits/8, NULL));
        if (ec)
@@ -59,7 +62,7 @@ diff -up libgcrypt-1.4.5/cipher/primegen.c.tests libgcrypt-1.4.5/cipher/primegen
              }
 -          gcry_md_hash_buffer (GCRY_MD_SHA1, digest, seed_plus, seedlen);
 +          gcry_md_hash_buffer (hashalgo, digest, seed_plus, seedlen);
-           
+ 
            gcry_mpi_release (tmpval); tmpval = NULL;
            ec = gpg_err_code (gcry_mpi_scan (&tmpval, GCRYMPI_FMT_USG,
 -                                            digest, sizeof digest, NULL));
@@ -81,21 +84,21 @@ diff -up libgcrypt-1.4.5/cipher/primegen.c.tests libgcrypt-1.4.5/cipher/primegen
    if (r_q)
      {
        *r_q = prime_q;
-diff -up libgcrypt-1.4.5/cipher/rsa.c.tests libgcrypt-1.4.5/cipher/rsa.c
---- libgcrypt-1.4.5/cipher/rsa.c.tests	2009-04-02 11:25:34.000000000 +0200
-+++ libgcrypt-1.4.5/cipher/rsa.c	2011-02-04 09:06:02.000000000 +0100
+diff -up libgcrypt-1.5.0/cipher/rsa.c.tests libgcrypt-1.5.0/cipher/rsa.c
+--- libgcrypt-1.5.0/cipher/rsa.c.tests	2011-06-10 10:53:41.000000000 +0200
++++ libgcrypt-1.5.0/cipher/rsa.c	2011-07-21 14:36:59.000000000 +0200
 @@ -388,7 +388,7 @@ generate_x931 (RSA_secret_key *sk, unsig
  
    *swapped = 0;
  
 -  if (e_value == 1)   /* Alias for a secure value. */
 +  if (e_value == 1 || e_value == 0)   /* Alias for a secure value. */
-     e_value = 65537; 
+     e_value = 65537;
  
    /* Point 1 of section 4.1:  k = 1024 + 256s with S >= 0  */
-diff -up libgcrypt-1.4.5/random/random-fips.c.tests libgcrypt-1.4.5/random/random-fips.c
---- libgcrypt-1.4.5/random/random-fips.c.tests	2011-02-04 09:06:02.000000000 +0100
-+++ libgcrypt-1.4.5/random/random-fips.c	2011-02-04 09:06:02.000000000 +0100
+diff -up libgcrypt-1.5.0/random/random-fips.c.tests libgcrypt-1.5.0/random/random-fips.c
+--- libgcrypt-1.5.0/random/random-fips.c.tests	2011-07-20 16:40:59.000000000 +0200
++++ libgcrypt-1.5.0/random/random-fips.c	2011-07-20 16:40:59.000000000 +0200
 @@ -691,6 +691,7 @@ get_random (void *buffer, size_t length,
  
    check_guards (rng_ctx);
@@ -123,9 +126,9 @@ diff -up libgcrypt-1.4.5/random/random-fips.c.tests libgcrypt-1.4.5/random/rando
      }
  
    if (x931_aes_driver (buffer, length, rng_ctx))
-diff -up libgcrypt-1.4.5/tests/ac.c.tests libgcrypt-1.4.5/tests/ac.c
---- libgcrypt-1.4.5/tests/ac.c.tests	2009-04-02 11:25:34.000000000 +0200
-+++ libgcrypt-1.4.5/tests/ac.c	2011-02-04 09:06:02.000000000 +0100
+diff -up libgcrypt-1.5.0/tests/ac.c.tests libgcrypt-1.5.0/tests/ac.c
+--- libgcrypt-1.5.0/tests/ac.c.tests	2011-02-04 20:18:20.000000000 +0100
++++ libgcrypt-1.5.0/tests/ac.c	2011-07-20 16:40:59.000000000 +0200
 @@ -150,6 +150,9 @@ main (int argc, char **argv)
    if (!gcry_check_version (GCRYPT_VERSION))
      die ("version mismatch\n");
@@ -136,9 +139,9 @@ diff -up libgcrypt-1.4.5/tests/ac.c.tests libgcrypt-1.4.5/tests/ac.c
    if (debug)
      gcry_control (GCRYCTL_SET_DEBUG_FLAGS, 1u , 0);
    /* No valuable keys are create, so we can speed up our RNG. */
-diff -up libgcrypt-1.4.5/tests/ac-data.c.tests libgcrypt-1.4.5/tests/ac-data.c
---- libgcrypt-1.4.5/tests/ac-data.c.tests	2009-04-02 11:25:34.000000000 +0200
-+++ libgcrypt-1.4.5/tests/ac-data.c	2011-02-04 09:06:02.000000000 +0100
+diff -up libgcrypt-1.5.0/tests/ac-data.c.tests libgcrypt-1.5.0/tests/ac-data.c
+--- libgcrypt-1.5.0/tests/ac-data.c.tests	2011-02-04 20:18:20.000000000 +0100
++++ libgcrypt-1.5.0/tests/ac-data.c	2011-07-20 16:40:59.000000000 +0200
 @@ -198,6 +198,9 @@ main (int argc, char **argv)
    if (!gcry_check_version (GCRYPT_VERSION))
      die ("version mismatch\n");
@@ -149,9 +152,9 @@ diff -up libgcrypt-1.4.5/tests/ac-data.c.tests libgcrypt-1.4.5/tests/ac-data.c
    if (debug)
      gcry_control (GCRYCTL_SET_DEBUG_FLAGS, 1u , 0);
  
-diff -up libgcrypt-1.4.5/tests/ac-schemes.c.tests libgcrypt-1.4.5/tests/ac-schemes.c
---- libgcrypt-1.4.5/tests/ac-schemes.c.tests	2009-04-02 11:25:34.000000000 +0200
-+++ libgcrypt-1.4.5/tests/ac-schemes.c	2011-02-04 09:06:02.000000000 +0100
+diff -up libgcrypt-1.5.0/tests/ac-schemes.c.tests libgcrypt-1.5.0/tests/ac-schemes.c
+--- libgcrypt-1.5.0/tests/ac-schemes.c.tests	2011-02-04 20:18:20.000000000 +0100
++++ libgcrypt-1.5.0/tests/ac-schemes.c	2011-07-20 16:40:59.000000000 +0200
 @@ -338,6 +338,9 @@ main (int argc, char **argv)
    if (! gcry_check_version (GCRYPT_VERSION))
      die ("version mismatch\n");
@@ -162,16 +165,16 @@ diff -up libgcrypt-1.4.5/tests/ac-schemes.c.tests libgcrypt-1.4.5/tests/ac-schem
    if (debug)
      gcry_control (GCRYCTL_SET_DEBUG_FLAGS, 1u, 0);
  
-diff -up libgcrypt-1.4.5/tests/keygen.c.tests libgcrypt-1.4.5/tests/keygen.c
---- libgcrypt-1.4.5/tests/keygen.c.tests	2009-04-02 11:25:34.000000000 +0200
-+++ libgcrypt-1.4.5/tests/keygen.c	2011-02-04 09:06:02.000000000 +0100
+diff -up libgcrypt-1.5.0/tests/keygen.c.tests libgcrypt-1.5.0/tests/keygen.c
+--- libgcrypt-1.5.0/tests/keygen.c.tests	2011-02-04 20:18:20.000000000 +0100
++++ libgcrypt-1.5.0/tests/keygen.c	2011-07-21 14:39:03.000000000 +0200
 @@ -148,12 +148,12 @@ check_rsa_keys (void)
      }
  
    if (verbose)
 -    fprintf (stderr, "creating 1536 bit DSA key\n");
 +    fprintf (stderr, "creating 2048 bit DSA key\n");
-   rc = gcry_sexp_new (&keyparm, 
+   rc = gcry_sexp_new (&keyparm,
                        "(genkey\n"
                        " (dsa\n"
 -                      "  (nbits 4:1536)\n"
@@ -187,7 +190,7 @@ diff -up libgcrypt-1.4.5/tests/keygen.c.tests libgcrypt-1.4.5/tests/keygen.c
    if (verbose)
 -    fprintf (stderr, "creating 512 bit RSA key with e=257\n");
 +    fprintf (stderr, "creating 1024 bit RSA key with e=257\n");
-   rc = gcry_sexp_new (&keyparm, 
+   rc = gcry_sexp_new (&keyparm,
                        "(genkey\n"
                        " (rsa\n"
 -                      "  (nbits 3:512)\n"
@@ -201,7 +204,7 @@ diff -up libgcrypt-1.4.5/tests/keygen.c.tests libgcrypt-1.4.5/tests/keygen.c
    if (verbose)
 -    fprintf (stderr, "creating 512 bit RSA key with default e\n");
 +    fprintf (stderr, "creating 1024 bit RSA key with default secure e\n");
-   rc = gcry_sexp_new (&keyparm, 
+   rc = gcry_sexp_new (&keyparm,
                        "(genkey\n"
                        " (rsa\n"
 -                      "  (nbits 3:512)\n"
