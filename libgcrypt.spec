@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.5.0
-Release: 1%{?dist}
+Release: 2%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.bz2
 # The original libgcrypt sources now contain potentially patented ECC
@@ -169,6 +169,9 @@ exit 0
 %doc COPYING
 
 %changelog
+* Mon Aug 15 2011 Kalev Lember <kalevlember@gmail.com> 1.5.0-2
+- Rebuilt for rpm bug #728707
+
 * Thu Jul 21 2011 Tomas Mraz <tmraz@redhat.com> 1.5.0-1
 - new upstream version
 
