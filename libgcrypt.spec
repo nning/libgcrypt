@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.5.0
-Release: 3%{?dist}
+Release: 4%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.bz2
 # The original libgcrypt sources now contain potentially patented ECC
@@ -21,6 +21,8 @@ Patch5: libgcrypt-1.5.0-tests.patch
 Patch6: libgcrypt-1.5.0-fips-cfgrandom.patch
 # make the FIPS-186-3 DSA CAVS testable
 Patch7: libgcrypt-1.5.0-fips-cavs.patch
+# add GCRYCTL_SET_ENFORCED_FIPS_FLAG
+Patch8: libgcrypt-1.5.0-set-enforced-mode.patch
 
 # Technically LGPLv2.1+, but Fedora's table doesn't draw a distinction.
 # Documentation and some utilities are GPLv2+ licensed. These files
@@ -58,6 +60,7 @@ applications using libgcrypt.
 %patch5 -p1 -b .tests
 %patch6 -p1 -b .cfgrandom
 %patch7 -p1 -b .cavs
+%patch8 -p1 -b .enforce
 
 mv AUTHORS AUTHORS.iso88591
 iconv -f ISO-8859-1 -t UTF-8 AUTHORS.iso88591 >AUTHORS
@@ -169,6 +172,9 @@ exit 0
 %doc COPYING
 
 %changelog
+* Wed Apr  4 2012 Tomas Mraz <tmraz@redhat.com> 1.5.0-4
+- Add GCRYCTL_SET_ENFORCED_FIPS_FLAG command
+
 * Fri Jan 13 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.5.0-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
 

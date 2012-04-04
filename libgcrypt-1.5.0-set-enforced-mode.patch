@@ -1,0 +1,127 @@
+diff -up libgcrypt-1.5.0/doc/gcrypt.texi.enforce libgcrypt-1.5.0/doc/gcrypt.texi
+--- libgcrypt-1.5.0/doc/gcrypt.texi.enforce	2011-06-29 10:36:37.000000000 +0200
++++ libgcrypt-1.5.0/doc/gcrypt.texi	2012-04-04 11:05:41.527430118 +0200
+@@ -577,8 +577,10 @@ initialization (i.e. before @code{gcry_c
+ 
+ In addition to the standard FIPS mode, Libgcrypt may also be put into
+ an Enforced FIPS mode by writing a non-zero value into the file
+-@file{/etc/gcrypt/fips_enabled}.  The Enforced FIPS mode helps to
+-detect applications which don't fulfill all requirements for using
++@file{/etc/gcrypt/fips_enabled} or by using the control command
++@code{GCRYCTL_SET_ENFORCED_FIPS_FLAG} before any other calls to
++libgcrypt.  The Enforced FIPS mode helps to detect applications
++which don't fulfill all requirements for using
+ Libgcrypt in FIPS mode (@pxref{FIPS Mode}).
+ 
+ Once Libgcrypt has been put into FIPS mode, it is not possible to
+@@ -787,20 +789,20 @@ proper random device.
+ This command dumps information pertaining to the configuration of the
+ library to the given stream.  If NULL is given for @var{stream}, the log
+ system is used.  This command may be used before the intialization has
+-been finished but not before a gcry_version_check.
++been finished but not before a @code{gcry_check_version}.
+ 
+ @item GCRYCTL_OPERATIONAL_P; Arguments: none
+ This command returns true if the library is in an operational state.
+ This information makes only sense in FIPS mode.  In contrast to other
+ functions, this is a pure test function and won't put the library into
+ FIPS mode or change the internal state.  This command may be used before
+-the intialization has been finished but not before a gcry_version_check.
++the intialization has been finished but not before a @code{gcry_check_version}.
+ 
+ @item GCRYCTL_FIPS_MODE_P; Arguments: none
+ This command returns true if the library is in FIPS mode.  Note, that
+ this is no indication about the current state of the library.  This
+ command may be used before the intialization has been finished but not
+-before a gcry_version_check.  An application may use this command or
++before a @code{gcry_check_version}.  An application may use this command or
+ the convenience macro below to check whether FIPS mode is actually
+ active.
+ 
+@@ -816,10 +818,19 @@ implemented as a macro.
+ Running this command puts the library into FIPS mode.  If the library is
+ already in FIPS mode, a self-test is triggered and thus the library will
+ be put into operational state.  This command may be used before a call
+-to gcry_check_version and that is actually the recommended way to let an
++to @code{gcry_check_version} and that is actually the recommended way to let an
+ application switch the library into FIPS mode.  Note that Libgcrypt will
+ reject an attempt to switch to fips mode during or after the intialization.
+ 
++@item GCRYCTL_SET_ENFORCED_FIPS_FLAG; Arguments: none
++Running this command sets the internal flag that puts the library into
++the enforced FIPS mode during the FIPS mode initialization.  This command
++does not affect the library if the library is not put into the FIPS mode and
++it must be used before any other libgcrypt library calls that initialize
++the library such as @code{gcry_check_version}. Note that Libgcrypt will
++reject an attempt to switch to the enforced fips mode during or after
++the intialization.
++
+ @item GCRYCTL_SELFTEST; Arguments: none
+ This may be used at anytime to have the library run all implemented
+ self-tests.  It works in standard and in FIPS mode.  Returns 0 on
+diff -up libgcrypt-1.5.0/src/fips.c.enforce libgcrypt-1.5.0/src/fips.c
+--- libgcrypt-1.5.0/src/fips.c.enforce	2011-07-21 15:41:25.000000000 +0200
++++ libgcrypt-1.5.0/src/fips.c	2012-04-04 10:26:24.311525789 +0200
+@@ -274,9 +274,17 @@ _gcry_fips_mode (void)
+ int
+ _gcry_enforced_fips_mode (void)
+ {
++  if (!_gcry_fips_mode ())
++    return 0;
+   return enforced_fips_mode;
+ }
+ 
++/* Set a flag telling whether we are in the enforced fips mode.  */
++void
++_gcry_set_enforced_fips_mode (void)
++{
++  enforced_fips_mode = 1;
++}
+ 
+ /* If we do not want to enforce the fips mode, we can set a flag so
+    that the application may check whether it is still in fips mode.
+diff -up libgcrypt-1.5.0/src/g10lib.h.enforce libgcrypt-1.5.0/src/g10lib.h
+--- libgcrypt-1.5.0/src/g10lib.h.enforce	2011-02-16 18:27:28.000000000 +0100
++++ libgcrypt-1.5.0/src/g10lib.h	2012-04-04 10:25:03.280777602 +0200
+@@ -326,6 +326,8 @@ int _gcry_fips_mode (void);
+ 
+ int _gcry_enforced_fips_mode (void);
+ 
++void _gcry_set_enforced_fips_mode (void);
++
+ void _gcry_inactivate_fips_mode (const char *text);
+ int _gcry_is_fips_mode_inactive (void);
+ 
+diff -up libgcrypt-1.5.0/src/gcrypt.h.in.enforce libgcrypt-1.5.0/src/gcrypt.h.in
+--- libgcrypt-1.5.0/src/gcrypt.h.in.enforce	2011-03-11 09:47:39.000000000 +0100
++++ libgcrypt-1.5.0/src/gcrypt.h.in	2012-04-04 10:25:53.806867670 +0200
+@@ -415,7 +415,8 @@ enum gcry_ctl_cmds
+     GCRYCTL_FORCE_FIPS_MODE = 56,
+     GCRYCTL_SELFTEST = 57,
+     /* Note: 58 .. 62 are used internally.  */
+-    GCRYCTL_DISABLE_HWF = 63
++    GCRYCTL_DISABLE_HWF = 63,
++    GCRYCTL_SET_ENFORCED_FIPS_FLAG = 64
+   };
+ 
+ /* Perform various operations defined by CMD. */
+diff -up libgcrypt-1.5.0/src/global.c.enforce libgcrypt-1.5.0/src/global.c
+--- libgcrypt-1.5.0/src/global.c.enforce	2011-04-01 10:15:40.000000000 +0200
++++ libgcrypt-1.5.0/src/global.c	2012-04-04 10:24:12.647685222 +0200
+@@ -596,6 +596,16 @@ _gcry_vcontrol (enum gcry_ctl_cmds cmd,
+       }
+       break;
+ 
++    case GCRYCTL_SET_ENFORCED_FIPS_FLAG:
++      if (!any_init_done)
++        {
++          /* Not yet intialized at all.  Set the enforced fips mode flag */
++          _gcry_set_enforced_fips_mode ();
++        }
++      else
++        err = GPG_ERR_GENERAL;
++      break;
++
+     default:
+       /* A call to make sure that the dummy code is linked in.  */
+       _gcry_compat_identification ();
