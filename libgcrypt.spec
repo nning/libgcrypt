@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.5.0
-Release: 4%{?dist}
+Release: 5%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.bz2
 # The original libgcrypt sources now contain potentially patented ECC
@@ -32,6 +32,8 @@ Summary: A general-purpose cryptography library
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildRequires: gawk, libgpg-error-devel >= 1.4, pkgconfig
 BuildRequires: fipscheck
+# This is needed only when patching the .texi doc.
+BuildRequires: texinfo
 Group: System Environment/Libraries
 
 %package devel
@@ -172,6 +174,9 @@ exit 0
 %doc COPYING
 
 %changelog
+* Thu Apr  5 2012 Tomas Mraz <tmraz@redhat.com> 1.5.0-5
+- Correctly rebuild the info documentation
+
 * Wed Apr  4 2012 Tomas Mraz <tmraz@redhat.com> 1.5.0-4
 - Add GCRYCTL_SET_ENFORCED_FIPS_FLAG command
 
