@@ -23,6 +23,8 @@ Patch6: libgcrypt-1.5.0-fips-cfgrandom.patch
 Patch7: libgcrypt-1.5.0-fips-cavs.patch
 # add GCRYCTL_SET_ENFORCED_FIPS_FLAG
 Patch8: libgcrypt-1.5.0-set-enforced-mode.patch
+# fix for memory leaks an other errors found by Coverity scan
+Patch9: libgcrypt-1.5.0-leak.patch
 
 # Technically LGPLv2.1+, but Fedora's table doesn't draw a distinction.
 # Documentation and some utilities are GPLv2+ licensed. These files
@@ -178,6 +180,7 @@ exit 0
 %changelog
 * Mon Dec  3 2012 Tomas Mraz <tmraz@redhat.com> 1.5.0-7
 - fix multilib conflict in libgcrypt-config
+- fix minor memory leaks and other bugs found by Coverity scan
 
 * Thu Jul 19 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.5.0-6
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
