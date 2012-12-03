@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.5.0
-Release: 7%{?dist}
+Release: 8%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.bz2
 # The original libgcrypt sources now contain potentially patented ECC
@@ -65,6 +65,7 @@ applications using libgcrypt.
 %patch6 -p1 -b .cfgrandom
 %patch7 -p1 -b .cavs
 %patch8 -p1 -b .enforce
+%patch9 -p1 -b .leak
 
 mv AUTHORS AUTHORS.iso88591
 iconv -f ISO-8859-1 -t UTF-8 AUTHORS.iso88591 >AUTHORS
@@ -178,7 +179,7 @@ exit 0
 %doc COPYING
 
 %changelog
-* Mon Dec  3 2012 Tomas Mraz <tmraz@redhat.com> 1.5.0-7
+* Mon Dec  3 2012 Tomas Mraz <tmraz@redhat.com> 1.5.0-8
 - fix multilib conflict in libgcrypt-config
 - fix minor memory leaks and other bugs found by Coverity scan
 
