@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.5.0
-Release: 6%{?dist}
+Release: 7%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.bz2
 # The original libgcrypt sources now contain potentially patented ECC
@@ -97,7 +97,9 @@ make install DESTDIR=$RPM_BUILD_ROOT
 # Change /usr/lib64 back to /usr/lib.  This saves us from having to patch the
 # script to "know" that -L/usr/lib64 should be suppressed, and also removes
 # a file conflict between 32- and 64-bit versions of this package.
+# Also replace my_host with none.
 sed -i -e 's,^libdir="/usr/lib.*"$,libdir="/usr/lib",g' $RPM_BUILD_ROOT/%{_bindir}/libgcrypt-config
+sed -i -e 's,^my_host=".*"$,my_host="none",g' $RPM_BUILD_ROOT/%{_bindir}/libgcrypt-config
 
 rm -f ${RPM_BUILD_ROOT}/%{_infodir}/dir ${RPM_BUILD_ROOT}/%{_libdir}/*.la
 /sbin/ldconfig -n $RPM_BUILD_ROOT/%{_libdir}
@@ -174,6 +176,9 @@ exit 0
 %doc COPYING
 
 %changelog
+* Mon Dec  3 2012 Tomas Mraz <tmraz@redhat.com> 1.5.0-7
+- fix multilib conflict in libgcrypt-config
+
 * Thu Jul 19 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.5.0-6
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
 
