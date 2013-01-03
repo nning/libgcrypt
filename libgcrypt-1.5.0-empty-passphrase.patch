@@ -1,0 +1,54 @@
+commit 8528f1ba40e587dc17e02822e529fbd7ac69a189
+Author: Milan Broz <mbroz@redhat.com>
+Date:   Mon Oct 29 17:18:09 2012 +0100
+
+    PBKDF2: Allow empty passphrase.
+    
+    * cipher/kdf.c (gcry_kdf_derive): Allow empty passphrase for PBKDF2.
+    * tests/t-kdf.c (check_pbkdf2): Add test case for above.
+    --
+    
+    While it is insecure, the PBKDF2 implementations usually
+    allows to derive key only from salt.
+    
+    This particular case is used e.g. in cryptsetup when
+    you use empty file as keyfile for LUKS keyslot.
+    
+    Test vector is compared with two independent implementations.
+    
+    Signed-off-by: Milan Broz <mbroz@redhat.com>
+
+diff --git a/cipher/kdf.c b/cipher/kdf.c
+index d981022..46e8550 100644
+--- a/cipher/kdf.c
++++ b/cipher/kdf.c
+@@ -238,7 +238,7 @@ gcry_kdf_derive (const void *passphrase, size_t passphraselen,
+ {
+   gpg_err_code_t ec;
+ 
+-  if (!passphrase || !passphraselen)
++  if (!passphrase || (!passphraselen && algo != GCRY_KDF_PBKDF2))
+     {
+       ec = GPG_ERR_INV_DATA;
+       goto leave;
+diff --git a/tests/t-kdf.c b/tests/t-kdf.c
+index 7209525..06c0026 100644
+--- a/tests/t-kdf.c
++++ b/tests/t-kdf.c
+@@ -917,7 +917,15 @@ check_pbkdf2 (void)
+       16,
+       "\x56\xfa\x6a\xa7\x55\x48\x09\x9d\xcc\x37"
+       "\xd7\xf0\x34\x25\xe0\xc3"
+-    }
++    },
++    { /* empty password test, not in RFC-6070 */
++      "", 0,
++      "salt", 4,
++      2,
++      20,
++      "\x13\x3a\x4c\xe8\x37\xb4\xd2\x52\x1e\xe2"
++      "\xbf\x03\xe1\x1c\x71\xca\x79\x4e\x07\x97"
++    },
+   };
+   int tvidx;
+   gpg_error_t err;

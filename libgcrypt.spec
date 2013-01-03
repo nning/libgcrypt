@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.5.0
-Release: 8%{?dist}
+Release: 9%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.bz2
 # The original libgcrypt sources now contain potentially patented ECC
@@ -25,6 +25,8 @@ Patch7: libgcrypt-1.5.0-fips-cavs.patch
 Patch8: libgcrypt-1.5.0-set-enforced-mode.patch
 # fix for memory leaks an other errors found by Coverity scan
 Patch9: libgcrypt-1.5.0-leak.patch
+# allow empty passphrase (upstreamed)
+Patch10: libgcrypt-1.5.0-empty-passphrase.patch
 
 # Technically LGPLv2.1+, but Fedora's table doesn't draw a distinction.
 # Documentation and some utilities are GPLv2+ licensed. These files
@@ -66,6 +68,7 @@ applications using libgcrypt.
 %patch7 -p1 -b .cavs
 %patch8 -p1 -b .enforce
 %patch9 -p1 -b .leak
+%patch10 -p1 -b .emptypass
 
 mv AUTHORS AUTHORS.iso88591
 iconv -f ISO-8859-1 -t UTF-8 AUTHORS.iso88591 >AUTHORS
@@ -179,6 +182,9 @@ exit 0
 %doc COPYING
 
 %changelog
+* Thu Jan  3 2013 Tomas Mraz <tmraz@redhat.com> 1.5.0-9
+- allow empty passphrase in PBKDF2 needed for cryptsetup (=891266)
+
 * Mon Dec  3 2012 Tomas Mraz <tmraz@redhat.com> 1.5.0-8
 - fix multilib conflict in libgcrypt-config
 - fix minor memory leaks and other bugs found by Coverity scan
