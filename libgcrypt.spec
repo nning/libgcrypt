@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.5.0
-Release: 9%{?dist}
+Release: 10%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.bz2
 # The original libgcrypt sources now contain potentially patented ECC
@@ -182,6 +182,9 @@ exit 0
 %doc COPYING
 
 %changelog
+* Thu Feb 14 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.5.0-10
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
+
 * Thu Jan  3 2013 Tomas Mraz <tmraz@redhat.com> 1.5.0-9
 - allow empty passphrase in PBKDF2 needed for cryptsetup (=891266)
 
