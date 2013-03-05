@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.5.0
-Release: 10%{?dist}
+Release: 11%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.bz2
 # The original libgcrypt sources now contain potentially patented ECC
@@ -27,6 +27,8 @@ Patch8: libgcrypt-1.5.0-set-enforced-mode.patch
 Patch9: libgcrypt-1.5.0-leak.patch
 # allow empty passphrase (upstreamed)
 Patch10: libgcrypt-1.5.0-empty-passphrase.patch
+# use poll instead of select when gathering randomness
+Patch11: libgcrypt-1.5.0-use-poll.patch
 
 # Technically LGPLv2.1+, but Fedora's table doesn't draw a distinction.
 # Documentation and some utilities are GPLv2+ licensed. These files
@@ -69,6 +71,7 @@ applications using libgcrypt.
 %patch8 -p1 -b .enforce
 %patch9 -p1 -b .leak
 %patch10 -p1 -b .emptypass
+%patch11 -p1 -b .use-poll
 
 mv AUTHORS AUTHORS.iso88591
 iconv -f ISO-8859-1 -t UTF-8 AUTHORS.iso88591 >AUTHORS
@@ -182,6 +185,9 @@ exit 0
 %doc COPYING
 
 %changelog
+* Tue Mar  5 2013 Tomas Mraz <tmraz@redhat.com> 1.5.0-11
+- use poll() instead of select() when gathering randomness (#913773)
+
 * Thu Feb 14 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.5.0-10
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
 
