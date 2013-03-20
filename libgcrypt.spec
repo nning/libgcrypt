@@ -1,8 +1,8 @@
 Name: libgcrypt
-Version: 1.5.0
-Release: 11%{?dist}
+Version: 1.5.1
+Release: 1%{?dist}
 URL: http://www.gnupg.org/
-Source0: libgcrypt-%{version}-hobbled.tar.bz2
+Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
 # cipher support. We have to remove it in the tarball we ship with
 # the hobble-libgcrypt script.
@@ -21,14 +21,10 @@ Patch5: libgcrypt-1.5.0-tests.patch
 Patch6: libgcrypt-1.5.0-fips-cfgrandom.patch
 # make the FIPS-186-3 DSA CAVS testable
 Patch7: libgcrypt-1.5.0-fips-cavs.patch
-# add GCRYCTL_SET_ENFORCED_FIPS_FLAG
-Patch8: libgcrypt-1.5.0-set-enforced-mode.patch
 # fix for memory leaks an other errors found by Coverity scan
 Patch9: libgcrypt-1.5.0-leak.patch
-# allow empty passphrase (upstreamed)
-Patch10: libgcrypt-1.5.0-empty-passphrase.patch
 # use poll instead of select when gathering randomness
-Patch11: libgcrypt-1.5.0-use-poll.patch
+Patch11: libgcrypt-1.5.1-use-poll.patch
 
 # Technically LGPLv2.1+, but Fedora's table doesn't draw a distinction.
 # Documentation and some utilities are GPLv2+ licensed. These files
@@ -68,9 +64,7 @@ applications using libgcrypt.
 %patch5 -p1 -b .tests
 %patch6 -p1 -b .cfgrandom
 %patch7 -p1 -b .cavs
-%patch8 -p1 -b .enforce
 %patch9 -p1 -b .leak
-%patch10 -p1 -b .emptypass
 %patch11 -p1 -b .use-poll
 
 mv AUTHORS AUTHORS.iso88591
@@ -185,6 +179,9 @@ exit 0
 %doc COPYING
 
 %changelog
+* Wed Mar 20 2013 Tomas Mraz <tmraz@redhat.com> 1.5.1-1
+- new upstream version
+
 * Tue Mar  5 2013 Tomas Mraz <tmraz@redhat.com> 1.5.0-11
 - use poll() instead of select() when gathering randomness (#913773)
 
