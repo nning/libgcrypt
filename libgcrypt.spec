@@ -67,9 +67,6 @@ applications using libgcrypt.
 %patch9 -p1 -b .leak
 %patch11 -p1 -b .use-poll
 
-mv AUTHORS AUTHORS.iso88591
-iconv -f ISO-8859-1 -t UTF-8 AUTHORS.iso88591 >AUTHORS
-
 %build
 %configure --disable-static \
 %ifarch sparc64
