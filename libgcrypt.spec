@@ -1,5 +1,5 @@
 Name: libgcrypt
-Version: 1.5.1
+Version: 1.5.2
 Release: 1%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
@@ -176,6 +176,9 @@ exit 0
 %doc COPYING
 
 %changelog
+* Fri Apr 19 2013 Tomáš Mráz <tmraz@redhat.com> 1.5.2-1
+- new upstream version
+
 * Wed Mar 20 2013 Tomas Mraz <tmraz@redhat.com> 1.5.1-1
 - new upstream version
 
