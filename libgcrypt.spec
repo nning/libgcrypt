@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.5.2
-Release: 1%{?dist}
+Release: 2%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
@@ -25,13 +25,16 @@ Patch7: libgcrypt-1.5.0-fips-cavs.patch
 Patch9: libgcrypt-1.5.0-leak.patch
 # use poll instead of select when gathering randomness
 Patch11: libgcrypt-1.5.1-use-poll.patch
+# compile rijndael with -fno-strict-aliasing
+Patch12: libgcrypt-1.5.2-aliasing.patch
+
+%define gcrylibdir %{_libdir}
 
 # Technically LGPLv2.1+, but Fedora's table doesn't draw a distinction.
 # Documentation and some utilities are GPLv2+ licensed. These files
 # are in the devel subpackage.
 License: LGPLv2+
 Summary: A general-purpose cryptography library
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildRequires: gawk, libgpg-error-devel >= 1.4, pkgconfig
 BuildRequires: fipscheck
 # This is needed only when patching the .texi doc.
@@ -66,6 +69,7 @@ applications using libgcrypt.
 %patch7 -p1 -b .cavs
 %patch9 -p1 -b .leak
 %patch11 -p1 -b .use-poll
+%patch12 -p1 -b .aliasing
 
 %build
 %configure --disable-static \
@@ -87,11 +91,10 @@ make check
     %{?__debug_package:%{__debug_install_post}} \
     %{__arch_install_post} \
     %{__os_install_post} \
-    fipshmac $RPM_BUILD_ROOT/%{_lib}/*.so.?? \
+    fipshmac $RPM_BUILD_ROOT%{gcrylibdir}/*.so.?? \
 %{nil}
 
 %install
-rm -fr $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT
 
 # Change /usr/lib64 back to /usr/lib.  This saves us from having to patch the
@@ -104,26 +107,20 @@ sed -i -e 's,^my_host=".*"$,my_host="none",g' $RPM_BUILD_ROOT/%{_bindir}/libgcry
 rm -f ${RPM_BUILD_ROOT}/%{_infodir}/dir ${RPM_BUILD_ROOT}/%{_libdir}/*.la
 /sbin/ldconfig -n $RPM_BUILD_ROOT/%{_libdir}
 
-# Relocate the shared libraries to /%{_lib}.
-mkdir -p $RPM_BUILD_ROOT/%{_lib}
-for shlib in $RPM_BUILD_ROOT/%{_libdir}/*.so* ; do
+%if "%{gcrylibdir}" != "%{_libdir}"
+# Relocate the shared libraries to %{gcrylibdir}.
+mkdir -p $RPM_BUILD_ROOT%{gcrylibdir}
+for shlib in $RPM_BUILD_ROOT%{_libdir}/*.so* ; do
 	if test -L "$shlib" ; then
 		rm "$shlib"
 	else
-		mv "$shlib" $RPM_BUILD_ROOT/%{_lib}/
+		mv "$shlib" $RPM_BUILD_ROOT%{gcrylibdir}/
 	fi
-done
-
-# Figure out where /%{_lib} is relative to %{_libdir}.
-touch $RPM_BUILD_ROOT/root_marker
-relroot=..
-while ! test -f $RPM_BUILD_ROOT/%{_libdir}/$relroot/root_marker ; do
-	relroot=$relroot/..
 done
 
 # Overwrite development symlinks.
 pushd $RPM_BUILD_ROOT/%{_libdir}
-for shlib in $relroot/%{_lib}/lib*.so.* ; do
+for shlib in %{gcrylibdir}/lib*.so.* ; do
 	shlib=`echo "$shlib" | sed -e 's,//,/,g'`
 	target=`basename "$shlib" | sed -e 's,\.so.*,,g'`.so
 	ln -sf $shlib $target
@@ -132,14 +129,12 @@ popd
 
 # Add soname symlink.
 /sbin/ldconfig -n $RPM_BUILD_ROOT/%{_lib}/
-rm -f $RPM_BUILD_ROOT/root_marker
+%endif
+
 
 # Create /etc/gcrypt (hardwired, not dependent on the configure invocation) so
 # that _someone_ owns it.
 mkdir -p -m 755 $RPM_BUILD_ROOT/etc/gcrypt
-
-%clean
-rm -fr $RPM_BUILD_ROOT
 
 %post -p /sbin/ldconfig
 
@@ -159,8 +154,8 @@ exit 0
 %files
 %defattr(-,root,root,-)
 %dir /etc/gcrypt
-/%{_lib}/libgcrypt.so.*
-/%{_lib}/.libgcrypt.so.*.hmac
+%{gcrylibdir}/libgcrypt.so.*
+%{gcrylibdir}/.libgcrypt.so.*.hmac
 %doc COPYING.LIB AUTHORS NEWS THANKS
 
 %files devel
@@ -176,6 +171,11 @@ exit 0
 %doc COPYING
 
 %changelog
+* Thu Apr 25 2013 Tomáš Mráz <tmraz@redhat.com> 1.5.2-2
+- silence strict aliasing warning in Rijndael
+- apply UsrMove
+- spec file cleanups
+
 * Fri Apr 19 2013 Tomáš Mráz <tmraz@redhat.com> 1.5.2-1
 - new upstream version
 
