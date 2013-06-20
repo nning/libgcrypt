@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.5.2
-Release: 2%{?dist}
+Release: 3%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
@@ -27,6 +27,8 @@ Patch9: libgcrypt-1.5.0-leak.patch
 Patch11: libgcrypt-1.5.1-use-poll.patch
 # compile rijndael with -fno-strict-aliasing
 Patch12: libgcrypt-1.5.2-aliasing.patch
+# slight optimalization of mpicoder.c to silence Valgrind (#968288)
+Patch13: libgcrypt-1.5.2-mpicoder-gccopt.patch
 
 %define gcrylibdir %{_libdir}
 
@@ -70,6 +72,7 @@ applications using libgcrypt.
 %patch9 -p1 -b .leak
 %patch11 -p1 -b .use-poll
 %patch12 -p1 -b .aliasing
+%patch13 -p1 -b .gccopt
 
 %build
 %configure --disable-static \
@@ -171,6 +174,9 @@ exit 0
 %doc COPYING
 
 %changelog
+* Thu Jun 20 2013 Tomáš Mráz <tmraz@redhat.com> 1.5.2-3
+- silence false error detected by valgrind (#968288)
+
 * Thu Apr 25 2013 Tomáš Mráz <tmraz@redhat.com> 1.5.2-2
 - silence strict aliasing warning in Rijndael
 - apply UsrMove
