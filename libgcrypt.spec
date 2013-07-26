@@ -1,6 +1,6 @@
 Name: libgcrypt
-Version: 1.5.2
-Release: 3%{?dist}
+Version: 1.5.3
+Release: 1%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
@@ -174,6 +174,9 @@ exit 0
 %doc COPYING
 
 %changelog
+* Fri Jul 26 2013 Tomáš Mráz <tmraz@redhat.com> 1.5.3-1
+- new upstream version fixing cache side-channel attack on RSA private keys
+
 * Thu Jun 20 2013 Tomáš Mráz <tmraz@redhat.com> 1.5.2-3
 - silence false error detected by valgrind (#968288)
 
