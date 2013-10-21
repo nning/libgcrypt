@@ -1,17 +1,19 @@
 Name: libgcrypt
 Version: 1.5.3
-Release: 1%{?dist}
+Release: 2%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
 # cipher support. We have to remove it in the tarball we ship with
-# the hobble-libgcrypt script.
+# the hobble-libgcrypt script. 
+# (We replace it with RH approved ECC in Source4-5)
 #Source0: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2
 #Source1: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2.sig
 Source2: wk@g10code.com
 Source3: hobble-libgcrypt
-# do not run the ecc curves test
-Patch1: libgcrypt-1.5.0-noecc.patch
+# Approved ECC support (from 1.5.3)
+Source4: ecc.c
+Source5: curves.c
 # make FIPS hmac compatible with fipscheck - non upstreamable
 Patch2: libgcrypt-1.5.0-use-fipscheck.patch
 # fix tests in the FIPS mode, fix the FIPS-186-3 DSA keygen
@@ -29,6 +31,8 @@ Patch11: libgcrypt-1.5.1-use-poll.patch
 Patch12: libgcrypt-1.5.2-aliasing.patch
 # slight optimalization of mpicoder.c to silence Valgrind (#968288)
 Patch13: libgcrypt-1.5.2-mpicoder-gccopt.patch
+# fix tests to work with approved ECC
+Patch14: libgcrypt-1.5.3-ecc-test-fix.patch
 
 %define gcrylibdir %{_libdir}
 
@@ -64,7 +68,6 @@ applications using libgcrypt.
 %prep
 %setup -q
 %{SOURCE3}
-%patch1 -p1 -b .noecc
 %patch2 -p1 -b .use-fipscheck
 %patch5 -p1 -b .tests
 %patch6 -p1 -b .cfgrandom
@@ -73,6 +76,10 @@ applications using libgcrypt.
 %patch11 -p1 -b .use-poll
 %patch12 -p1 -b .aliasing
 %patch13 -p1 -b .gccopt
+%patch14 -p1 -b .eccfix
+cp %{SOURCE4} cipher/
+rm -rf tests/curves.c
+cp %{SOURCE5} tests/curves.c
 
 %build
 %configure --disable-static \
@@ -81,7 +88,7 @@ applications using libgcrypt.
 %endif
      --enable-noexecstack \
      --enable-hmac-binary-check \
-     --enable-pubkey-ciphers='dsa elgamal rsa' \
+     --enable-pubkey-ciphers='dsa elgamal rsa ecc' \
      --disable-O-flag-munging
 make %{?_smp_mflags}
 
@@ -174,6 +181,9 @@ exit 0
 %doc COPYING
 
 %changelog
+* Sun Oct 20 2013 Tom Callaway <spot@fedoraproject.org> - 1.5.3-2
+- add cleared ECC support
+
 * Fri Jul 26 2013 Tomáš Mráz <tmraz@redhat.com> 1.5.3-1
 - new upstream version fixing cache side-channel attack on RSA private keys
 
