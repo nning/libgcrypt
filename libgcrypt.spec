@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.5.3
-Release: 2%{?dist}
+Release: 3%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
@@ -33,6 +33,12 @@ Patch12: libgcrypt-1.5.2-aliasing.patch
 Patch13: libgcrypt-1.5.2-mpicoder-gccopt.patch
 # fix tests to work with approved ECC
 Patch14: libgcrypt-1.5.3-ecc-test-fix.patch
+# pbkdf2 speedup - upstream
+Patch15: libgcrypt-1.5.3-pbkdf-speedup.patch
+# fix bug in whirlpool implementation (for backwards compatibility
+# with files generated with buggy version set environment
+# varible GCRYPT_WHIRLPOOL_BUG
+Patch16: libgcrypt-1.5.3-whirlpool-bug.patch
 
 %define gcrylibdir %{_libdir}
 
@@ -77,6 +83,8 @@ applications using libgcrypt.
 %patch12 -p1 -b .aliasing
 %patch13 -p1 -b .gccopt
 %patch14 -p1 -b .eccfix
+%patch15 -p1 -b .pbkdf-speedup
+%patch16 -p1 -b .whirlpool-bug
 cp %{SOURCE4} cipher/
 rm -rf tests/curves.c
 cp %{SOURCE5} tests/curves.c
@@ -181,6 +189,11 @@ exit 0
 %doc COPYING
 
 %changelog
+* Tue Jan 21 2014 Tomáš Mráz <tmraz@redhat.com> 1.5.3-3
+- add back the nistp521r1 EC curve
+- fix a bug in the Whirlpool hash implementation
+- speed up the PBKDF2 computation
+
 * Sun Oct 20 2013 Tom Callaway <spot@fedoraproject.org> - 1.5.3-2
 - add cleared ECC support
 
