@@ -259,7 +259,7 @@ exit 0
 * Mon Feb 07 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.4.5-7
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_15_Mass_Rebuild
 
-* Thu Feb  4 2011 Tomas Mraz <tmraz@redhat.com> 1.4.5-6
+* Fri Feb  4 2011 Tomas Mraz <tmraz@redhat.com> 1.4.5-6
 - fix a bug in the fips-186-3 dsa parameter generation code
 
 * Tue Feb  1 2011 Tomas Mraz <tmraz@redhat.com> 1.4.5-5
@@ -436,5 +436,5 @@ exit 0
 * Thu Jan 10 2002 Nalin Dahyabhai <nalin@redhat.com> 1.1.5-1
 - fix the Source tag so that it's a real URL
 
-* Wed Dec 20 2001 Nalin Dahyabhai <nalin@redhat.com>
+* Thu Dec 20 2001 Nalin Dahyabhai <nalin@redhat.com>
 - initial package
