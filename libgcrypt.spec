@@ -1,6 +1,6 @@
 Name: libgcrypt
-Version: 1.5.3
-Release: 3%{?dist}
+Version: 1.6.1
+Release: 1%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
@@ -11,34 +11,29 @@ Source0: libgcrypt-%{version}-hobbled.tar.xz
 #Source1: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2.sig
 Source2: wk@g10code.com
 Source3: hobble-libgcrypt
-# Approved ECC support (from 1.5.3)
-Source4: ecc.c
+# Approved ECC support (from 1.6.1)
+Source4: ecc-curves.c
 Source5: curves.c
+Source6: t-mpi-point.c
 # make FIPS hmac compatible with fipscheck - non upstreamable
 Patch2: libgcrypt-1.5.0-use-fipscheck.patch
 # fix tests in the FIPS mode, fix the FIPS-186-3 DSA keygen
-Patch5: libgcrypt-1.5.0-tests.patch
+Patch5: libgcrypt-1.6.1-tests.patch
 # add configurable source of RNG seed and seed by default
 # from /dev/urandom in the FIPS mode
-Patch6: libgcrypt-1.5.0-fips-cfgrandom.patch
+Patch6: libgcrypt-1.6.1-fips-cfgrandom.patch
 # make the FIPS-186-3 DSA CAVS testable
-Patch7: libgcrypt-1.5.0-fips-cavs.patch
+Patch7: libgcrypt-1.6.1-fips-cavs.patch
 # fix for memory leaks an other errors found by Coverity scan
-Patch9: libgcrypt-1.5.0-leak.patch
+Patch9: libgcrypt-1.6.1-leak.patch
 # use poll instead of select when gathering randomness
-Patch11: libgcrypt-1.5.1-use-poll.patch
+Patch11: libgcrypt-1.6.1-use-poll.patch
 # compile rijndael with -fno-strict-aliasing
 Patch12: libgcrypt-1.5.2-aliasing.patch
 # slight optimalization of mpicoder.c to silence Valgrind (#968288)
-Patch13: libgcrypt-1.5.2-mpicoder-gccopt.patch
+Patch13: libgcrypt-1.6.1-mpicoder-gccopt.patch
 # fix tests to work with approved ECC
-Patch14: libgcrypt-1.5.3-ecc-test-fix.patch
-# pbkdf2 speedup - upstream
-Patch15: libgcrypt-1.5.3-pbkdf-speedup.patch
-# fix bug in whirlpool implementation (for backwards compatibility
-# with files generated with buggy version set environment
-# varible GCRYPT_WHIRLPOOL_BUG
-Patch16: libgcrypt-1.5.3-whirlpool-bug.patch
+Patch14: libgcrypt-1.6.1-ecc-test-fix.patch
 
 %define gcrylibdir %{_libdir}
 
@@ -80,14 +75,11 @@ applications using libgcrypt.
 %patch7 -p1 -b .cavs
 %patch9 -p1 -b .leak
 %patch11 -p1 -b .use-poll
-%patch12 -p1 -b .aliasing
+#%patch12 -p1 -b .aliasing
 %patch13 -p1 -b .gccopt
 %patch14 -p1 -b .eccfix
-%patch15 -p1 -b .pbkdf-speedup
-%patch16 -p1 -b .whirlpool-bug
 cp %{SOURCE4} cipher/
-rm -rf tests/curves.c
-cp %{SOURCE5} tests/curves.c
+cp %{SOURCE5} %{SOURCE6} tests/
 
 %build
 %configure --disable-static \
@@ -98,6 +90,7 @@ cp %{SOURCE5} tests/curves.c
      --enable-hmac-binary-check \
      --enable-pubkey-ciphers='dsa elgamal rsa ecc' \
      --disable-O-flag-munging
+sed -i -e '/^sys_lib_dlsearch_path_spec/s,/lib /usr/lib,/usr/lib /lib64 /usr/lib64 /lib,g' libtool
 make %{?_smp_mflags}
 
 %check
@@ -147,8 +140,11 @@ popd
 
 # Add soname symlink.
 /sbin/ldconfig -n $RPM_BUILD_ROOT/%{_lib}/
+
 %endif
 
+# temporary compat library for buildroots
+install %{gcrylibdir}/libgcrypt.so.11.*.* $RPM_BUILD_ROOT/%{_libdir}
 
 # Create /etc/gcrypt (hardwired, not dependent on the configure invocation) so
 # that _someone_ owns it.
@@ -181,14 +177,20 @@ exit 0
 %{_bindir}/%{name}-config
 %{_bindir}/dumpsexp
 %{_bindir}/hmac256
+%{_bindir}/mpicalc
 %{_includedir}/*
 %{_libdir}/*.so
 %{_datadir}/aclocal/*
+%{_mandir}/man1/*
 
 %{_infodir}/gcrypt.info*
 %doc COPYING
 
 %changelog
+* Fri Feb 28 2014 Tomáš Mráz <tmraz@redhat.com> 1.6.1-1
+- new upstream version breaking ABI compatibility
+- this release temporarily includes old compatibility .so
+
 * Tue Jan 21 2014 Tomáš Mráz <tmraz@redhat.com> 1.5.3-3
 - add back the nistp521r1 EC curve
 - fix a bug in the Whirlpool hash implementation

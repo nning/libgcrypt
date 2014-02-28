@@ -26,10 +26,10 @@
 #include <string.h>
 #include <stdarg.h>
 
-#include "../src/gcrypt.h"
+#include "../src/gcrypt-int.h"
 
 /* Number of curves defined in ../cipger/ecc.c */
-#define N_CURVES 3
+#define N_CURVES 4
 
 /* A real world sample public key.  */
 static char const sample_key_1[] =

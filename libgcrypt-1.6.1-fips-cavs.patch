@@ -1,57 +1,6 @@
-diff -up libgcrypt-1.5.0/cipher/dsa.c.cavs libgcrypt-1.5.0/cipher/dsa.c
---- libgcrypt-1.5.0/cipher/dsa.c.cavs	2011-07-21 14:56:35.000000000 +0200
-+++ libgcrypt-1.5.0/cipher/dsa.c	2011-07-21 14:58:06.000000000 +0200
-@@ -479,7 +479,6 @@ generate_fips186 (DSA_secret_key *sk, un
-             initial_seed.seed = gcry_sexp_nth_data (initial_seed.sexp, 1,
-                                                     &initial_seed.seedlen);
-         }
--      
-       if (use_fips186_2)
-         ec = _gcry_generate_fips186_2_prime (nbits, qbits, 
-                                            initial_seed.seed, 
-@@ -487,13 +486,22 @@ generate_fips186 (DSA_secret_key *sk, un
-                                            &prime_q, &prime_p,
-                                            r_counter,
-                                            r_seed, r_seedlen);
--      else
-+      else if (!domain->p || !domain->q)
-         ec = _gcry_generate_fips186_3_prime (nbits, qbits,
-                                           initial_seed.seed,
-                                           initial_seed.seedlen,
-                                           &prime_q, &prime_p,
-                                           r_counter,
-                                           r_seed, r_seedlen, NULL);
-+      else
-+        {
-+          /* Domain parameters p and q are given; use them.  */
-+          prime_p = mpi_copy (domain->p);
-+          prime_q = mpi_copy (domain->q);
-+          gcry_assert (mpi_get_nbits (prime_p) == nbits);
-+          gcry_assert (mpi_get_nbits (prime_q) == qbits);
-+          ec = 0;
-+        }
-       gcry_sexp_release (initial_seed.sexp);
-       if (ec)
-         goto leave;
-@@ -784,13 +792,12 @@ dsa_generate_ext (int algo, unsigned int
-           gcry_sexp_release (l1);
-           gcry_sexp_release (domainsexp);
- 
--          /* Check that all domain parameters are available.  */
--          if (!domain.p || !domain.q || !domain.g)
-+          /* Check that p and q domain parameters are available.  */
-+          if (!domain.p || !domain.q || (!domain.g && !use_fips186))
-             {
-               gcry_mpi_release (domain.p);
-               gcry_mpi_release (domain.q);
-               gcry_mpi_release (domain.g);
--              gcry_sexp_release (deriveparms);
-               return GPG_ERR_MISSING_VALUE;
-             }
- 
-diff -up libgcrypt-1.5.0/tests/cavs_driver.pl.cavs libgcrypt-1.5.0/tests/cavs_driver.pl
---- libgcrypt-1.5.0/tests/cavs_driver.pl.cavs	2011-02-04 20:18:20.000000000 +0100
-+++ libgcrypt-1.5.0/tests/cavs_driver.pl	2011-07-21 15:01:47.000000000 +0200
+diff -up libgcrypt-1.6.1/tests/cavs_driver.pl.cavs libgcrypt-1.6.1/tests/cavs_driver.pl
+--- libgcrypt-1.6.1/tests/cavs_driver.pl.cavs	2013-03-15 20:25:38.000000000 +0100
++++ libgcrypt-1.6.1/tests/cavs_driver.pl	2014-02-28 14:46:16.436544639 +0100
 @@ -1,9 +1,11 @@
  #!/usr/bin/env perl
  #
@@ -725,9 +674,9 @@ diff -up libgcrypt-1.5.0/tests/cavs_driver.pl.cavs libgcrypt-1.5.0/tests/cavs_dr
  		$dsa_sign =     \&libgcrypt_dsa_sign;
  		$dsa_verify =   \&libgcrypt_dsa_verify;
  		$dsa_genpubkey = \&libgcrypt_dsa_genpubkey;
-diff -up libgcrypt-1.5.0/tests/cavs_tests.sh.cavs libgcrypt-1.5.0/tests/cavs_tests.sh
---- libgcrypt-1.5.0/tests/cavs_tests.sh.cavs	2011-02-04 20:18:20.000000000 +0100
-+++ libgcrypt-1.5.0/tests/cavs_tests.sh	2011-07-21 15:02:16.000000000 +0200
+diff -up libgcrypt-1.6.1/tests/cavs_tests.sh.cavs libgcrypt-1.6.1/tests/cavs_tests.sh
+--- libgcrypt-1.6.1/tests/cavs_tests.sh.cavs	2013-03-15 20:25:38.000000000 +0100
++++ libgcrypt-1.6.1/tests/cavs_tests.sh	2014-02-28 14:46:16.437544662 +0100
 @@ -55,7 +55,7 @@ function run_one_test () {
      [ -d "$respdir" ] || mkdir "$respdir"
      [ -f "$rspfile" ] &&  rm "$rspfile"
@@ -737,9 +686,9 @@ diff -up libgcrypt-1.5.0/tests/cavs_tests.sh.cavs libgcrypt-1.5.0/tests/cavs_tes
          dflag="-D"
      fi
  
-diff -up libgcrypt-1.5.0/tests/fipsdrv.c.cavs libgcrypt-1.5.0/tests/fipsdrv.c
---- libgcrypt-1.5.0/tests/fipsdrv.c.cavs	2011-02-04 20:18:20.000000000 +0100
-+++ libgcrypt-1.5.0/tests/fipsdrv.c	2011-07-21 15:06:44.000000000 +0200
+diff -up libgcrypt-1.6.1/tests/fipsdrv.c.cavs libgcrypt-1.6.1/tests/fipsdrv.c
+--- libgcrypt-1.6.1/tests/fipsdrv.c.cavs	2013-12-16 18:44:32.000000000 +0100
++++ libgcrypt-1.6.1/tests/fipsdrv.c	2014-02-28 14:46:16.437544662 +0100
 @@ -893,6 +893,9 @@ print_mpi_line (gcry_mpi_t a, int no_lz)
      die ("gcry_mpi_aprint failed: %s\n", gpg_strerror (err));
  
