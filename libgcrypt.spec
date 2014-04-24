@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.6.1
-Release: 1%{?dist}
+Release: 2%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
@@ -16,6 +16,7 @@ Source4: ecc-curves.c
 Source5: curves.c
 Source6: t-mpi-point.c
 # make FIPS hmac compatible with fipscheck - non upstreamable
+# update on soname bump
 Patch2: libgcrypt-1.5.0-use-fipscheck.patch
 # fix tests in the FIPS mode, fix the FIPS-186-3 DSA keygen
 Patch5: libgcrypt-1.6.1-tests.patch
@@ -28,8 +29,6 @@ Patch7: libgcrypt-1.6.1-fips-cavs.patch
 Patch9: libgcrypt-1.6.1-leak.patch
 # use poll instead of select when gathering randomness
 Patch11: libgcrypt-1.6.1-use-poll.patch
-# compile rijndael with -fno-strict-aliasing
-Patch12: libgcrypt-1.5.2-aliasing.patch
 # slight optimalization of mpicoder.c to silence Valgrind (#968288)
 Patch13: libgcrypt-1.6.1-mpicoder-gccopt.patch
 # fix tests to work with approved ECC
@@ -42,7 +41,7 @@ Patch14: libgcrypt-1.6.1-ecc-test-fix.patch
 # are in the devel subpackage.
 License: LGPLv2+
 Summary: A general-purpose cryptography library
-BuildRequires: gawk, libgpg-error-devel >= 1.4, pkgconfig
+BuildRequires: gawk, libgpg-error-devel >= 1.11, pkgconfig
 BuildRequires: fipscheck
 # This is needed only when patching the .texi doc.
 BuildRequires: texinfo
@@ -75,7 +74,6 @@ applications using libgcrypt.
 %patch7 -p1 -b .cavs
 %patch9 -p1 -b .leak
 %patch11 -p1 -b .use-poll
-#%patch12 -p1 -b .aliasing
 %patch13 -p1 -b .gccopt
 %patch14 -p1 -b .eccfix
 cp %{SOURCE4} cipher/
@@ -129,22 +127,20 @@ for shlib in $RPM_BUILD_ROOT%{_libdir}/*.so* ; do
 	fi
 done
 
+# Add soname symlink.
+/sbin/ldconfig -n $RPM_BUILD_ROOT/%{_lib}/
+%endif
+
 # Overwrite development symlinks.
-pushd $RPM_BUILD_ROOT/%{_libdir}
-for shlib in %{gcrylibdir}/lib*.so.* ; do
-	shlib=`echo "$shlib" | sed -e 's,//,/,g'`
-	target=`basename "$shlib" | sed -e 's,\.so.*,,g'`.so
+pushd $RPM_BUILD_ROOT/%{gcrylibdir}
+for shlib in lib*.so.?? ; do
+	target=$RPM_BUILD_ROOT/%{_libdir}/`echo "$shlib" | sed -e 's,\.so.*,,g'`.so
+%if "%{gcrylibdir}" != "%{_libdir}"
+	shlib=%{gcrylibdir}/$shlib
+%endif
 	ln -sf $shlib $target
 done
 popd
-
-# Add soname symlink.
-/sbin/ldconfig -n $RPM_BUILD_ROOT/%{_lib}/
-
-%endif
-
-# temporary compat library for buildroots
-install %{gcrylibdir}/libgcrypt.so.11.*.* $RPM_BUILD_ROOT/%{_libdir}
 
 # Create /etc/gcrypt (hardwired, not dependent on the configure invocation) so
 # that _someone_ owns it.
@@ -187,6 +183,10 @@ exit 0
 %doc COPYING
 
 %changelog
+* Thu Apr 24 2014 Tomáš Mráz <tmraz@redhat.com> 1.6.1-2
+- drop the temporary compat shared library version
+- fix the soname version in -use-fipscheck.patch
+
 * Fri Feb 28 2014 Tomáš Mráz <tmraz@redhat.com> 1.6.1-1
 - new upstream version breaking ABI compatibility
 - this release temporarily includes old compatibility .so

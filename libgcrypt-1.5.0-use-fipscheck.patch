@@ -46,7 +46,7 @@ diff -up libgcrypt-1.5.0/src/fips.c.use-fipscheck libgcrypt-1.5.0/src/fips.c
 -  if (!dladdr ("gcry_check_version", &info))
 +  const char key[] = "orboDeJITITejsirpADONivirpUkvarP";
 +  
-+  if (get_library_path ("libgcrypt.so.11", "gcry_check_version", libpath, sizeof(libpath)))
++  if (get_library_path ("libgcrypt.so.20", "gcry_check_version", libpath, sizeof(libpath)))
      err = gpg_error_from_syserror ();
    else
      {
