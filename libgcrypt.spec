@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.6.1
-Release: 3%{?dist}
+Release: 4%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
@@ -33,7 +33,7 @@ Patch11: libgcrypt-1.6.1-use-poll.patch
 Patch13: libgcrypt-1.6.1-mpicoder-gccopt.patch
 # fix tests to work with approved ECC
 Patch14: libgcrypt-1.6.1-ecc-test-fix.patch
-Patch15: libgcrypt-1.6.1-disable-non-PIC-arm.patch
+Patch15: libgcrypt-1.6.1-make-arm-asm-fPIC-friendly.patch
 
 %define gcrylibdir %{_libdir}
 
@@ -185,6 +185,10 @@ exit 0
 %doc COPYING
 
 %changelog
+* Tue May 20 2014 Kyle McMartin <kyle@fedoraproject.org> 1.6.1-4
+- Re-enable below algos, apply patch from upstream list to make
+  that code -fPIC friendly. (rhbz#1069792)
+
 * Mon May 19 2014 Kyle McMartin <kyle@fedoraproject.org> 1.6.1-3
 - Disable rijndael, cast5, camellia ARM assembly, as it's non-PIC as
   presently written, which results in .text relocations in the shared
