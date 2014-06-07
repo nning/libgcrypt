@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.6.1
-Release: 4%{?dist}
+Release: 5%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
@@ -185,6 +185,9 @@ exit 0
 %doc COPYING
 
 %changelog
+* Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.6.1-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
+
 * Tue May 20 2014 Kyle McMartin <kyle@fedoraproject.org> 1.6.1-4
 - Re-enable below algos, apply patch from upstream list to make
   that code -fPIC friendly. (rhbz#1069792)
