@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.6.1
-Release: 5%{?dist}
+Release: 6%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
@@ -168,7 +168,9 @@ exit 0
 %dir /etc/gcrypt
 %{gcrylibdir}/libgcrypt.so.*
 %{gcrylibdir}/.libgcrypt.so.*.hmac
-%doc COPYING.LIB AUTHORS NEWS THANKS
+%{!?_licensedir:%global license %%doc}
+%license COPYING.LIB
+%doc AUTHORS NEWS THANKS
 
 %files devel
 %defattr(-,root,root,-)
@@ -182,9 +184,13 @@ exit 0
 %{_mandir}/man1/*
 
 %{_infodir}/gcrypt.info*
-%doc COPYING
+%{!?_licensedir:%global license %%doc}
+%license COPYING
 
 %changelog
+* Thu Jul 17 2014 Tom Callaway <spot@fedoraproject.org> - 1.6.1-6
+- fix license handling
+
 * Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.6.1-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
 
