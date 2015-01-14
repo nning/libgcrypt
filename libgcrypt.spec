@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.6.2
-Release: 1%{?dist}
+Release: 2%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
@@ -201,6 +201,9 @@ exit 0
 %license COPYING
 
 %changelog
+* Wed Jan 14 2015 Tomáš Mráz <tmraz@redhat.com> 1.6.2-2
+- fix buildability of programs using gcrypt.h with -ansi (#1182200)
+
 * Mon Dec  8 2014 Tomáš Mráz <tmraz@redhat.com> 1.6.2-1
 - new upstream version
 

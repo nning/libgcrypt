@@ -2553,7 +2553,7 @@ diff -up libgcrypt-1.6.2/src/gcrypt.h.in.drbg libgcrypt-1.6.2/src/gcrypt.h.in
    };
  
  /* Perform various operations defined by CMD. */
-@@ -1668,6 +1670,112 @@ int gcry_is_secure (const void *a) _GCRY
+@@ -1668,6 +1670,109 @@ int gcry_is_secure (const void *a) _GCRY
  /* Return true if Libgcrypt is in FIPS mode.  */
  #define gcry_fips_mode_active()  !!gcry_control (GCRYCTL_FIPS_MODE_P, 0)
  
@@ -2583,25 +2583,22 @@ diff -up libgcrypt-1.6.2/src/gcrypt.h.in.drbg libgcrypt-1.6.2/src/gcrypt.h.in
 +	struct gcry_drbg_string *next;
 +};
 +
-+static inline void gcry_drbg_string_fill(struct gcry_drbg_string *string,
-+				    const unsigned char *buf, size_t len)
-+{
-+	string->buf = buf;
-+	string->len = len;
-+	string->next = NULL;
-+}
++#define gcry_drbg_string_fill(s, b, l) \
++do { \
++	(s)->buf = (b); \
++	(s)->len = (l); \
++	(s)->next = NULL; \
++} while (0)
 +
 +/* this is a wrapper function for users of libgcrypt */
-+static inline void gcry_randomize_drbg(void *outbuf, size_t outlen,
-+				       enum gcry_random_level level,
-+				       struct gcry_drbg_string *addtl)
-+{
-+	struct gcry_drbg_gen genbuf;
-+	genbuf.outbuf = (unsigned char *)outbuf;
-+	genbuf.outlen = outlen;
-+	genbuf.addtl = addtl;
-+	gcry_randomize(&genbuf, 0, level);
-+}
++#define gcry_randomize_drbg(ob, ol, lvl, add) \
++do { \
++	struct gcry_drbg_gen genbuf; \
++	genbuf.outbuf = (unsigned char *)(ob); \
++	genbuf.outlen = (ol); \
++	genbuf.addtl = (add); \
++	gcry_randomize(&genbuf, 0, (lvl)); \
++} while (0)
 +
 +/*
 + * DRBG flags bitmasks
