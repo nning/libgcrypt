@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.6.2
-Release: 2%{?dist}
+Release: 3%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
@@ -201,6 +201,10 @@ exit 0
 %license COPYING
 
 %changelog
+* Sat Feb 21 2015 Till Maas <opensource@till.name> - 1.6.2-3
+- Rebuilt for Fedora 23 Change
+  https://fedoraproject.org/wiki/Changes/Harden_all_packages_with_position-independent_code
+
 * Wed Jan 14 2015 Tomáš Mráz <tmraz@redhat.com> 1.6.2-2
 - fix buildability of programs using gcrypt.h with -ansi (#1182200)
 
