@@ -51,18 +51,16 @@ diff -up libgcrypt-1.6.2/src/global.c.fips-ctor libgcrypt-1.6.2/src/global.c
  /* This function is called by the macro fips_is_operational and makes
     sure that the minimal initialization has been done.  This is far
     from a perfect solution and hides problems with an improper
-@@ -542,9 +570,8 @@ _gcry_vcontrol (enum gcry_ctl_cmds cmd,
+@@ -542,8 +570,7 @@ _gcry_vcontrol (enum gcry_ctl_cmds cmd,
  
      case GCRYCTL_FIPS_MODE_P:
        if (fips_mode ()
 -          && !_gcry_is_fips_mode_inactive ()
 -          && !no_secure_memory)
--	rc = GPG_ERR_GENERAL; /* Used as TRUE value */
 +          && !_gcry_is_fips_mode_inactive ())
-+	err = GPG_ERR_GENERAL; /* Used as TRUE value */
+ 	rc = GPG_ERR_GENERAL; /* Used as TRUE value */
        break;
  
-     case GCRYCTL_FORCE_FIPS_MODE:
 @@ -635,7 +662,7 @@ _gcry_vcontrol (enum gcry_ctl_cmds cmd,
        break;
  
