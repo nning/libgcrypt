@@ -1,16 +1,3 @@
-diff -up libgcrypt-1.6.2/src/global.c.fips-test libgcrypt-1.6.2/src/global.c
---- libgcrypt-1.6.2/src/global.c.fips-test	2014-12-08 16:54:07.766619659 +0100
-+++ libgcrypt-1.6.2/src/global.c	2014-12-08 16:55:18.555220601 +0100
-@@ -564,8 +564,7 @@ _gcry_vcontrol (enum gcry_ctl_cmds cmd,
- 
-     case GCRYCTL_FIPS_MODE_P:
-       if (fips_mode ()
--          && !_gcry_is_fips_mode_inactive ()
--          && !no_secure_memory)
-+          && !_gcry_is_fips_mode_inactive ())
- 	rc = GPG_ERR_GENERAL; /* Used as TRUE value */
-       break;
- 
 diff -up libgcrypt-1.6.2/tests/basic.c.fips-test libgcrypt-1.6.2/tests/basic.c
 --- libgcrypt-1.6.2/tests/basic.c.fips-test	2014-08-21 14:50:39.000000000 +0200
 +++ libgcrypt-1.6.2/tests/basic.c	2014-12-08 16:54:07.767619682 +0100
