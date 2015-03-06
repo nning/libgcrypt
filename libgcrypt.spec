@@ -1,6 +1,6 @@
 Name: libgcrypt
-Version: 1.6.2
-Release: 4%{?dist}
+Version: 1.6.3
+Release: 1%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
@@ -40,7 +40,7 @@ Patch18: libgcrypt-1.6.2-fips-ctor.patch
 # Make it possible to run the test suite in the FIPS mode
 Patch19: libgcrypt-1.6.2-fips-test.patch
 # Make the FIPS RSA keygen to be FIPS 186-4 compliant
-Patch20: libgcrypt-1.6.2-rsa-fips-keygen.patch
+Patch20: libgcrypt-1.6.3-rsa-fips-keygen.patch
 # update the selftests for new FIPS requirements
 Patch22: libgcrypt-1.6.2-fips-reqs.patch
 
@@ -201,6 +201,9 @@ exit 0
 %license COPYING
 
 %changelog
+* Fri Mar  6 2015 Tomáš Mráz <tmraz@redhat.com> 1.6.3-1
+- new upstream version
+
 * Wed Feb 25 2015 Tomáš Mráz <tmraz@redhat.com> 1.6.2-4
 - do not initialize secure memory during the selftest (#1195850)
 

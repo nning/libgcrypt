@@ -1,8 +1,8 @@
-diff -up libgcrypt-1.6.2/cipher/primegen.c.fips-keygen libgcrypt-1.6.2/cipher/primegen.c
---- libgcrypt-1.6.2/cipher/primegen.c.fips-keygen	2014-12-08 16:55:56.425077059 +0100
-+++ libgcrypt-1.6.2/cipher/primegen.c	2014-12-08 16:59:26.039817665 +0100
-@@ -1198,6 +1198,22 @@ _gcry_prime_check (gcry_mpi_t x, unsigne
-   return rc;
+diff -up libgcrypt-1.6.3/cipher/primegen.c.fips-keygen libgcrypt-1.6.3/cipher/primegen.c
+--- libgcrypt-1.6.3/cipher/primegen.c.fips-keygen	2015-03-06 16:38:56.698052602 +0100
++++ libgcrypt-1.6.3/cipher/primegen.c	2015-03-06 16:45:45.848193024 +0100
+@@ -1199,6 +1199,25 @@ _gcry_prime_check (gcry_mpi_t x, unsigne
+   return GPG_ERR_NO_PRIME;
  }
  
 +/* Check whether the number X is prime according to FIPS 186-4 table C.2.  */
@@ -10,13 +10,16 @@ diff -up libgcrypt-1.6.2/cipher/primegen.c.fips-keygen libgcrypt-1.6.2/cipher/pr
 +_gcry_fips186_4_prime_check (gcry_mpi_t x, unsigned int bits)
 +{
 +  gcry_err_code_t ec = GPG_ERR_NO_ERROR;
-+  gcry_mpi_t val_2 = mpi_alloc_set_ui (2); /* Used by the Fermat test. */
++
++  switch (mpi_cmp_ui (x, 2))
++    {
++    case 0:  return ec;                /* 2 is a prime */
++    case -1: return GPG_ERR_NO_PRIME; /* Only numbers > 1 are primes.  */
++    }
 +
 +  /* We use 5 or 4 rounds as specified in table C.2 */
-+  if (! check_prime (x, val_2, bits > 1024 ? 4 : 5, NULL, NULL))
++  if (! check_prime (x, mpi_const (MPI_C_TWO), bits > 1024 ? 4 : 5, NULL, NULL))
 +    ec = GPG_ERR_NO_PRIME;
-+
-+  mpi_free (val_2);
 +
 +  return ec;
 +}
@@ -24,9 +27,9 @@ diff -up libgcrypt-1.6.2/cipher/primegen.c.fips-keygen libgcrypt-1.6.2/cipher/pr
  /* Find a generator for PRIME where the factorization of (prime-1) is
     in the NULL terminated array FACTORS. Return the generator as a
     newly allocated MPI in R_G.  If START_G is not NULL, use this as s
-diff -up libgcrypt-1.6.2/cipher/rsa.c.fips-keygen libgcrypt-1.6.2/cipher/rsa.c
---- libgcrypt-1.6.2/cipher/rsa.c.fips-keygen	2014-12-08 16:55:56.407076652 +0100
-+++ libgcrypt-1.6.2/cipher/rsa.c	2014-12-08 17:11:06.770665261 +0100
+diff -up libgcrypt-1.6.3/cipher/rsa.c.fips-keygen libgcrypt-1.6.3/cipher/rsa.c
+--- libgcrypt-1.6.3/cipher/rsa.c.fips-keygen	2015-03-06 16:38:56.661052411 +0100
++++ libgcrypt-1.6.3/cipher/rsa.c	2015-03-06 16:38:56.699052607 +0100
 @@ -339,6 +339,279 @@ generate_std (RSA_secret_key *sk, unsign
  }
  
@@ -333,9 +336,9 @@ diff -up libgcrypt-1.6.2/cipher/rsa.c.fips-keygen libgcrypt-1.6.2/cipher/rsa.c
      }
  
    if (!ec)
-diff -up libgcrypt-1.6.2/src/g10lib.h.fips-keygen libgcrypt-1.6.2/src/g10lib.h
---- libgcrypt-1.6.2/src/g10lib.h.fips-keygen	2014-08-21 12:29:09.000000000 +0200
-+++ libgcrypt-1.6.2/src/g10lib.h	2014-12-08 16:55:56.426077081 +0100
+diff -up libgcrypt-1.6.3/src/g10lib.h.fips-keygen libgcrypt-1.6.3/src/g10lib.h
+--- libgcrypt-1.6.3/src/g10lib.h.fips-keygen	2015-02-23 11:55:58.000000000 +0100
++++ libgcrypt-1.6.3/src/g10lib.h	2015-03-06 16:38:56.699052607 +0100
 @@ -259,6 +259,9 @@ gpg_err_code_t _gcry_generate_fips186_3_
                    int *r_counter,
                    void **r_seed, size_t *r_seedlen, int *r_hashalgo);
@@ -346,9 +349,9 @@ diff -up libgcrypt-1.6.2/src/g10lib.h.fips-keygen libgcrypt-1.6.2/src/g10lib.h
  
  /* Replacements of missing functions (missing-string.c).  */
  #ifndef HAVE_STPCPY
-diff -up libgcrypt-1.6.2/tests/keygen.c.fips-keygen libgcrypt-1.6.2/tests/keygen.c
---- libgcrypt-1.6.2/tests/keygen.c.fips-keygen	2014-12-08 16:55:56.407076652 +0100
-+++ libgcrypt-1.6.2/tests/keygen.c	2014-12-08 17:13:29.449892067 +0100
+diff -up libgcrypt-1.6.3/tests/keygen.c.fips-keygen libgcrypt-1.6.3/tests/keygen.c
+--- libgcrypt-1.6.3/tests/keygen.c.fips-keygen	2015-03-06 16:38:56.661052411 +0100
++++ libgcrypt-1.6.3/tests/keygen.c	2015-03-06 16:38:56.699052607 +0100
 @@ -215,12 +215,12 @@ check_rsa_keys (void)
  
  
