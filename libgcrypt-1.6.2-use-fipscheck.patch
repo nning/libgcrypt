@@ -1,7 +1,7 @@
-diff -up libgcrypt-1.5.0/src/fips.c.use-fipscheck libgcrypt-1.5.0/src/fips.c
---- libgcrypt-1.5.0/src/fips.c.use-fipscheck	2011-02-04 20:17:33.000000000 +0100
-+++ libgcrypt-1.5.0/src/fips.c	2011-07-20 16:17:21.000000000 +0200
-@@ -570,23 +570,48 @@ run_random_selftests (void)
+diff -up libgcrypt-1.6.2/src/fips.c.use-fipscheck libgcrypt-1.6.2/src/fips.c
+--- libgcrypt-1.6.2/src/fips.c.use-fipscheck	2014-08-21 14:50:39.000000000 +0200
++++ libgcrypt-1.6.2/src/fips.c	2014-09-26 11:42:20.999588282 +0200
+@@ -578,23 +578,48 @@ run_random_selftests (void)
    return !!err;
  }
  
@@ -55,16 +55,16 @@ diff -up libgcrypt-1.5.0/src/fips.c.use-fipscheck libgcrypt-1.5.0/src/fips.c
                                   key, strlen (key));
        if (dlen < 0)
          err = gpg_error_from_syserror ();
-@@ -594,7 +619,7 @@ check_binary_integrity (void)
+@@ -602,7 +627,7 @@ check_binary_integrity (void)
          err = gpg_error (GPG_ERR_INTERNAL);
        else
          {
--          fname = gcry_malloc (strlen (info.dli_fname) + 1 + 5 + 1 );
-+          fname = _gcry_malloc (strlen (libpath) + 1 + 5 + 1 );
+-          fname = xtrymalloc (strlen (info.dli_fname) + 1 + 5 + 1 );
++          fname = xtrymalloc (strlen (libpath) + 1 + 5 + 1 );
            if (!fname)
              err = gpg_error_from_syserror ();
            else
-@@ -603,7 +628,7 @@ check_binary_integrity (void)
+@@ -611,7 +636,7 @@ check_binary_integrity (void)
                char *p;
  
                /* Prefix the basename with a dot.  */
@@ -73,10 +73,10 @@ diff -up libgcrypt-1.5.0/src/fips.c.use-fipscheck libgcrypt-1.5.0/src/fips.c
                p = strrchr (fname, '/');
                if (p)
                  p++;
-diff -up libgcrypt-1.5.0/src/Makefile.in.use-fipscheck libgcrypt-1.5.0/src/Makefile.in
---- libgcrypt-1.5.0/src/Makefile.in.use-fipscheck	2011-06-29 10:58:01.000000000 +0200
-+++ libgcrypt-1.5.0/src/Makefile.in	2011-07-20 16:19:33.000000000 +0200
-@@ -375,7 +375,7 @@ libgcrypt_la_LIBADD = $(gcrypt_res) \
+diff -up libgcrypt-1.6.2/src/Makefile.in.use-fipscheck libgcrypt-1.6.2/src/Makefile.in
+--- libgcrypt-1.6.2/src/Makefile.in.use-fipscheck	2014-08-21 15:14:08.000000000 +0200
++++ libgcrypt-1.6.2/src/Makefile.in	2014-09-26 11:41:13.271059281 +0200
+@@ -449,7 +449,7 @@ libgcrypt_la_LIBADD = $(gcrypt_res) \
  	../cipher/libcipher.la \
  	../random/librandom.la \
  	../mpi/libmpi.la \

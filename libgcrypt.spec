@@ -1,6 +1,6 @@
 Name: libgcrypt
-Version: 1.6.1
-Release: 7%{?dist}
+Version: 1.6.3
+Release: 1%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
@@ -17,14 +17,14 @@ Source5: curves.c
 Source6: t-mpi-point.c
 # make FIPS hmac compatible with fipscheck - non upstreamable
 # update on soname bump
-Patch2: libgcrypt-1.5.0-use-fipscheck.patch
+Patch2: libgcrypt-1.6.2-use-fipscheck.patch
 # fix tests in the FIPS mode, fix the FIPS-186-3 DSA keygen
 Patch5: libgcrypt-1.6.1-tests.patch
 # add configurable source of RNG seed and seed by default
 # from /dev/urandom in the FIPS mode
 Patch6: libgcrypt-1.6.1-fips-cfgrandom.patch
-# make the FIPS-186-3 DSA CAVS testable
-Patch7: libgcrypt-1.6.1-fips-cavs.patch
+# update the CAVS tests
+Patch7: libgcrypt-1.6.2-fips-cavs.patch
 # fix for memory leaks an other errors found by Coverity scan
 Patch9: libgcrypt-1.6.1-leak.patch
 # use poll instead of select when gathering randomness
@@ -33,7 +33,16 @@ Patch11: libgcrypt-1.6.1-use-poll.patch
 Patch13: libgcrypt-1.6.1-mpicoder-gccopt.patch
 # fix tests to work with approved ECC
 Patch14: libgcrypt-1.6.1-ecc-test-fix.patch
-Patch15: libgcrypt-1.6.1-make-arm-asm-fPIC-friendly.patch
+# Replace the FIPS RNG with DRBG
+Patch15: libgcrypt-1.6.2-drbg.patch
+# Run the FIPS mode initialization in the shared library constructor
+Patch18: libgcrypt-1.6.2-fips-ctor.patch
+# Make it possible to run the test suite in the FIPS mode
+Patch19: libgcrypt-1.6.2-fips-test.patch
+# Make the FIPS RSA keygen to be FIPS 186-4 compliant
+Patch20: libgcrypt-1.6.3-rsa-fips-keygen.patch
+# update the selftests for new FIPS requirements
+Patch22: libgcrypt-1.6.2-fips-reqs.patch
 
 %define gcrylibdir %{_libdir}
 
@@ -77,7 +86,11 @@ applications using libgcrypt.
 %patch11 -p1 -b .use-poll
 %patch13 -p1 -b .gccopt
 %patch14 -p1 -b .eccfix
-%patch15 -p1 -b .pic
+%patch15 -p1 -b .drbg
+%patch18 -p1 -b .fips-ctor
+%patch19 -p1 -b .fips-test
+%patch20 -p1 -b .fips-keygen
+%patch22 -p1 -b .fips-reqs
 cp %{SOURCE4} cipher/
 cp %{SOURCE5} %{SOURCE6} tests/
 
@@ -188,6 +201,22 @@ exit 0
 %license COPYING
 
 %changelog
+* Fri Mar  6 2015 Tomáš Mráz <tmraz@redhat.com> 1.6.3-1
+- new upstream version
+
+* Wed Feb 25 2015 Tomáš Mráz <tmraz@redhat.com> 1.6.2-4
+- do not initialize secure memory during the selftest (#1195850)
+
+* Sat Feb 21 2015 Till Maas <opensource@till.name> - 1.6.2-3
+- Rebuilt for Fedora 23 Change
+  https://fedoraproject.org/wiki/Changes/Harden_all_packages_with_position-independent_code
+
+* Wed Jan 14 2015 Tomáš Mráz <tmraz@redhat.com> 1.6.2-2
+- fix buildability of programs using gcrypt.h with -ansi (#1182200)
+
+* Mon Dec  8 2014 Tomáš Mráz <tmraz@redhat.com> 1.6.2-1
+- new upstream version
+
 * Sun Aug 17 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.6.1-7
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_21_22_Mass_Rebuild
 
