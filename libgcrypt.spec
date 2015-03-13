@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.6.3
-Release: 1%{?dist}
+Release: 2%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
@@ -43,6 +43,8 @@ Patch19: libgcrypt-1.6.2-fips-test.patch
 Patch20: libgcrypt-1.6.3-rsa-fips-keygen.patch
 # update the selftests for new FIPS requirements
 Patch22: libgcrypt-1.6.2-fips-reqs.patch
+# do not use strict aliasing for bufhelp functions
+Patch23: libgcrypt-1.6.3-aliasing.patch
 
 %define gcrylibdir %{_libdir}
 
@@ -91,6 +93,7 @@ applications using libgcrypt.
 %patch19 -p1 -b .fips-test
 %patch20 -p1 -b .fips-keygen
 %patch22 -p1 -b .fips-reqs
+%patch23 -p1 -b .aliasing
 cp %{SOURCE4} cipher/
 cp %{SOURCE5} %{SOURCE6} tests/
 
@@ -201,6 +204,9 @@ exit 0
 %license COPYING
 
 %changelog
+* Fri Mar 13 2015 Tomáš Mráz <tmraz@redhat.com> 1.6.3-2
+- do not use strict aliasing for bufhelp functions (#1201219)
+
 * Fri Mar  6 2015 Tomáš Mráz <tmraz@redhat.com> 1.6.3-1
 - new upstream version
 
