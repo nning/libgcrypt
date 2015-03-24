@@ -189,15 +189,15 @@ diff -up libgcrypt-1.6.3/cipher/rsa.c.fips-keygen libgcrypt-1.6.3/cipher/rsa.c
 +          if (testparms) goto err;
 +          goto qloop;
 +        }
-+      if (mpi_cmp (p, q) < 0)
++      if (mpi_cmp (p, q) > 0)
 +        {
 +          pqswitch = 1;
-+          mpi_sub (diff, q, p);
-+        }      
++          mpi_sub (diff, p, q);
++        }
 +      else
 +        {
 +          pqswitch = 0;
-+          mpi_sub (diff, p, q);
++          mpi_sub (diff, q, p);
 +        }
 +      if (mpi_cmp (diff, mindiff) < 0)
 +        {
@@ -248,7 +248,7 @@ diff -up libgcrypt-1.6.3/cipher/rsa.c.fips-keygen libgcrypt-1.6.3/cipher/rsa.c
 +      mpi_gcd (g, p1, q1);
 +      mpi_fdiv_q (f, p1, g);
 +      mpi_mul (f, f, q1);
-+      
++
 +      mpi_invm (d, e, f);
 +
 +      _gcry_mpi_release (f);
@@ -329,7 +329,7 @@ diff -up libgcrypt-1.6.3/cipher/rsa.c.fips-keygen libgcrypt-1.6.3/cipher/rsa.c
 -      ec = generate_std (&sk, nbits, evalue,
 -                         !!(flags & PUBKEY_FLAG_TRANSIENT_KEY));
 +      if (deriveparms || fips_mode())
-+	ec = generate_fips (&sk, nbits, evalue, deriveparms, !!(flags & PUBKEY_FLAG_TRANSIENT_KEY));
++        ec = generate_fips (&sk, nbits, evalue, deriveparms, !!(flags & PUBKEY_FLAG_TRANSIENT_KEY));
 +      else
 +        ec = generate_std (&sk, nbits, evalue, !!(flags & PUBKEY_FLAG_TRANSIENT_KEY));
 +      sexp_release (deriveparms);

@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.6.3
-Release: 2%{?dist}
+Release: 3%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
@@ -45,6 +45,8 @@ Patch20: libgcrypt-1.6.3-rsa-fips-keygen.patch
 Patch22: libgcrypt-1.6.2-fips-reqs.patch
 # do not use strict aliasing for bufhelp functions
 Patch23: libgcrypt-1.6.3-aliasing.patch
+# use only urandom if /dev/random cannot be opened
+Patch24: libgcrypt-1.6.3-urandom-only.patch
 
 %define gcrylibdir %{_libdir}
 
@@ -94,6 +96,8 @@ applications using libgcrypt.
 %patch20 -p1 -b .fips-keygen
 %patch22 -p1 -b .fips-reqs
 %patch23 -p1 -b .aliasing
+%patch24 -p1 -b .urandom-only
+
 cp %{SOURCE4} cipher/
 cp %{SOURCE5} %{SOURCE6} tests/
 
@@ -204,6 +208,11 @@ exit 0
 %license COPYING
 
 %changelog
+* Tue Mar 24 2015 Tomáš Mráz <tmraz@redhat.com> 1.6.3-3
+- touch only urandom in the selftest and when /dev/random is
+  unavailable for example by SELinux confinement
+- fix the RSA selftest key (p q swap) (#1204517)
+
 * Fri Mar 13 2015 Tomáš Mráz <tmraz@redhat.com> 1.6.3-2
 - do not use strict aliasing for bufhelp functions (#1201219)
 
