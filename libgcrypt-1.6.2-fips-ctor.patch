@@ -16,7 +16,7 @@ diff -up libgcrypt-1.6.2/cipher/md.c.fips-ctor libgcrypt-1.6.2/cipher/md.c
 diff -up libgcrypt-1.6.2/src/global.c.fips-ctor libgcrypt-1.6.2/src/global.c
 --- libgcrypt-1.6.2/src/global.c.fips-ctor	2015-02-25 13:57:21.174704842 +0100
 +++ libgcrypt-1.6.2/src/global.c	2015-02-25 14:03:07.066864208 +0100
-@@ -132,6 +132,34 @@ global_init (void)
+@@ -132,6 +132,36 @@ global_init (void)
  }
  
  
@@ -44,6 +44,8 @@ diff -up libgcrypt-1.6.2/src/global.c.fips-ctor libgcrypt-1.6.2/src/global.c
 +      if (fips_mode ())
 +         _gcry_random_initialize (1);
 +      _gcry_fips_run_selftests (0);
++      if (!fips_mode())
++         _gcry_random_close_fds ();
 +      no_secure_memory = no_secmem_save;
 +    }
 +}
@@ -51,7 +53,7 @@ diff -up libgcrypt-1.6.2/src/global.c.fips-ctor libgcrypt-1.6.2/src/global.c
  /* This function is called by the macro fips_is_operational and makes
     sure that the minimal initialization has been done.  This is far
     from a perfect solution and hides problems with an improper
-@@ -542,8 +570,7 @@ _gcry_vcontrol (enum gcry_ctl_cmds cmd,
+@@ -542,8 +572,7 @@ _gcry_vcontrol (enum gcry_ctl_cmds cmd,
  
      case GCRYCTL_FIPS_MODE_P:
        if (fips_mode ()
@@ -61,7 +63,7 @@ diff -up libgcrypt-1.6.2/src/global.c.fips-ctor libgcrypt-1.6.2/src/global.c
  	rc = GPG_ERR_GENERAL; /* Used as TRUE value */
        break;
  
-@@ -635,7 +662,7 @@ _gcry_vcontrol (enum gcry_ctl_cmds cmd,
+@@ -635,7 +664,7 @@ _gcry_vcontrol (enum gcry_ctl_cmds cmd,
        break;
  
      case GCRYCTL_SET_ENFORCED_FIPS_FLAG:

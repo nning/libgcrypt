@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.6.3
-Release: 3%{?dist}
+Release: 4%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
@@ -208,6 +208,9 @@ exit 0
 %license COPYING
 
 %changelog
+* Fri Apr  3 2015 Tomáš Mráz <tmraz@redhat.com> 1.6.3-4
+- deinitialize the RNG after the selftest is run
+
 * Tue Mar 24 2015 Tomáš Mráz <tmraz@redhat.com> 1.6.3-3
 - touch only urandom in the selftest and when /dev/random is
   unavailable for example by SELinux confinement
