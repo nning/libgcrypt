@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.6.3
-Release: 4%{?dist}
+Release: 5%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
@@ -208,6 +208,9 @@ exit 0
 %license COPYING
 
 %changelog
+* Wed Jun 17 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.6.3-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
+
 * Fri Apr  3 2015 Tomáš Mráz <tmraz@redhat.com> 1.6.3-4
 - deinitialize the RNG after the selftest is run
 
