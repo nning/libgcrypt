@@ -2553,7 +2553,7 @@ diff -up libgcrypt-1.6.2/src/gcrypt.h.in.drbg libgcrypt-1.6.2/src/gcrypt.h.in
    };
  
  /* Perform various operations defined by CMD. */
-@@ -1668,6 +1670,109 @@ int gcry_is_secure (const void *a) _GCRY
+@@ -1668,6 +1670,110 @@ int gcry_is_secure (const void *a) _GCRY
  /* Return true if Libgcrypt is in FIPS mode.  */
  #define gcry_fips_mode_active()  !!gcry_control (GCRYCTL_FIPS_MODE_P, 0)
  
@@ -2659,7 +2659,8 @@ diff -up libgcrypt-1.6.2/src/gcrypt.h.in.drbg libgcrypt-1.6.2/src/gcrypt.h.in
 +#define GCRY_DRBG_NOPR_HMACSHA1  (GCRY_DRBG_HASHSHA1 | GCRY_DRBG_HMAC)
 +#define GCRY_DRBG_NOPR_HMACSHA256 (GCRY_DRBG_HASHSHA256 | GCRY_DRBG_HMAC)
 +#define GCRY_DRBG_NOPR_HMACSHA384 (GCRY_DRBG_HASHSHA384 | GCRY_DRBG_HMAC)
-+#define DRBG_NOPR_HMACSHA512 (GCRY_DRBG_HASHSHA512 | GCRY_DRBG_HMAC)
++#define GCRY_DRBG_NOPR_HMACSHA512 (GCRY_DRBG_HASHSHA512 | GCRY_DRBG_HMAC)
++#define DRBG_NOPR_HMACSHA512 GCRY_DRBG_NOPR_HMACSHA512 /* deprecated leftover */
  
  #if 0 /* (Keep Emacsens' auto-indent happy.) */
  {
