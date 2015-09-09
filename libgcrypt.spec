@@ -1,6 +1,6 @@
 Name: libgcrypt
-Version: 1.6.3
-Release: 5%{?dist}
+Version: 1.6.4
+Release: 1%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
@@ -208,6 +208,9 @@ exit 0
 %license COPYING
 
 %changelog
+* Wed Sep  9 2015 Tomáš Mráz <tmraz@redhat.com> 1.6.4-1
+- new upstream version
+
 * Wed Jun 17 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.6.3-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
 
