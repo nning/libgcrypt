@@ -25,8 +25,8 @@ Patch5: libgcrypt-1.6.1-tests.patch
 Patch6: libgcrypt-1.6.1-fips-cfgrandom.patch
 # update the CAVS tests
 Patch7: libgcrypt-1.6.2-fips-cavs.patch
-# fix for memory leaks an other errors found by Coverity scan
-Patch9: libgcrypt-1.6.1-leak.patch
+# fix for memory leaks and other errors found by Coverity scan
+Patch9: libgcrypt-1.6.5-leak.patch
 # use poll instead of select when gathering randomness
 Patch11: libgcrypt-1.6.1-use-poll.patch
 # slight optimalization of mpicoder.c to silence Valgrind (#968288)
