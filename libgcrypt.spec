@@ -1,5 +1,5 @@
 Name: libgcrypt
-Version: 1.6.5
+Version: 1.6.6
 Release: 1%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
@@ -208,6 +208,9 @@ exit 0
 %license COPYING
 
 %changelog
+* Wed Aug 17 2016 Tomáš Mráz <tmraz@redhat.com> 1.6.6-1
+- new upstream version with important security fix (CVE-2016-6316)
+
 * Thu Jul 21 2016 Tomáš Mráz <tmraz@redhat.com> 1.6.5-1
 - new upstream version fixing low impact issue CVE-2015-7511
 
