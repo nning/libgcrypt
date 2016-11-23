@@ -1,6 +1,6 @@
-diff -up libgcrypt-1.5.3/tests/cavs_driver.pl.cavs libgcrypt-1.5.3/tests/cavs_driver.pl
---- libgcrypt-1.5.3/tests/cavs_driver.pl.cavs	2013-05-22 18:02:55.000000000 +0200
-+++ libgcrypt-1.5.3/tests/cavs_driver.pl	2014-10-21 09:38:34.250691408 +0200
+diff -up libgcrypt-1.7.3/tests/cavs_driver.pl.cavs libgcrypt-1.7.3/tests/cavs_driver.pl
+--- libgcrypt-1.7.3/tests/cavs_driver.pl.cavs	2013-03-15 20:25:38.000000000 +0100
++++ libgcrypt-1.7.3/tests/cavs_driver.pl	2016-11-22 17:29:06.067553077 +0100
 @@ -1,9 +1,11 @@
  #!/usr/bin/env perl
  #
@@ -862,9 +862,9 @@ diff -up libgcrypt-1.5.3/tests/cavs_driver.pl.cavs libgcrypt-1.5.3/tests/cavs_dr
          } else {
                  die "Invalid interface option given";
          }
-diff -up libgcrypt-1.5.3/tests/cavs_tests.sh.cavs libgcrypt-1.5.3/tests/cavs_tests.sh
---- libgcrypt-1.5.3/tests/cavs_tests.sh.cavs	2013-05-22 18:02:55.000000000 +0200
-+++ libgcrypt-1.5.3/tests/cavs_tests.sh	2014-09-26 17:45:38.434674884 +0200
+diff -up libgcrypt-1.7.3/tests/cavs_tests.sh.cavs libgcrypt-1.7.3/tests/cavs_tests.sh
+--- libgcrypt-1.7.3/tests/cavs_tests.sh.cavs	2013-03-15 20:25:38.000000000 +0100
++++ libgcrypt-1.7.3/tests/cavs_tests.sh	2016-11-22 17:29:06.067553077 +0100
 @@ -55,7 +55,7 @@ function run_one_test () {
      [ -d "$respdir" ] || mkdir "$respdir"
      [ -f "$rspfile" ] &&  rm "$rspfile"
@@ -874,10 +874,10 @@ diff -up libgcrypt-1.5.3/tests/cavs_tests.sh.cavs libgcrypt-1.5.3/tests/cavs_tes
          dflag="-D"
      fi
  
-diff -up libgcrypt-1.5.3/tests/fipsdrv.c.cavs libgcrypt-1.5.3/tests/fipsdrv.c
---- libgcrypt-1.5.3/tests/fipsdrv.c.cavs	2013-07-25 11:10:04.000000000 +0200
-+++ libgcrypt-1.5.3/tests/fipsdrv.c	2014-10-21 09:30:30.796777225 +0200
-@@ -893,6 +893,9 @@ print_mpi_line (gcry_mpi_t a, int no_lz)
+diff -up libgcrypt-1.7.3/tests/fipsdrv.c.cavs libgcrypt-1.7.3/tests/fipsdrv.c
+--- libgcrypt-1.7.3/tests/fipsdrv.c.cavs	2016-07-14 11:19:17.000000000 +0200
++++ libgcrypt-1.7.3/tests/fipsdrv.c	2016-11-22 17:33:15.468330859 +0100
+@@ -892,6 +892,9 @@ print_mpi_line (gcry_mpi_t a, int no_lz)
      die ("gcry_mpi_aprint failed: %s\n", gpg_strerror (err));
  
    p = buf;
@@ -887,77 +887,7 @@ diff -up libgcrypt-1.5.3/tests/fipsdrv.c.cavs libgcrypt-1.5.3/tests/fipsdrv.c
    if (no_lz && p[0] == '0' && p[1] == '0' && p[2])
      p += 2;
  
-@@ -1346,6 +1349,69 @@ run_rsa_derive (const void *data, size_t
- }
- 
- 
-+/* Generate RSA key using the S-expression in (DATA,DATALEN).  This
-+   S-expression is used directly as input to gcry_pk_genkey.  The
-+   result is printed to stdout with one parameter per line in hex
-+   format and in this order: e, p, q, n, d.  */
-+static void
-+run_rsa_keygen (const void *data, size_t datalen, int test)
-+{
-+  gpg_error_t err;
-+  gcry_sexp_t s_keyspec, s_key, s_top, l1;
-+  gcry_mpi_t mpi;
-+  const char *parmlist;
-+  int idx;
-+
-+  if (!datalen)
-+    err = gpg_error (GPG_ERR_NO_DATA);
-+  else
-+    err = gcry_sexp_new (&s_keyspec, data, datalen, 1);
-+  if (err)
-+    die ("gcry_sexp_new failed for RSA key generation: %s\n",
-+         gpg_strerror (err));
-+
-+  err = gcry_pk_genkey (&s_key, s_keyspec);
-+
-+  gcry_sexp_release (s_keyspec);
-+
-+  if (test) {
-+	if (err)
-+		printf("F\n");
-+	else {
-+		gcry_sexp_release (s_key);
-+		printf("P\n");
-+	}
-+	return;
-+  }
-+
-+  if (err)
-+    die ("gcry_pk_genkey failed for RSA: %s\n", gpg_strerror (err));
-+
-+  parmlist = "epqnd";
-+
-+  /* Parse and print the parameters.  */
-+  l1 = gcry_sexp_find_token (s_key, "private-key", 0);
-+  s_top = gcry_sexp_find_token (l1, "rsa", 0);
-+  gcry_sexp_release (l1);
-+  if (!s_top)
-+    die ("private-key part not found in result\n");
-+
-+  for (idx=0; parmlist[idx]; idx++)
-+    {
-+      l1 = gcry_sexp_find_token (s_top, parmlist+idx, 1);
-+      mpi = gcry_sexp_nth_mpi (l1, 1, GCRYMPI_FMT_USG);
-+      gcry_sexp_release (l1);
-+      if (!mpi)
-+        die ("parameter %c missing in private-key\n", parmlist[idx]);
-+      print_mpi_line (mpi, 1);
-+      gcry_mpi_release (mpi);
-+    }
-+
-+  gcry_sexp_release (s_top);
-+  gcry_sexp_release (s_key);
-+}
-+
-+
- 
- static size_t
- compute_tag_length (size_t n)
-@@ -1675,14 +1741,14 @@ run_rsa_verify (const void *data, size_t
+@@ -1765,14 +1768,14 @@ run_rsa_verify (const void *data, size_t
  /* Generate a DSA key of size KEYSIZE and return the complete
     S-expression.  */
  static gcry_sexp_t
@@ -975,7 +905,7 @@ diff -up libgcrypt-1.5.3/tests/fipsdrv.c.cavs libgcrypt-1.5.3/tests/fipsdrv.c
    if (err)
      die ("gcry_sexp_build failed for DSA key generation: %s\n",
           gpg_strerror (err));
-@@ -1700,7 +1766,7 @@ dsa_gen (int keysize)
+@@ -1790,7 +1793,7 @@ dsa_gen (int keysize)
  /* Generate a DSA key of size KEYSIZE and return the complete
     S-expression.  */
  static gcry_sexp_t
@@ -984,7 +914,7 @@ diff -up libgcrypt-1.5.3/tests/fipsdrv.c.cavs libgcrypt-1.5.3/tests/fipsdrv.c
  {
    gpg_error_t err;
    gcry_sexp_t keyspec, key;
-@@ -1709,10 +1775,11 @@ dsa_gen_with_seed (int keysize, const vo
+@@ -1799,10 +1802,11 @@ dsa_gen_with_seed (int keysize, const vo
                           "(genkey"
                           "  (dsa"
                           "    (nbits %d)"
@@ -998,7 +928,7 @@ diff -up libgcrypt-1.5.3/tests/fipsdrv.c.cavs libgcrypt-1.5.3/tests/fipsdrv.c
    if (err)
      die ("gcry_sexp_build failed for DSA key generation: %s\n",
           gpg_strerror (err));
-@@ -1720,6 +1787,37 @@ dsa_gen_with_seed (int keysize, const vo
+@@ -1810,6 +1814,37 @@ dsa_gen_with_seed (int keysize, const vo
    err = gcry_pk_genkey (&key, keyspec);
    if (err)
      die ("gcry_pk_genkey failed for DSA: %s\n", gpg_strerror (err));
@@ -1036,7 +966,7 @@ diff -up libgcrypt-1.5.3/tests/fipsdrv.c.cavs libgcrypt-1.5.3/tests/fipsdrv.c
  
    gcry_sexp_release (keyspec);
  
-@@ -1732,7 +1830,7 @@ dsa_gen_with_seed (int keysize, const vo
+@@ -1849,7 +1884,7 @@ ecdsa_gen_key (const char *curve)
     with one parameter per line in hex format using this order: p, q,
     g, seed, counter, h. */
  static void
@@ -1045,7 +975,7 @@ diff -up libgcrypt-1.5.3/tests/fipsdrv.c.cavs libgcrypt-1.5.3/tests/fipsdrv.c
  {
    gcry_sexp_t l1, l2;
    gcry_mpi_t mpi;
-@@ -1768,6 +1866,9 @@ print_dsa_domain_parameters (gcry_sexp_t
+@@ -1885,6 +1920,9 @@ print_dsa_domain_parameters (gcry_sexp_t
      }
    gcry_sexp_release (l1);
  
@@ -1055,7 +985,7 @@ diff -up libgcrypt-1.5.3/tests/fipsdrv.c.cavs libgcrypt-1.5.3/tests/fipsdrv.c
    /* Extract the seed values.  */
    l1 = gcry_sexp_find_token (key, "misc-key-info", 0);
    if (!l1)
-@@ -1819,38 +1920,106 @@ print_dsa_domain_parameters (gcry_sexp_t
+@@ -1976,38 +2014,106 @@ print_ecdsa_dq (gcry_sexp_t key)
  }
  
  
@@ -1172,7 +1102,7 @@ diff -up libgcrypt-1.5.3/tests/fipsdrv.c.cavs libgcrypt-1.5.3/tests/fipsdrv.c
  
    fp = fopen (filename, "wb");
    if (!fp)
-@@ -1863,6 +2032,53 @@ run_dsa_gen (int keysize, const char *fi
+@@ -2020,6 +2126,53 @@ run_dsa_gen (int keysize, const char *fi
  }
  
  
@@ -1226,7 +1156,7 @@ diff -up libgcrypt-1.5.3/tests/fipsdrv.c.cavs libgcrypt-1.5.3/tests/fipsdrv.c
  
  /* Sign DATA of length DATALEN using the key taken from the S-expression
     encoded KEYFILE. */
-@@ -1872,11 +2088,16 @@ run_dsa_sign (const void *data, size_t d
+@@ -2029,11 +2182,16 @@ run_dsa_sign (const void *data, size_t d
  {
    gpg_error_t err;
    gcry_sexp_t s_data, s_key, s_sig, s_tmp, s_tmp2;
@@ -1234,19 +1164,19 @@ diff -up libgcrypt-1.5.3/tests/fipsdrv.c.cavs libgcrypt-1.5.3/tests/fipsdrv.c
 +  char hash[128];
    gcry_mpi_t tmpmpi;
 +  int algo;
++
++  s_key = read_sexp_from_file (keyfile);
++  algo = dsa_hash_from_key(s_key);
  
 -  gcry_md_hash_buffer (GCRY_MD_SHA1, hash, data, datalen);
 -  err = gcry_mpi_scan (&tmpmpi, GCRYMPI_FMT_USG, hash, 20, NULL);
-+  s_key = read_sexp_from_file (keyfile);
-+  algo = dsa_hash_from_key(s_key);
-+
 +  gcry_md_hash_buffer (algo, hash, data, datalen);
 +  err = gcry_mpi_scan (&tmpmpi, GCRYMPI_FMT_USG, hash,
 +                       gcry_md_get_algo_dlen(algo), NULL);
    if (!err)
      {
        err = gcry_sexp_build (&s_data, NULL,
-@@ -1887,8 +2108,6 @@ run_dsa_sign (const void *data, size_t d
+@@ -2044,8 +2202,6 @@ run_dsa_sign (const void *data, size_t d
      die ("gcry_sexp_build failed for DSA data input: %s\n",
           gpg_strerror (err));
  
@@ -1255,7 +1185,7 @@ diff -up libgcrypt-1.5.3/tests/fipsdrv.c.cavs libgcrypt-1.5.3/tests/fipsdrv.c
    err = gcry_pk_sign (&s_sig, s_data, s_key);
    if (err)
      {
-@@ -1964,13 +2183,18 @@ run_dsa_verify (const void *data, size_t
+@@ -2121,13 +2277,18 @@ run_dsa_verify (const void *data, size_t
  {
    gpg_error_t err;
    gcry_sexp_t s_data, s_key, s_sig;
@@ -1263,11 +1193,11 @@ diff -up libgcrypt-1.5.3/tests/fipsdrv.c.cavs libgcrypt-1.5.3/tests/fipsdrv.c
 +  char hash[128];
    gcry_mpi_t tmpmpi;
 +  int algo;
-+
-+  s_key = read_sexp_from_file (keyfile);
-+  algo = dsa_hash_from_key(s_key);
  
 -  gcry_md_hash_buffer (GCRY_MD_SHA1, hash, data, datalen);
++  s_key = read_sexp_from_file (keyfile);
++  algo = dsa_hash_from_key(s_key);
++
 +  gcry_md_hash_buffer (algo, hash, data, datalen);
    /* Note that we can't simply use %b with HASH to build the
       S-expression, because that might yield a negative value.  */
@@ -1277,7 +1207,7 @@ diff -up libgcrypt-1.5.3/tests/fipsdrv.c.cavs libgcrypt-1.5.3/tests/fipsdrv.c
    if (!err)
      {
        err = gcry_sexp_build (&s_data, NULL,
-@@ -1981,7 +2205,6 @@ run_dsa_verify (const void *data, size_t
+@@ -2138,7 +2299,6 @@ run_dsa_verify (const void *data, size_t
      die ("gcry_sexp_build failed for DSA data input: %s\n",
           gpg_strerror (err));
  
@@ -1285,24 +1215,24 @@ diff -up libgcrypt-1.5.3/tests/fipsdrv.c.cavs libgcrypt-1.5.3/tests/fipsdrv.c
    s_sig = read_sexp_from_file (sigfile);
  
    err = gcry_pk_verify (s_sig, s_data, s_key);
-@@ -2014,7 +2237,7 @@ usage (int show_help)
-      "Run a crypto operation using hex encoded input and output.\n"
+@@ -2304,7 +2464,7 @@ usage (int show_help)
       "MODE:\n"
       "  encrypt, decrypt, digest, random, hmac-sha,\n"
--     "  rsa-{derive,gen,sign,verify}, dsa-{pqg-gen,gen,sign,verify}\n"
-+     "  rsa-{derive,gen,sign,verify}, dsa-{pq-gen,g-gen,gen,sign,verify}\n"
+      "  rsa-{derive,gen,sign,verify},\n"
+-     "  dsa-{pqg-gen,gen,sign,verify}, ecdsa-{gen-key,sign,verify}\n"
++     "  dsa-{pq-gen,g-gen,gen,sign,verify}, ecdsa-{gen-key,sign,verify}\n"
       "OPTIONS:\n"
       "  --verbose        Print additional information\n"
       "  --binary         Input and output is in binary form\n"
-@@ -2024,6 +2247,7 @@ usage (int show_help)
-      "  --dt DT          Use the hex encoded DT for the RNG\n"
+@@ -2315,6 +2475,7 @@ usage (int show_help)
       "  --algo NAME      Use algorithm NAME\n"
+      "  --curve NAME     Select ECC curve spec NAME\n"
       "  --keysize N      Use a keysize of N bits\n"
 +     "  --qize N         Use a DSA q parameter size of N bits\n"
       "  --signature NAME Take signature from file NAME\n"
       "  --chunk N        Read in chunks of N bytes (implies --binary)\n"
       "  --pkcs1          Use PKCS#1 encoding\n"
-@@ -2050,6 +2274,7 @@ main (int argc, char **argv)
+@@ -2344,6 +2505,7 @@ main (int argc, char **argv)
    const char *dt_string = NULL;
    const char *algo_string = NULL;
    const char *keysize_string = NULL;
@@ -1310,7 +1240,7 @@ diff -up libgcrypt-1.5.3/tests/fipsdrv.c.cavs libgcrypt-1.5.3/tests/fipsdrv.c
    const char *signature_string = NULL;
    FILE *input;
    void *data;
-@@ -2143,6 +2368,14 @@ main (int argc, char **argv)
+@@ -2437,6 +2599,14 @@ main (int argc, char **argv)
            keysize_string = *argv;
            argc--; argv++;
          }
@@ -1325,36 +1255,16 @@ diff -up libgcrypt-1.5.3/tests/fipsdrv.c.cavs libgcrypt-1.5.3/tests/fipsdrv.c
        else if (!strcmp (*argv, "--signature"))
          {
            argc--; argv++;
-@@ -2406,6 +2639,18 @@ main (int argc, char **argv)
-         die ("no data available (do not use --chunk)\n");
-       run_rsa_derive (data, datalen);
-     }
-+  else if (!strcmp (mode_string, "rsa-keygen"))
-+    {
-+      if (!data)
-+        die ("no data available (do not use --chunk)\n");
-+      run_rsa_keygen (data, datalen, 0);
-+    }
-+  else if (!strcmp (mode_string, "rsa-keygen-kat"))
-+    {
-+      if (!data)
-+        die ("no data available (do not use --chunk)\n");
-+      run_rsa_keygen (data, datalen, 1);
-+    }
-   else if (!strcmp (mode_string, "rsa-gen"))
-     {
-       int keysize;
-@@ -2463,23 +2708,49 @@ main (int argc, char **argv)
+@@ -2792,23 +2962,49 @@ main (int argc, char **argv)
      }
    else if (!strcmp (mode_string, "dsa-pqg-gen"))
      {
 -      int keysize;
 +      int keysize, qsize;
- 
-       keysize = keysize_string? atoi (keysize_string) : 0;
-       if (keysize < 1024 || keysize > 3072)
-         die ("invalid keysize specified; needs to be 1024 .. 3072\n");
--      run_dsa_pqg_gen (keysize, datalen? data:NULL, datalen);
++
++      keysize = keysize_string? atoi (keysize_string) : 0;
++      if (keysize < 1024 || keysize > 3072)
++        die ("invalid keysize specified; needs to be 1024 .. 3072\n");
 +      qsize = qsize_string? atoi (qsize_string) : 0;
 +      if (qsize < 160 || qsize > 256)
 +        die ("invalid qsize specified; needs to be 160 .. 256\n");
@@ -1363,10 +1273,11 @@ diff -up libgcrypt-1.5.3/tests/fipsdrv.c.cavs libgcrypt-1.5.3/tests/fipsdrv.c
 +  else if (!strcmp (mode_string, "dsa-g-gen"))
 +    {
 +      int keysize, qsize;
-+
-+      keysize = keysize_string? atoi (keysize_string) : 0;
-+      if (keysize < 1024 || keysize > 3072)
-+        die ("invalid keysize specified; needs to be 1024 .. 3072\n");
+ 
+       keysize = keysize_string? atoi (keysize_string) : 0;
+       if (keysize < 1024 || keysize > 3072)
+         die ("invalid keysize specified; needs to be 1024 .. 3072\n");
+-      run_dsa_pqg_gen (keysize, datalen? data:NULL, datalen);
 +      qsize = qsize_string? atoi (qsize_string) : 0;
 +      if (qsize < 160 || qsize > 256)
 +        die ("invalid qsize specified; needs to be 160 .. 256\n");

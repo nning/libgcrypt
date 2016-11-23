@@ -1,5 +1,5 @@
 Name: libgcrypt
-Version: 1.6.6
+Version: 1.7.3
 Release: 1%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
@@ -15,36 +15,29 @@ Source3: hobble-libgcrypt
 Source4: ecc-curves.c
 Source5: curves.c
 Source6: t-mpi-point.c
+Source7: ecc-gost.c
 # make FIPS hmac compatible with fipscheck - non upstreamable
 # update on soname bump
 Patch2: libgcrypt-1.6.2-use-fipscheck.patch
-# fix tests in the FIPS mode, fix the FIPS-186-3 DSA keygen
-Patch5: libgcrypt-1.6.1-tests.patch
+# fix tests in the FIPS mode, allow CAVS testing of DSA keygen
+Patch5: libgcrypt-1.7.3-tests.patch
 # add configurable source of RNG seed and seed by default
 # from /dev/urandom in the FIPS mode
-Patch6: libgcrypt-1.6.1-fips-cfgrandom.patch
+Patch6: libgcrypt-1.7.3-fips-cfgrandom.patch
 # update the CAVS tests
-Patch7: libgcrypt-1.6.2-fips-cavs.patch
-# fix for memory leaks and other errors found by Coverity scan
-Patch9: libgcrypt-1.6.5-leak.patch
+Patch7: libgcrypt-1.7.3-fips-cavs.patch
 # use poll instead of select when gathering randomness
-Patch11: libgcrypt-1.6.1-use-poll.patch
+Patch11: libgcrypt-1.7.3-use-poll.patch
 # slight optimalization of mpicoder.c to silence Valgrind (#968288)
 Patch13: libgcrypt-1.6.1-mpicoder-gccopt.patch
 # fix tests to work with approved ECC
-Patch14: libgcrypt-1.6.1-ecc-test-fix.patch
-# Replace the FIPS RNG with DRBG
-Patch15: libgcrypt-1.6.2-drbg.patch
+Patch14: libgcrypt-1.7.3-ecc-test-fix.patch
 # Run the FIPS mode initialization in the shared library constructor
 Patch18: libgcrypt-1.6.2-fips-ctor.patch
-# Make it possible to run the test suite in the FIPS mode
-Patch19: libgcrypt-1.6.2-fips-test.patch
-# Make the FIPS RSA keygen to be FIPS 186-4 compliant
-Patch20: libgcrypt-1.6.3-rsa-fips-keygen.patch
-# update the selftests for new FIPS requirements
-Patch22: libgcrypt-1.6.2-fips-reqs.patch
+# Block some operations if in FIPS non-operational state
+Patch22: libgcrypt-1.7.3-fips-reqs.patch
 # do not use strict aliasing for bufhelp functions
-Patch23: libgcrypt-1.6.3-aliasing.patch
+Patch23: libgcrypt-1.7.3-aliasing.patch
 # use only urandom if /dev/random cannot be opened
 Patch24: libgcrypt-1.6.3-urandom-only.patch
 
@@ -86,19 +79,15 @@ applications using libgcrypt.
 %patch5 -p1 -b .tests
 %patch6 -p1 -b .cfgrandom
 %patch7 -p1 -b .cavs
-%patch9 -p1 -b .leak
 %patch11 -p1 -b .use-poll
 %patch13 -p1 -b .gccopt
 %patch14 -p1 -b .eccfix
-%patch15 -p1 -b .drbg
 %patch18 -p1 -b .fips-ctor
-%patch19 -p1 -b .fips-test
-%patch20 -p1 -b .fips-keygen
 %patch22 -p1 -b .fips-reqs
 %patch23 -p1 -b .aliasing
 %patch24 -p1 -b .urandom-only
 
-cp %{SOURCE4} cipher/
+cp %{SOURCE4} %{SOURCE7} cipher/
 cp %{SOURCE5} %{SOURCE6} tests/
 
 %build
@@ -208,6 +197,9 @@ exit 0
 %license COPYING
 
 %changelog
+* Wed Nov 23 2016 Tomáš Mráz <tmraz@redhat.com> 1.7.3-1
+- new upstream version 1.7.3
+
 * Wed Aug 17 2016 Tomáš Mráz <tmraz@redhat.com> 1.6.6-1
 - new upstream version with important security fix (CVE-2016-6316)
 

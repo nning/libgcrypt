@@ -1,0 +1,104 @@
+diff -up libgcrypt-1.7.3/random/random-drbg.c.cfgrandom libgcrypt-1.7.3/random/random-drbg.c
+--- libgcrypt-1.7.3/random/random-drbg.c.cfgrandom	2016-04-07 17:30:08.000000000 +0200
++++ libgcrypt-1.7.3/random/random-drbg.c	2016-11-22 15:54:02.227319203 +0100
+@@ -627,8 +627,13 @@ drbg_get_entropy (drbg_state_t drbg, uns
+   read_cb_size = len;
+   read_cb_len = 0;
+ #if USE_RNDLINUX
++  /* First read from /etc/gcrypt/rngseed if available */
++  _gcry_rndlinux_gather_random (drbg_read_cb, 0, len,
++				     -1);
++  read_cb_len = 0;
++  /* then use /dev/urandom. */
+   rc = _gcry_rndlinux_gather_random (drbg_read_cb, 0, len,
+-				     GCRY_VERY_STRONG_RANDOM);
++				     GCRY_STRONG_RANDOM);
+ #elif USE_RNDUNIX
+   rc = _gcry_rndunix_gather_random (drbg_read_cb, 0, len,
+ 				    GCRY_VERY_STRONG_RANDOM);
+diff -up libgcrypt-1.7.3/random/rndlinux.c.cfgrandom libgcrypt-1.7.3/random/rndlinux.c
+--- libgcrypt-1.7.3/random/rndlinux.c.cfgrandom	2016-07-14 11:19:17.000000000 +0200
++++ libgcrypt-1.7.3/random/rndlinux.c	2016-11-22 15:45:19.921141761 +0100
+@@ -40,7 +40,9 @@
+ #include "g10lib.h"
+ #include "rand-internal.h"
+ 
+-static int open_device (const char *name, int retry);
++#define NAME_OF_CFG_RNGSEED "/etc/gcrypt/rngseed"
++
++static int open_device (const char *name, int retry, int fatal);
+ 
+ 
+ static int
+@@ -63,7 +65,7 @@ set_cloexec_flag (int fd)
+  * a fatal error but retries until it is able to reopen the device.
+  */
+ static int
+-open_device (const char *name, int retry)
++open_device (const char *name, int retry, int fatal)
+ {
+   int fd;
+ 
+@@ -71,6 +73,8 @@ open_device (const char *name, int retry
+     _gcry_random_progress ("open_dev_random", 'X', 1, 0);
+  again:
+   fd = open (name, O_RDONLY);
++  if (fd == -1 && !fatal)
++      return fd;
+   if (fd == -1 && retry)
+     {
+       struct timeval tv;
+@@ -115,6 +119,7 @@ _gcry_rndlinux_gather_random (void (*add
+ {
+   static int fd_urandom = -1;
+   static int fd_random = -1;
++  static int fd_configured = -1;
+   static unsigned char ever_opened;
+   int fd;
+   int n;
+@@ -138,6 +143,11 @@ _gcry_rndlinux_gather_random (void (*add
+           close (fd_urandom);
+           fd_urandom = -1;
+         }
++      if (fd_configured != -1)
++        {
++          close (fd_configured);
++          fd_configured = -1;
++        }
+       return 0;
+     }
+ 
+@@ -165,20 +175,30 @@ _gcry_rndlinux_gather_random (void (*add
+      that we always require the device to be existent but want a more
+      graceful behaviour if the rarely needed close operation has been
+      used and the device needs to be re-opened later. */
++
++  if (level == -1)
++    {
++      if (fd_configured == -1)
++        fd_configured = open_device ( NAME_OF_CFG_RNGSEED, 0, 0 );
++      fd = fd_configured;
++      if (fd == -1)
++        return -1;
++    }
++
+   if (level >= 2)
+     {
+       if (fd_random == -1)
+         {
+-          fd_random = open_device (NAME_OF_DEV_RANDOM, (ever_opened & 1));
++          fd_random = open_device (NAME_OF_DEV_RANDOM, (ever_opened & 1), 1);
+           ever_opened |= 1;
+         }
+       fd = fd_random;
+     }
+-  else
++  else if (level != -1)
+     {
+       if (fd_urandom == -1)
+         {
+-          fd_urandom = open_device (NAME_OF_DEV_URANDOM, (ever_opened & 2));
++          fd_urandom = open_device (NAME_OF_DEV_URANDOM, (ever_opened & 2), 1);
+           ever_opened |= 2;
+         }
+       fd = fd_urandom;
