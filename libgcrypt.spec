@@ -1,5 +1,5 @@
 Name: libgcrypt
-Version: 1.7.5
+Version: 1.7.6
 Release: 1%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
@@ -27,7 +27,7 @@ Patch6: libgcrypt-1.7.3-fips-cfgrandom.patch
 # update the CAVS tests
 Patch7: libgcrypt-1.7.3-fips-cavs.patch
 # use poll instead of select when gathering randomness
-Patch11: libgcrypt-1.7.3-use-poll.patch
+Patch11: libgcrypt-1.7.6-use-poll.patch
 # slight optimalization of mpicoder.c to silence Valgrind (#968288)
 Patch13: libgcrypt-1.6.1-mpicoder-gccopt.patch
 # fix tests to work with approved ECC
@@ -197,6 +197,9 @@ exit 0
 %license COPYING
 
 %changelog
+* Mon Jan 30 2017 Tomáš Mráz <tmraz@redhat.com> 1.7.6-1
+- new upstream version 1.7.6
+
 * Fri Dec 16 2016 Tomáš Mráz <tmraz@redhat.com> 1.7.5-1
 - new upstream version 1.7.5
 

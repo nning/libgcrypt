@@ -1,6 +1,6 @@
-diff -up libgcrypt-1.7.3/random/rndlinux.c.use-poll libgcrypt-1.7.3/random/rndlinux.c
---- libgcrypt-1.7.3/random/rndlinux.c.use-poll	2016-11-22 16:05:05.114761069 +0100
-+++ libgcrypt-1.7.3/random/rndlinux.c	2016-11-22 16:16:05.373139721 +0100
+diff -up libgcrypt-1.7.6/random/rndlinux.c.use-poll libgcrypt-1.7.6/random/rndlinux.c
+--- libgcrypt-1.7.6/random/rndlinux.c.use-poll	2017-01-30 14:20:13.665662981 +0100
++++ libgcrypt-1.7.6/random/rndlinux.c	2017-01-30 14:27:45.957027214 +0100
 @@ -32,6 +32,7 @@
  #include <string.h>
  #include <unistd.h>
@@ -9,7 +9,7 @@ diff -up libgcrypt-1.7.3/random/rndlinux.c.use-poll libgcrypt-1.7.3/random/rndli
  #if defined(__linux__) && defined(HAVE_SYSCALL)
  # include <sys/syscall.h>
  #endif
-@@ -211,9 +212,11 @@ _gcry_rndlinux_gather_random (void (*add
+@@ -211,9 +212,8 @@ _gcry_rndlinux_gather_random (void (*add
                   return with something we will actually use 100ms. */
    while (length)
      {
@@ -17,13 +17,10 @@ diff -up libgcrypt-1.7.3/random/rndlinux.c.use-poll libgcrypt-1.7.3/random/rndli
 -      struct timeval tv;
        int rc;
 +      struct pollfd pfd;
-+
-+      pfd.fd = fd;
-+      pfd.events = POLLIN;
  
-       /* If we collected some bytes update the progress indicator.  We
-          do this always and not just if the select timed out because
-@@ -227,33 +230,19 @@ _gcry_rndlinux_gather_random (void (*add
+       /* If we have a modern Linux kernel and we want to read from the
+        * the non-blocking /dev/urandom, we first try to use the new
+@@ -269,33 +269,22 @@ _gcry_rndlinux_gather_random (void (*add
            any_need_entropy = 1;
          }
  
@@ -35,13 +32,10 @@ diff -up libgcrypt-1.7.3/random/rndlinux.c.use-poll libgcrypt-1.7.3/random/rndli
 -#ifdef FD_SETSIZE
 -      if (fd < FD_SETSIZE)
 -#endif
++      pfd.fd = fd;
++      pfd.events = POLLIN;
++
 +      if ( !(rc=poll(&pfd, 1, delay)) )
-+        {
-+          any_need_entropy = 1;
-+          delay = 3000; /* Use 3 seconds henceforth.  */
-+          continue;
-+        }
-+        else if( rc == -1 )
          {
 -          FD_ZERO(&rfds);
 -          FD_SET(fd, &rfds);
@@ -61,6 +55,12 @@ diff -up libgcrypt-1.7.3/random/rndlinux.c.use-poll libgcrypt-1.7.3/random/rndli
 -                              we have ever blocked.  */
 -              continue;
 -            }
++          any_need_entropy = 1;
++          delay = 3000; /* Use 3 seconds henceforth.  */
++          continue;
++        }
++        else if( rc == -1 )
++        {
 +          log_error ("poll() error: %s\n", strerror(errno));
 +          if (!delay)
 +            delay = 1000; /* Use 1 second if we encounter an error before
@@ -68,4 +68,4 @@ diff -up libgcrypt-1.7.3/random/rndlinux.c.use-poll libgcrypt-1.7.3/random/rndli
 +          continue;
          }
  
-       /* If we have a modern Linux kernel and we want to read from the
+       /* Read from the device.  */
