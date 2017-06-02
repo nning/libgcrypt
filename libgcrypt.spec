@@ -1,6 +1,6 @@
 Name: libgcrypt
-Version: 1.7.6
-Release: 2%{?dist}
+Version: 1.7.7
+Release: 1%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
@@ -15,7 +15,6 @@ Source3: hobble-libgcrypt
 Source4: ecc-curves.c
 Source5: curves.c
 Source6: t-mpi-point.c
-Source7: ecc-gost.c
 # make FIPS hmac compatible with fipscheck - non upstreamable
 # update on soname bump
 Patch2: libgcrypt-1.6.2-use-fipscheck.patch
@@ -87,7 +86,7 @@ applications using libgcrypt.
 %patch23 -p1 -b .aliasing
 %patch24 -p1 -b .urandom-only
 
-cp %{SOURCE4} %{SOURCE7} cipher/
+cp %{SOURCE4} cipher/
 cp %{SOURCE5} %{SOURCE6} tests/
 
 %build
@@ -197,6 +196,10 @@ exit 0
 %license COPYING
 
 %changelog
+* Fri Jun  2 2017 Tomáš Mráz <tmraz@redhat.com> 1.7.7-1
+- new upstream version 1.7.7
+- GOST is now enabled
+
 * Fri Feb 10 2017 Fedora Release Engineering <releng@fedoraproject.org> - 1.7.6-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_26_Mass_Rebuild
 

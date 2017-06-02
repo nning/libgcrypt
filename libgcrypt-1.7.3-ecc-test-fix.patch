@@ -1,51 +1,15 @@
-diff -up libgcrypt-1.7.3/tests/basic.c.eccfix libgcrypt-1.7.3/tests/basic.c
---- libgcrypt-1.7.3/tests/basic.c.eccfix	2016-04-15 09:42:06.000000000 +0200
-+++ libgcrypt-1.7.3/tests/basic.c	2016-11-22 18:43:19.732897206 +0100
-@@ -8506,6 +8506,7 @@ check_pubkey_sign_ecdsa (int n, gcry_sex
-         /* */          "000102030405060708090A0B0C0D0E0F#))",
-         0
-       },
-+#if 0
-       { 256,
-         "(data (flags gost)\n"
-         " (value #00112233445566778899AABBCCDDEEFF"
-@@ -8530,6 +8531,7 @@ check_pubkey_sign_ecdsa (int n, gcry_sex
-         /* */    "000102030405060708090A0B0C0D0E0F#))",
-         0
-       },
-+#endif
-       { 0, NULL }
-     };
- 
-@@ -9136,6 +9138,7 @@ check_pubkey (void)
-       "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
-       "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00" }
-   },
-+#if 0
-   { /* GOST R 34.10-2001/2012 test 256 bit.  */
-     GCRY_PK_ECDSA, FLAG_SIGN,
-     {
-@@ -9187,6 +9190,7 @@ check_pubkey (void)
-       "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
-       "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00" }
-   },
-+#endif
-   { /* secp256k1 test 256 bit.  */
-     GCRY_PK_ECDSA, FLAG_SIGN,
-     {
 diff -up libgcrypt-1.7.3/tests/benchmark.c.eccfix libgcrypt-1.7.3/tests/benchmark.c
 --- libgcrypt-1.7.3/tests/benchmark.c.eccfix	2016-07-14 11:19:17.000000000 +0200
 +++ libgcrypt-1.7.3/tests/benchmark.c	2016-11-22 16:21:00.109004197 +0100
-@@ -1412,8 +1412,7 @@ ecc_bench (int iterations, int print_hea
+@@ -1412,7 +1412,7 @@ ecc_bench (int iterations, int print_hea
  {
  #if USE_ECC
    gpg_error_t err;
 -  const char *p_sizes[] = { "192", "224", "256", "384", "521", "Ed25519",
--              "gost256", "gost512" };
-+  const char *p_sizes[] = { "224", "256", "384", "521", "Ed25519" };
++  const char *p_sizes[] = { "224", "256", "384", "521", "Ed25519",
+               "gost256", "gost512" };
    int testno;
  
-   if (print_header)
 diff -up libgcrypt-1.7.3/tests/dsa-rfc6979.c.eccfix libgcrypt-1.7.3/tests/dsa-rfc6979.c
 --- libgcrypt-1.7.3/tests/dsa-rfc6979.c.eccfix	2016-02-18 09:38:03.000000000 +0100
 +++ libgcrypt-1.7.3/tests/dsa-rfc6979.c	2016-11-22 16:22:11.804674008 +0100

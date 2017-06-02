@@ -7,6 +7,5 @@ set -e -x
 # EC:    ????????? ??/??/2015
 
 rm -f cipher/ecc-curves.c
-rm -f cipher/ecc-gost.c
 rm -f tests/curves.c
 rm -f tests/t-mpi-point.c
