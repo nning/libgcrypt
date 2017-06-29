@@ -1,5 +1,5 @@
 Name: libgcrypt
-Version: 1.7.7
+Version: 1.7.8
 Release: 1%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
@@ -196,6 +196,9 @@ exit 0
 %license COPYING
 
 %changelog
+* Thu Jun 29 2017 Tomáš Mráz <tmraz@redhat.com> 1.7.8-1
+- new upstream version 1.7.8
+
 * Fri Jun  2 2017 Tomáš Mráz <tmraz@redhat.com> 1.7.7-1
 - new upstream version 1.7.7
 - GOST is now enabled
