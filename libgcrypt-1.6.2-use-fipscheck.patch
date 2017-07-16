@@ -1,10 +1,11 @@
 diff -up libgcrypt-1.6.2/src/fips.c.use-fipscheck libgcrypt-1.6.2/src/fips.c
 --- libgcrypt-1.6.2/src/fips.c.use-fipscheck	2014-08-21 14:50:39.000000000 +0200
 +++ libgcrypt-1.6.2/src/fips.c	2014-09-26 11:42:20.999588282 +0200
-@@ -578,23 +578,48 @@ run_random_selftests (void)
+@@ -578,23 +578,50 @@ run_random_selftests (void)
    return !!err;
  }
  
++#ifdef ENABLE_HMAC_BINARY_CHECK
 +static int
 +get_library_path(const char *libname, const char *symbolname, char *path, size_t pathlen)
 +{
@@ -29,6 +30,7 @@ diff -up libgcrypt-1.6.2/src/fips.c.use-fipscheck libgcrypt-1.6.2/src/fips.c
 +    
 +    return rv;
 +}
++#endif
 +
  /* Run an integrity check on the binary.  Returns 0 on success.  */
  static int
@@ -55,7 +57,7 @@ diff -up libgcrypt-1.6.2/src/fips.c.use-fipscheck libgcrypt-1.6.2/src/fips.c
                                   key, strlen (key));
        if (dlen < 0)
          err = gpg_error_from_syserror ();
-@@ -602,7 +627,7 @@ check_binary_integrity (void)
+@@ -602,7 +629,7 @@ check_binary_integrity (void)
          err = gpg_error (GPG_ERR_INTERNAL);
        else
          {
@@ -64,7 +66,7 @@ diff -up libgcrypt-1.6.2/src/fips.c.use-fipscheck libgcrypt-1.6.2/src/fips.c
            if (!fname)
              err = gpg_error_from_syserror ();
            else
-@@ -611,7 +636,7 @@ check_binary_integrity (void)
+@@ -611,7 +638,7 @@ check_binary_integrity (void)
                char *p;
  
                /* Prefix the basename with a dot.  */
