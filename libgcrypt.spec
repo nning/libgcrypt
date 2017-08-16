@@ -33,6 +33,8 @@ Patch14: libgcrypt-1.7.3-ecc-test-fix.patch
 Patch18: libgcrypt-1.6.2-fips-ctor.patch
 # Block some operations if in FIPS non-operational state
 Patch22: libgcrypt-1.7.3-fips-reqs.patch
+# Fix the t-secmem on PPC64
+Patch23: libgcrypt-1.8.0-build.patch
 
 %define gcrylibdir %{_libdir}
 
@@ -76,7 +78,7 @@ applications using libgcrypt.
 %patch14 -p1 -b .eccfix
 %patch18 -p1 -b .fips-ctor
 %patch22 -p1 -b .fips-reqs
-#%patch23 -p1 -b .aliasing
+%patch23 -p1 -b .build
 
 cp %{SOURCE4} cipher/
 cp %{SOURCE5} %{SOURCE6} tests/
