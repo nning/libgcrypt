@@ -26,29 +26,8 @@
 #include <assert.h>
 #include <stdarg.h>
 
-#include "../src/gcrypt-int.h"
-
 #define PGM "t-mpi-point"
-
-static const char *wherestr;
-static int verbose;
-static int debug;
-static int error_count;
-
-
-#define my_isascii(c) (!((c) & 0x80))
-#define digitp(p)   (*(p) >= '0' && *(p) <= '9')
-#define hexdigitp(a) (digitp (a)                     \
-                      || (*(a) >= 'A' && *(a) <= 'F')  \
-                      || (*(a) >= 'a' && *(a) <= 'f'))
-#define xtoi_1(p)   (*(p) <= '9'? (*(p)- '0'): \
-                     *(p) <= 'F'? (*(p)-'A'+10):(*(p)-'a'+10))
-#define xtoi_2(p)   ((xtoi_1(p) * 16) + xtoi_1((p)+1))
-#define xmalloc(a)    gcry_xmalloc ((a))
-#define xcalloc(a,b)  gcry_xcalloc ((a),(b))
-#define xfree(a)      gcry_free ((a))
-#define pass() do { ; } while (0)
-
+#include "t-common.h"
 
 static struct
 {
@@ -153,50 +132,6 @@ static const char sample_ed25519_q_eddsa[] =
   "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a";
 static const char sample_ed25519_d[] =
   "9d61b19deffd5a60ba844af492ec2cc44449c5697b326919703bac031cae7f60";
-
-
-static void
-show (const char *format, ...)
-{
-  va_list arg_ptr;
-
-  if (!verbose)
-    return;
-  fprintf (stderr, "%s: ", PGM);
-  va_start (arg_ptr, format);
-  vfprintf (stderr, format, arg_ptr);
-  va_end (arg_ptr);
-}
-
-static void
-fail (const char *format, ...)
-{
-  va_list arg_ptr;
-
-  fflush (stdout);
-  fprintf (stderr, "%s: ", PGM);
-  if (wherestr)
-    fprintf (stderr, "%s: ", wherestr);
-  va_start (arg_ptr, format);
-  vfprintf (stderr, format, arg_ptr);
-  va_end (arg_ptr);
-  error_count++;
-}
-
-static void
-die (const char *format, ...)
-{
-  va_list arg_ptr;
-
-  fflush (stdout);
-  fprintf (stderr, "%s: ", PGM);
-  if (wherestr)
-    fprintf (stderr, "%s: ", wherestr);
-  va_start (arg_ptr, format);
-  vfprintf (stderr, format, arg_ptr);
-  va_end (arg_ptr);
-  exit (1);
-}
 
 
 static void
@@ -310,7 +245,7 @@ hex2mpiopa (const char *string)
     die ("hex2mpiopa '%s' failed: parser error\n", string);
   val = gcry_mpi_set_opaque (NULL, buffer, buflen*8);
   if (!buffer)
-    die ("hex2mpiopa '%s' failed: set_opaque error%s\n", string);
+    die ("hex2mpiopa '%s' failed: set_opaque error\n", string);
   return val;
 }
 
@@ -360,11 +295,11 @@ ec_p_new (gcry_ctx_t *r_ctx, gcry_mpi_t p, gcry_mpi_t a)
 static void
 set_get_point (void)
 {
-  gcry_mpi_point_t point;
+  gcry_mpi_point_t point, point2;
   gcry_mpi_t x, y, z;
 
   wherestr = "set_get_point";
-  show ("checking point setting functions\n");
+  info ("checking point setting functions\n");
 
   point = gcry_mpi_point_new (0);
   x = gcry_mpi_set_ui (NULL, 17);
@@ -404,7 +339,22 @@ set_get_point (void)
       || gcry_mpi_cmp_ui (y, 42) || gcry_mpi_cmp_ui (z, 11371))
     fail ("point_snatch_set/point_get failed\n");
 
+  point2 = gcry_mpi_point_copy (point);
+
+  gcry_mpi_point_get (x, y, z, point2);
+  if (gcry_mpi_cmp_ui (x, 17)
+      || gcry_mpi_cmp_ui (y, 42) || gcry_mpi_cmp_ui (z, 11371))
+    fail ("point_copy failed (1)\n");
+
   gcry_mpi_point_release (point);
+
+  gcry_mpi_point_get (x, y, z, point2);
+  if (gcry_mpi_cmp_ui (x, 17)
+      || gcry_mpi_cmp_ui (y, 42) || gcry_mpi_cmp_ui (z, 11371))
+    fail ("point_copy failed (2)\n");
+
+  gcry_mpi_point_release (point2);
+
   gcry_mpi_release (x);
   gcry_mpi_release (y);
   gcry_mpi_release (z);
@@ -419,7 +369,7 @@ context_alloc (void)
   gcry_mpi_t p, a;
 
   wherestr = "context_alloc";
-  show ("checking context functions\n");
+  info ("checking context functions\n");
 
   p = gcry_mpi_set_ui (NULL, 1);
   a = gcry_mpi_set_ui (NULL, 1);
@@ -526,7 +476,7 @@ context_param (void)
 
   wherestr = "context_param";
 
-  show ("checking standard curves\n");
+  info ("checking standard curves\n");
   for (idx=0; test_curve[idx].desc; idx++)
     {
       /* P-192 and Ed25519 are not supported in fips mode */
@@ -535,7 +485,7 @@ context_param (void)
           if (!strcmp(test_curve[idx].desc, "NIST P-192")
               || !strcmp(test_curve[idx].desc, "Ed25519"))
             {
-	      show("skipping %s in fips mode\n", test_curve[idx].desc );
+	      info ("skipping %s in fips mode\n", test_curve[idx].desc );
               continue;
             }
         }
@@ -568,7 +518,7 @@ context_param (void)
 
     }
 
-  show ("checking sample public key (nistp256)\n");
+  info ("checking sample public key (nistp256)\n");
   q = hex2mpi (sample_p256_q);
   err = gcry_sexp_build (&keyparam, NULL,
                         "(public-key(ecc(curve %s)(q %m)))",
@@ -639,7 +589,7 @@ context_param (void)
   if (gcry_fips_mode_active())
     goto cleanup;
 
-  show ("checking sample public key (Ed25519)\n");
+  info ("checking sample public key (Ed25519)\n");
   q = hex2mpi (sample_ed25519_q);
   gcry_sexp_release (keyparam);
   err = gcry_sexp_build (&keyparam, NULL,
@@ -761,7 +711,7 @@ basic_ec_math (void)
   gcry_mpi_t x, y, z;
 
   wherestr = "basic_ec_math";
-  show ("checking basic math functions for EC\n");
+  info ("checking basic math functions for EC\n");
 
   P = hex2mpi ("0xfffffffffffffffffffffffffffffffeffffffffffffffff");
   A = hex2mpi ("0xfffffffffffffffffffffffffffffffefffffffffffffffc");
@@ -847,7 +797,7 @@ twistededwards_math (void)
   gcry_mpi_t w, a, x, y, z, p, n, b, I;
 
   wherestr = "twistededwards_math";
-  show ("checking basic Twisted Edwards math\n");
+  info ("checking basic Twisted Edwards math\n");
 
   err = gcry_mpi_ec_new (&ctx, NULL, "Ed25519");
   if (err)
@@ -881,7 +831,7 @@ twistededwards_math (void)
   /* Check: p % 4 == 1 */
   gcry_mpi_mod (w, p, GCRYMPI_CONST_FOUR);
   if (gcry_mpi_cmp_ui (w, 1))
-    fail ("failed assertion: p % 4 == 1\n");
+    fail ("failed assertion: p %% 4 == 1\n");
 
   /* Check: 2^{n-1} mod n == 1 */
   gcry_mpi_sub_ui (a, n, 1);
@@ -985,11 +935,11 @@ main (int argc, char **argv)
   if (!gcry_check_version (GCRYPT_VERSION))
     die ("version mismatch\n");
 
-  gcry_control (GCRYCTL_DISABLE_SECMEM, 0);
-  gcry_control (GCRYCTL_ENABLE_QUICK_RANDOM, 0);
+  xgcry_control (GCRYCTL_DISABLE_SECMEM, 0);
+  xgcry_control (GCRYCTL_ENABLE_QUICK_RANDOM, 0);
   if (debug)
-    gcry_control (GCRYCTL_SET_DEBUG_FLAGS, 1u, 0);
-  gcry_control (GCRYCTL_INITIALIZATION_FINISHED, 0);
+    xgcry_control (GCRYCTL_SET_DEBUG_FLAGS, 1u, 0);
+  xgcry_control (GCRYCTL_INITIALIZATION_FINISHED, 0);
 
   set_get_point ();
   context_alloc ();
@@ -1004,6 +954,6 @@ main (int argc, char **argv)
       twistededwards_math ();
     }
 
-  show ("All tests completed. Errors: %d\n", error_count);
+  info ("All tests completed. Errors: %d\n", error_count);
   return error_count ? 1 : 0;
 }

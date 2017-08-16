@@ -1,32 +1,30 @@
 Name: libgcrypt
-Version: 1.7.8
-Release: 3%{?dist}
+Version: 1.8.0
+Release: 1%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
 # cipher support. We have to remove it in the tarball we ship with
 # the hobble-libgcrypt script. 
 # (We replace it with RH approved ECC in Source4-5)
-#Source0: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2
-#Source1: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2.sig
+#Source0: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-{version}.tar.bz2
+#Source1: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-{version}.tar.bz2.sig
 Source2: wk@g10code.com
 Source3: hobble-libgcrypt
 # Approved ECC support (from 1.6.1)
 Source4: ecc-curves.c
 Source5: curves.c
 Source6: t-mpi-point.c
+Source7: random.conf
 # make FIPS hmac compatible with fipscheck - non upstreamable
 # update on soname bump
 Patch2: libgcrypt-1.6.2-use-fipscheck.patch
 # fix tests in the FIPS mode, allow CAVS testing of DSA keygen
-Patch5: libgcrypt-1.7.3-tests.patch
-# add configurable source of RNG seed and seed by default
-# from /dev/urandom in the FIPS mode
-Patch6: libgcrypt-1.7.3-fips-cfgrandom.patch
+Patch5: libgcrypt-1.8.0-tests.patch
 # update the CAVS tests
 Patch7: libgcrypt-1.7.3-fips-cavs.patch
 # use poll instead of select when gathering randomness
-Patch11: libgcrypt-1.7.6-use-poll.patch
+Patch11: libgcrypt-1.8.0-use-poll.patch
 # slight optimalization of mpicoder.c to silence Valgrind (#968288)
 Patch13: libgcrypt-1.6.1-mpicoder-gccopt.patch
 # fix tests to work with approved ECC
@@ -35,10 +33,6 @@ Patch14: libgcrypt-1.7.3-ecc-test-fix.patch
 Patch18: libgcrypt-1.6.2-fips-ctor.patch
 # Block some operations if in FIPS non-operational state
 Patch22: libgcrypt-1.7.3-fips-reqs.patch
-# do not use strict aliasing for bufhelp functions
-Patch23: libgcrypt-1.7.3-aliasing.patch
-# use only urandom if /dev/random cannot be opened
-Patch24: libgcrypt-1.6.3-urandom-only.patch
 
 %define gcrylibdir %{_libdir}
 
@@ -76,15 +70,13 @@ applications using libgcrypt.
 %{SOURCE3}
 %patch2 -p1 -b .use-fipscheck
 %patch5 -p1 -b .tests
-%patch6 -p1 -b .cfgrandom
 %patch7 -p1 -b .cavs
 %patch11 -p1 -b .use-poll
 %patch13 -p1 -b .gccopt
 %patch14 -p1 -b .eccfix
 %patch18 -p1 -b .fips-ctor
 %patch22 -p1 -b .fips-reqs
-%patch23 -p1 -b .aliasing
-%patch24 -p1 -b .urandom-only
+#%patch23 -p1 -b .aliasing
 
 cp %{SOURCE4} cipher/
 cp %{SOURCE5} %{SOURCE6} tests/
@@ -155,6 +147,7 @@ popd
 # Create /etc/gcrypt (hardwired, not dependent on the configure invocation) so
 # that _someone_ owns it.
 mkdir -p -m 755 $RPM_BUILD_ROOT/etc/gcrypt
+install -m644 %{SOURCE7} $RPM_BUILD_ROOT/etc/gcrypt/random.conf
 
 %post -p /sbin/ldconfig
 
@@ -174,6 +167,7 @@ exit 0
 %files
 %defattr(-,root,root,-)
 %dir /etc/gcrypt
+%config(noreplace) /etc/gcrypt/random.conf
 %{gcrylibdir}/libgcrypt.so.*
 %{gcrylibdir}/.libgcrypt.so.*.hmac
 %{!?_licensedir:%global license %%doc}
@@ -196,6 +190,9 @@ exit 0
 %license COPYING
 
 %changelog
+* Wed Aug 16 2017 Tomáš Mráz <tmraz@redhat.com> 1.8.0-1
+- new upstream version 1.8.0
+
 * Thu Aug 03 2017 Fedora Release Engineering <releng@fedoraproject.org> - 1.7.8-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Binutils_Mass_Rebuild
 
