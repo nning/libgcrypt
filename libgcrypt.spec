@@ -1,5 +1,5 @@
 Name: libgcrypt
-Version: 1.8.0
+Version: 1.8.1
 Release: 1%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
@@ -192,6 +192,9 @@ exit 0
 %license COPYING
 
 %changelog
+* Tue Sep  5 2017 Tomáš Mráz <tmraz@redhat.com> 1.8.1-1
+- new upstream version 1.8.1
+
 * Wed Aug 16 2017 Tomáš Mráz <tmraz@redhat.com> 1.8.0-1
 - new upstream version 1.8.0
 
