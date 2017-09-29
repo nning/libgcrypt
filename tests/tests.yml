@@ -1,0 +1,21 @@
+- hosts: localhost
+  tags:
+  - classic
+  - container
+  roles:
+  - role: standard-test-beakerlib
+    tests:
+    - smoke-test
+    required_packages:
+    - fipscheck
+    - gawk
+    - gcc-c++
+    - libgcrypt
+    - libgpg-error-devel
+    - libselinux-utils
+    - nfs-utils
+    - pkgconfig
+    - rpm-build
+    - texinfo
+    - wget
+    - yum-utils
