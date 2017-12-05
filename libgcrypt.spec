@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.8.1
-Release: 2%{?dist}
+Release: 3%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
@@ -195,6 +195,9 @@ exit 0
 %license COPYING
 
 %changelog
+* Tue Dec  5 2017 Tomáš Mráz <tmraz@redhat.com> 1.8.1-3
+- do not try to access() /dev/urandom either if getrandom() works
+
 * Mon Dec  4 2017 Tomáš Mráz <tmraz@redhat.com> 1.8.1-2
 - do not try to open /dev/urandom if getrandom() works (#1380866)
 
