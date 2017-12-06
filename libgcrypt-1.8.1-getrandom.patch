@@ -23,7 +23,7 @@ diff -up libgcrypt-1.8.1/random/random-csprng.c.getrandom libgcrypt-1.8.1/random
 +  _gcry_pre_syscall ();
 +  ret = syscall (__NR_getrandom,
 +                 (void*)buffer, (size_t)1, (unsigned int)GRND_NONBLOCK);
-+  gcry_post_syscall ();
++  _gcry_post_syscall ();
 +  if (ret != -1 || errno != ENOSYS)
 +    {
 +      fnc = _gcry_rndlinux_gather_random;
