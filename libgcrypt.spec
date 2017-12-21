@@ -1,6 +1,6 @@
 Name: libgcrypt
-Version: 1.8.1
-Release: 3%{?dist}
+Version: 1.8.2
+Release: 1%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
@@ -33,8 +33,6 @@ Patch14: libgcrypt-1.7.3-ecc-test-fix.patch
 Patch18: libgcrypt-1.6.2-fips-ctor.patch
 # Block some operations if in FIPS non-operational state
 Patch22: libgcrypt-1.7.3-fips-reqs.patch
-# Fix the t-secmem on PPC64
-Patch23: libgcrypt-1.8.0-build.patch
 # Do not try to open /dev/urandom if getrandom() works
 Patch24: libgcrypt-1.8.1-getrandom.patch
 
@@ -80,7 +78,6 @@ applications using libgcrypt.
 %patch14 -p1 -b .eccfix
 %patch18 -p1 -b .fips-ctor
 %patch22 -p1 -b .fips-reqs
-%patch23 -p1 -b .build
 %patch24 -p1 -b .getrandom
 
 cp %{SOURCE4} cipher/
@@ -195,6 +192,9 @@ exit 0
 %license COPYING
 
 %changelog
+* Thu Dec 21 2017 Tomáš Mráz <tmraz@redhat.com> 1.8.2-1
+- new upstream version 1.8.2
+
 * Tue Dec  5 2017 Tomáš Mráz <tmraz@redhat.com> 1.8.1-3
 - do not try to access() /dev/urandom either if getrandom() works
 
