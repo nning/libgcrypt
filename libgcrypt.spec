@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.8.2
-Release: 1%{?dist}
+Release: 2%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
@@ -192,6 +192,9 @@ exit 0
 %license COPYING
 
 %changelog
+* Tue Feb  6 2018 Tomáš Mráz <tmraz@redhat.com> 1.8.2-2
+- fix behavior when getrandom syscall is not present (#1542453)
+
 * Thu Dec 21 2017 Tomáš Mráz <tmraz@redhat.com> 1.8.2-1
 - new upstream version 1.8.2
 
