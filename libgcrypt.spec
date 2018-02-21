@@ -43,6 +43,7 @@ Patch24: libgcrypt-1.8.1-getrandom.patch
 # are in the devel subpackage.
 License: LGPLv2+
 Summary: A general-purpose cryptography library
+BuildRequires: gcc
 BuildRequires: gawk, libgpg-error-devel >= 1.11, pkgconfig
 BuildRequires: fipscheck
 # This is needed only when patching the .texi doc.
