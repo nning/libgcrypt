@@ -1,6 +1,6 @@
 Name: libgcrypt
-Version: 1.8.2
-Release: 2%{?dist}
+Version: 1.8.3
+Release: 1%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
@@ -11,7 +11,7 @@ Source0: libgcrypt-%{version}-hobbled.tar.xz
 #Source1: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-{version}.tar.bz2.sig
 Source2: wk@g10code.com
 Source3: hobble-libgcrypt
-# Approved ECC support (from 1.6.1)
+# Approved ECC support
 Source4: ecc-curves.c
 Source5: curves.c
 Source6: t-mpi-point.c
@@ -193,6 +193,9 @@ exit 0
 %license COPYING
 
 %changelog
+* Thu Jun 14 2018 Tomáš Mráz <tmraz@redhat.com> 1.8.3-1
+- new upstream version 1.8.3
+
 * Tue Feb  6 2018 Tomáš Mráz <tmraz@redhat.com> 1.8.2-2
 - fix behavior when getrandom syscall is not present (#1542453)
 
