@@ -18,4 +18,3 @@
     - rpm-build
     - texinfo
     - wget
-    - yum-utils
