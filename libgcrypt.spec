@@ -168,7 +168,6 @@ fi
 exit 0
 
 %files
-%defattr(-,root,root,-)
 %dir /etc/gcrypt
 %config(noreplace) /etc/gcrypt/random.conf
 %{gcrylibdir}/libgcrypt.so.*
@@ -178,7 +177,6 @@ exit 0
 %doc AUTHORS NEWS THANKS
 
 %files devel
-%defattr(-,root,root,-)
 %{_bindir}/%{name}-config
 %{_bindir}/dumpsexp
 %{_bindir}/hmac256
