@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.8.3
-Release: 1%{?dist}
+Release: 2%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
@@ -30,11 +30,11 @@ Patch13: libgcrypt-1.6.1-mpicoder-gccopt.patch
 # fix tests to work with approved ECC
 Patch14: libgcrypt-1.7.3-ecc-test-fix.patch
 # Run the FIPS mode initialization in the shared library constructor
-Patch18: libgcrypt-1.6.2-fips-ctor.patch
+Patch18: libgcrypt-1.8.3-fips-ctor.patch
 # Block some operations if in FIPS non-operational state
 Patch22: libgcrypt-1.7.3-fips-reqs.patch
 # Do not try to open /dev/urandom if getrandom() works
-Patch24: libgcrypt-1.8.1-getrandom.patch
+Patch24: libgcrypt-1.8.3-getrandom.patch
 
 %define gcrylibdir %{_libdir}
 
@@ -191,6 +191,11 @@ exit 0
 %license COPYING
 
 %changelog
+* Thu Jul 12 2018 Tomáš Mráz <tmraz@redhat.com> 1.8.3-2
+- make only_urandom a default in non-presence of configuration file
+- run the full FIPS selftests only when the library is called from
+  application
+
 * Thu Jun 14 2018 Tomáš Mráz <tmraz@redhat.com> 1.8.3-1
 - new upstream version 1.8.3
 
