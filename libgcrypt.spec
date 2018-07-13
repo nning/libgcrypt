@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.8.3
-Release: 2%{?dist}
+Release: 3%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
@@ -191,6 +191,9 @@ exit 0
 %license COPYING
 
 %changelog
+* Fri Jul 13 2018 Fedora Release Engineering <releng@fedoraproject.org> - 1.8.3-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_29_Mass_Rebuild
+
 * Thu Jul 12 2018 Tomáš Mráz <tmraz@redhat.com> 1.8.3-2
 - make only_urandom a default in non-presence of configuration file
 - run the full FIPS selftests only when the library is called from
