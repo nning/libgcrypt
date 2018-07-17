@@ -1,6 +1,6 @@
 diff -up libgcrypt-1.8.3/cipher/md.c.fips-ctor libgcrypt-1.8.3/cipher/md.c
 --- libgcrypt-1.8.3/cipher/md.c.fips-ctor	2017-11-23 19:16:58.000000000 +0100
-+++ libgcrypt-1.8.3/cipher/md.c	2018-07-12 13:02:49.599423390 +0200
++++ libgcrypt-1.8.3/cipher/md.c	2018-07-12 13:24:54.088403006 +0200
 @@ -411,11 +411,8 @@ md_enable (gcry_md_hd_t hd, int algorith
  
    if (!err && algorithm == GCRY_MD_MD5 && fips_mode ())
@@ -14,8 +14,8 @@ diff -up libgcrypt-1.8.3/cipher/md.c.fips-ctor libgcrypt-1.8.3/cipher/md.c
          }
      }
 diff -up libgcrypt-1.8.3/src/fips.c.fips-ctor libgcrypt-1.8.3/src/fips.c
---- libgcrypt-1.8.3/src/fips.c.fips-ctor	2018-07-12 13:02:49.589423158 +0200
-+++ libgcrypt-1.8.3/src/fips.c	2018-07-12 13:08:45.955663998 +0200
+--- libgcrypt-1.8.3/src/fips.c.fips-ctor	2018-07-12 13:24:54.075402698 +0200
++++ libgcrypt-1.8.3/src/fips.c	2018-07-12 13:24:54.088403006 +0200
 @@ -91,6 +91,31 @@ static void fips_new_state (enum module_
  
  
@@ -189,7 +189,7 @@ diff -up libgcrypt-1.8.3/src/fips.c.fips-ctor libgcrypt-1.8.3/src/fips.c
          ok = 1;
 diff -up libgcrypt-1.8.3/src/global.c.fips-ctor libgcrypt-1.8.3/src/global.c
 --- libgcrypt-1.8.3/src/global.c.fips-ctor	2017-11-23 19:25:58.000000000 +0100
-+++ libgcrypt-1.8.3/src/global.c	2018-07-12 13:02:49.599423390 +0200
++++ libgcrypt-1.8.3/src/global.c	2018-07-17 19:15:43.933827112 +0200
 @@ -141,6 +141,29 @@ global_init (void)
  }
  
@@ -230,18 +230,21 @@ diff -up libgcrypt-1.8.3/src/global.c.fips-ctor libgcrypt-1.8.3/src/global.c
  	rc = GPG_ERR_GENERAL; /* Used as TRUE value */
        break;
  
-@@ -749,7 +771,7 @@ _gcry_vcontrol (enum gcry_ctl_cmds cmd,
+@@ -749,9 +771,9 @@ _gcry_vcontrol (enum gcry_ctl_cmds cmd,
        break;
  
      case GCRYCTL_SET_ENFORCED_FIPS_FLAG:
 -      if (!any_init_done)
 +      if (fips_mode ())
          {
-           /* Not yet initialized at all.  Set the enforced fips mode flag */
+-          /* Not yet initialized at all.  Set the enforced fips mode flag */
++          /* We are in FIPS mode, we can set the enforced fips mode flag. */
            _gcry_set_preferred_rng_type (0);
+           _gcry_set_enforced_fips_mode ();
+         }
 diff -up libgcrypt-1.8.3/src/g10lib.h.fips-ctor libgcrypt-1.8.3/src/g10lib.h
 --- libgcrypt-1.8.3/src/g10lib.h.fips-ctor	2017-11-23 19:16:58.000000000 +0100
-+++ libgcrypt-1.8.3/src/g10lib.h	2018-07-12 13:02:49.600423413 +0200
++++ libgcrypt-1.8.3/src/g10lib.h	2018-07-12 13:24:54.089403030 +0200
 @@ -422,6 +422,8 @@ gpg_err_code_t _gcry_sexp_vextract_param
  
  /*-- fips.c --*/
