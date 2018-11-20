@@ -1,6 +1,6 @@
 Name: libgcrypt
-Version: 1.8.3
-Release: 3%{?dist}
+Version: 1.8.4
+Release: 1%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
@@ -24,7 +24,7 @@ Patch5: libgcrypt-1.8.0-tests.patch
 # update the CAVS tests
 Patch7: libgcrypt-1.7.3-fips-cavs.patch
 # use poll instead of select when gathering randomness
-Patch11: libgcrypt-1.8.0-use-poll.patch
+Patch11: libgcrypt-1.8.4-use-poll.patch
 # slight optimalization of mpicoder.c to silence Valgrind (#968288)
 Patch13: libgcrypt-1.6.1-mpicoder-gccopt.patch
 # fix tests to work with approved ECC
@@ -34,7 +34,7 @@ Patch18: libgcrypt-1.8.3-fips-ctor.patch
 # Block some operations if in FIPS non-operational state
 Patch22: libgcrypt-1.7.3-fips-reqs.patch
 # Do not try to open /dev/urandom if getrandom() works
-Patch24: libgcrypt-1.8.3-getrandom.patch
+Patch24: libgcrypt-1.8.4-getrandom.patch
 
 %define gcrylibdir %{_libdir}
 
@@ -191,6 +191,9 @@ exit 0
 %license COPYING
 
 %changelog
+* Tue Nov 20 2018 Tomáš Mráz <tmraz@redhat.com> 1.8.4-1
+- new upstream version 1.8.4
+
 * Fri Jul 13 2018 Fedora Release Engineering <releng@fedoraproject.org> - 1.8.3-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_29_Mass_Rebuild
 
