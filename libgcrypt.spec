@@ -152,9 +152,7 @@ popd
 mkdir -p -m 755 $RPM_BUILD_ROOT/etc/gcrypt
 install -m644 %{SOURCE7} $RPM_BUILD_ROOT/etc/gcrypt/random.conf
 
-%post -p /sbin/ldconfig
-
-%postun -p /sbin/ldconfig
+%ldconfig_scriptlets
 
 %post devel
 [ -f %{_infodir}/gcrypt.info.gz ] && \
