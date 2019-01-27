@@ -54,8 +54,6 @@ Group: System Environment/Libraries
 Summary: Development files for the %{name} package
 License: LGPLv2+ and GPLv2+
 Group: Development/Libraries
-Requires(pre): /sbin/install-info
-Requires(post): /sbin/install-info
 Requires: libgpg-error-devel
 Requires: %{name} = %{version}-%{release}
 
@@ -153,17 +151,6 @@ mkdir -p -m 755 $RPM_BUILD_ROOT/etc/gcrypt
 install -m644 %{SOURCE7} $RPM_BUILD_ROOT/etc/gcrypt/random.conf
 
 %ldconfig_scriptlets
-
-%post devel
-[ -f %{_infodir}/gcrypt.info.gz ] && \
-    /sbin/install-info %{_infodir}/gcrypt.info.gz %{_infodir}/dir
-exit 0
-
-%preun devel
-if [ $1 = 0 -a -f %{_infodir}/gcrypt.info.gz ]; then
-    /sbin/install-info --delete %{_infodir}/gcrypt.info.gz %{_infodir}/dir
-fi
-exit 0
 
 %files
 %dir /etc/gcrypt
