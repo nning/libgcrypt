@@ -48,12 +48,10 @@ BuildRequires: gawk, libgpg-error-devel >= 1.11, pkgconfig
 BuildRequires: fipscheck
 # This is needed only when patching the .texi doc.
 BuildRequires: texinfo
-Group: System Environment/Libraries
 
 %package devel
 Summary: Development files for the %{name} package
 License: LGPLv2+ and GPLv2+
-Group: Development/Libraries
 Requires: libgpg-error-devel
 Requires: %{name} = %{version}-%{release}
 
