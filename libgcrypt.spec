@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.8.4
-Release: 2%{?dist}
+Release: 3%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
@@ -19,8 +19,10 @@ Source7: random.conf
 # make FIPS hmac compatible with fipscheck - non upstreamable
 # update on soname bump
 Patch2: libgcrypt-1.6.2-use-fipscheck.patch
-# fix tests in the FIPS mode, allow CAVS testing of DSA keygen
-Patch5: libgcrypt-1.8.0-tests.patch
+# modify FIPS RSA and DSA keygen to comply with requirements
+Patch5: libgcrypt-1.8.4-fips-keygen.patch
+# fix the tests to work correctly in the FIPS mode
+Patch6: libgcrypt-1.8.4-tests-fipsmode.patch
 # update the CAVS tests
 Patch7: libgcrypt-1.7.3-fips-cavs.patch
 # use poll instead of select when gathering randomness
@@ -68,7 +70,8 @@ applications using libgcrypt.
 %setup -q
 %{SOURCE3}
 %patch2 -p1 -b .use-fipscheck
-%patch5 -p1 -b .tests
+%patch5 -p1 -b .fips-keygen
+%patch6 -p1 -b .tests-fipsmode
 %patch7 -p1 -b .cavs
 %patch11 -p1 -b .use-poll
 %patch13 -p1 -b .gccopt
@@ -174,6 +177,9 @@ install -m644 %{SOURCE7} $RPM_BUILD_ROOT/etc/gcrypt/random.conf
 %license COPYING
 
 %changelog
+* Tue Feb 12 2019 Tomáš Mráz <tmraz@redhat.com> 1.8.4-3
+- fix the build tests to pass in the FIPS mode
+
 * Fri Feb 01 2019 Fedora Release Engineering <releng@fedoraproject.org> - 1.8.4-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_30_Mass_Rebuild
 
