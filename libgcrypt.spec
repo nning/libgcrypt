@@ -1,6 +1,6 @@
 Name: libgcrypt
-Version: 1.8.4
-Release: 4%{?dist}
+Version: 1.8.5
+Release: 1%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
@@ -37,6 +37,12 @@ Patch18: libgcrypt-1.8.3-fips-ctor.patch
 Patch22: libgcrypt-1.7.3-fips-reqs.patch
 # Do not try to open /dev/urandom if getrandom() works
 Patch24: libgcrypt-1.8.4-getrandom.patch
+# CMAC selftest for FIPS POST
+Patch25: libgcrypt-1.8.3-cmac-selftest.patch
+# Continuous FIPS entropy test
+Patch26: libgcrypt-1.8.3-fips-enttest.patch
+# Disable non-approved FIPS hashes in the enforced FIPS mode
+Patch27: libgcrypt-1.8.3-md-fips-enforce.patch
 
 %define gcrylibdir %{_libdir}
 
@@ -56,6 +62,7 @@ Summary: Development files for the %{name} package
 License: LGPLv2+ and GPLv2+
 Requires: libgpg-error-devel
 Requires: %{name} = %{version}-%{release}
+Requires: pkgconfig
 
 %description
 Libgcrypt is a general purpose crypto library based on the code used
@@ -79,6 +86,9 @@ applications using libgcrypt.
 %patch18 -p1 -b .fips-ctor
 %patch22 -p1 -b .fips-reqs
 %patch24 -p1 -b .getrandom
+%patch25 -p1 -b .cmac-selftest
+%patch26 -p1 -b .fips-enttest
+%patch27 -p1 -b .fips-enforce
 
 cp %{SOURCE4} cipher/
 cp %{SOURCE5} %{SOURCE6} tests/
@@ -169,6 +179,7 @@ install -m644 %{SOURCE7} $RPM_BUILD_ROOT/etc/gcrypt/random.conf
 %{_bindir}/mpicalc
 %{_includedir}/*
 %{_libdir}/*.so
+%{_libdir}/pkgconfig/libgcrypt.pc
 %{_datadir}/aclocal/*
 %{_mandir}/man1/*
 
@@ -177,6 +188,12 @@ install -m644 %{SOURCE7} $RPM_BUILD_ROOT/etc/gcrypt/random.conf
 %license COPYING
 
 %changelog
+* Tue Sep  3 2019 Tomáš Mráz <tmraz@redhat.com> 1.8.5-1
+- new upstream version 1.8.5
+- add CMAC selftest for FIPS POST
+- add continuous FIPS entropy test
+- disable non-approved FIPS hashes in the enforced FIPS mode
+
 * Thu Jul 25 2019 Fedora Release Engineering <releng@fedoraproject.org> - 1.8.4-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_31_Mass_Rebuild
 
