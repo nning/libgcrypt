@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.8.5
-Release: 1%{?dist}
+Release: 2%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
@@ -43,6 +43,8 @@ Patch25: libgcrypt-1.8.3-cmac-selftest.patch
 Patch26: libgcrypt-1.8.3-fips-enttest.patch
 # Disable non-approved FIPS hashes in the enforced FIPS mode
 Patch27: libgcrypt-1.8.3-md-fips-enforce.patch
+# Intel CET support, in upstream master
+Patch28: libgcrypt-1.8.5-intel-cet.patch
 
 %define gcrylibdir %{_libdir}
 
@@ -89,6 +91,7 @@ applications using libgcrypt.
 %patch25 -p1 -b .cmac-selftest
 %patch26 -p1 -b .fips-enttest
 %patch27 -p1 -b .fips-enforce
+%patch28 -p1 -b .intel-cet
 
 cp %{SOURCE4} cipher/
 cp %{SOURCE5} %{SOURCE6} tests/
@@ -188,6 +191,9 @@ install -m644 %{SOURCE7} $RPM_BUILD_ROOT/etc/gcrypt/random.conf
 %license COPYING
 
 %changelog
+* Thu Jan 23 2020 Tomáš Mráz <tmraz@redhat.com> 1.8.5-2
+- Intel CET support by H. J. Lu
+
 * Tue Sep  3 2019 Tomáš Mráz <tmraz@redhat.com> 1.8.5-1
 - new upstream version 1.8.5
 - add CMAC selftest for FIPS POST
