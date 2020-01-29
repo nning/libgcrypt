@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.8.5
-Release: 2%{?dist}
+Release: 3%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
@@ -191,6 +191,9 @@ install -m644 %{SOURCE7} $RPM_BUILD_ROOT/etc/gcrypt/random.conf
 %license COPYING
 
 %changelog
+* Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.8.5-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild
+
 * Thu Jan 23 2020 Tomáš Mráz <tmraz@redhat.com> 1.8.5-2
 - Intel CET support by H. J. Lu
 
