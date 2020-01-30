@@ -45,6 +45,8 @@ Patch26: libgcrypt-1.8.3-fips-enttest.patch
 Patch27: libgcrypt-1.8.3-md-fips-enforce.patch
 # Intel CET support, in upstream master
 Patch28: libgcrypt-1.8.5-intel-cet.patch
+# Fix build on ARMv7
+Patch29: libgcrypt-1.8.5-build.patch
 
 %define gcrylibdir %{_libdir}
 
@@ -92,6 +94,7 @@ applications using libgcrypt.
 %patch26 -p1 -b .fips-enttest
 %patch27 -p1 -b .fips-enforce
 %patch28 -p1 -b .intel-cet
+%patch29 -p1 -b .build
 
 cp %{SOURCE4} cipher/
 cp %{SOURCE5} %{SOURCE6} tests/
@@ -191,8 +194,8 @@ install -m644 %{SOURCE7} $RPM_BUILD_ROOT/etc/gcrypt/random.conf
 %license COPYING
 
 %changelog
-* Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.8.5-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild
+* Thu Jan 30 2020 Tomáš Mráz <tmraz@redhat.com> 1.8.5-3
+- fix the build on ARMv7
 
 * Thu Jan 23 2020 Tomáš Mráz <tmraz@redhat.com> 1.8.5-2
 - Intel CET support by H. J. Lu
