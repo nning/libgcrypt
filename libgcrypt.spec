@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.8.5
-Release: 3%{?dist}
+Release: 4%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
@@ -36,7 +36,7 @@ Patch18: libgcrypt-1.8.3-fips-ctor.patch
 # Block some operations if in FIPS non-operational state
 Patch22: libgcrypt-1.7.3-fips-reqs.patch
 # Do not try to open /dev/urandom if getrandom() works
-Patch24: libgcrypt-1.8.4-getrandom.patch
+Patch24: libgcrypt-1.8.5-getrandom.patch
 # CMAC selftest for FIPS POST
 Patch25: libgcrypt-1.8.3-cmac-selftest.patch
 # Continuous FIPS entropy test
@@ -47,6 +47,8 @@ Patch27: libgcrypt-1.8.3-md-fips-enforce.patch
 Patch28: libgcrypt-1.8.5-intel-cet.patch
 # Fix build on ARMv7
 Patch29: libgcrypt-1.8.5-build.patch
+# FIPS module is redefined a little bit (implicit by kernel FIPS mode)
+Patch30: libgcrypt-1.8.5-fips-module.patch
 
 %define gcrylibdir %{_libdir}
 
@@ -95,6 +97,7 @@ applications using libgcrypt.
 %patch27 -p1 -b .fips-enforce
 %patch28 -p1 -b .intel-cet
 %patch29 -p1 -b .build
+%patch30 -p1 -b .fips-module
 
 cp %{SOURCE4} cipher/
 cp %{SOURCE5} %{SOURCE6} tests/
@@ -194,6 +197,10 @@ install -m644 %{SOURCE7} $RPM_BUILD_ROOT/etc/gcrypt/random.conf
 %license COPYING
 
 %changelog
+* Mon Apr 20 2020 Tomáš Mráz <tmraz@redhat.com> 1.8.5-4
+- FIPS selftest is run directly from the constructor
+- FIPS module is implicit with kernel FIPS flag
+
 * Thu Jan 30 2020 Tomáš Mráz <tmraz@redhat.com> 1.8.5-3
 - fix the build on ARMv7
 
