@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.8.5
-Release: 4%{?dist}
+Release: 5%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
@@ -49,6 +49,8 @@ Patch28: libgcrypt-1.8.5-intel-cet.patch
 Patch29: libgcrypt-1.8.5-build.patch
 # FIPS module is redefined a little bit (implicit by kernel FIPS mode)
 Patch30: libgcrypt-1.8.5-fips-module.patch
+# Backported AES performance improvements
+Patch31: libgcrypt-1.8.5-aes-perf.patch
 
 %define gcrylibdir %{_libdir}
 
@@ -62,6 +64,7 @@ BuildRequires: gawk, libgpg-error-devel >= 1.11, pkgconfig
 BuildRequires: fipscheck
 # This is needed only when patching the .texi doc.
 BuildRequires: texinfo
+BuildRequires: autoconf, automake, libtool
 
 %package devel
 Summary: Development files for the %{name} package
@@ -98,11 +101,13 @@ applications using libgcrypt.
 %patch28 -p1 -b .intel-cet
 %patch29 -p1 -b .build
 %patch30 -p1 -b .fips-module
+%patch31 -p1 -b .aes-perf
 
 cp %{SOURCE4} cipher/
 cp %{SOURCE5} %{SOURCE6} tests/
 
 %build
+autoreconf -f
 %configure --disable-static \
 %ifarch sparc64
      --disable-asm \
@@ -197,6 +202,9 @@ install -m644 %{SOURCE7} $RPM_BUILD_ROOT/etc/gcrypt/random.conf
 %license COPYING
 
 %changelog
+* Wed Apr 22 2020 Tomáš Mráz <tmraz@redhat.com> 1.8.5-5
+- AES performance improvements backported from master branch
+
 * Mon Apr 20 2020 Tomáš Mráz <tmraz@redhat.com> 1.8.5-4
 - FIPS selftest is run directly from the constructor
 - FIPS module is implicit with kernel FIPS flag
