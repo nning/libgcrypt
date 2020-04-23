@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.8.5
-Release: 5%{?dist}
+Release: 6%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
@@ -18,7 +18,7 @@ Source6: t-mpi-point.c
 Source7: random.conf
 # make FIPS hmac compatible with fipscheck - non upstreamable
 # update on soname bump
-Patch2: libgcrypt-1.6.2-use-fipscheck.patch
+Patch2: libgcrypt-1.8.5-use-fipscheck.patch
 # modify FIPS RSA and DSA keygen to comply with requirements
 Patch5: libgcrypt-1.8.4-fips-keygen.patch
 # fix the tests to work correctly in the FIPS mode
@@ -202,6 +202,9 @@ install -m644 %{SOURCE7} $RPM_BUILD_ROOT/etc/gcrypt/random.conf
 %license COPYING
 
 %changelog
+* Thu Apr 23 2020 Tomáš Mráz <tmraz@redhat.com> 1.8.5-6
+- Fix regression - missing -ldl linkage
+
 * Wed Apr 22 2020 Tomáš Mráz <tmraz@redhat.com> 1.8.5-5
 - AES performance improvements backported from master branch
 
