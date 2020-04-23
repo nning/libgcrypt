@@ -121,6 +121,7 @@ make %{?_smp_mflags}
 
 %check
 fipshmac src/.libs/libgcrypt.so.??
+mv src/.libs/libgcrypt.so.20.hmac src/.libs/.libgcrypt.so.20.hmac 
 make check
 
 # Add generation of HMAC checksums of the final stripped binaries 
@@ -129,6 +130,7 @@ make check
     %{__arch_install_post} \
     %{__os_install_post} \
     fipshmac $RPM_BUILD_ROOT%{gcrylibdir}/*.so.?? \
+    mv $RPM_BUILD_ROOT%{gcrylibdir}/libgcrypt.so.20.hmac $RPM_BUILD_ROOT%{gcrylibdir}/.libgcrypt.so.20.hmac \
 %{nil}
 
 %install
