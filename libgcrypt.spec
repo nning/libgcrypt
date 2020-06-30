@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.8.5
-Release: 6%{?dist}
+Release: 7%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
@@ -107,6 +107,12 @@ cp %{SOURCE4} cipher/
 cp %{SOURCE5} %{SOURCE6} tests/
 
 %build
+# configure tests try to compile code containing ASMs to a .o file
+# In an LTO world, that always works as compilation does not happen until
+# link time.  As a result we get the wrong results from configure.
+# Disable LTO.
+%define _lto_cflags %{nil}
+
 autoreconf -f
 %configure --disable-static \
 %ifarch sparc64
@@ -202,6 +208,9 @@ install -m644 %{SOURCE7} $RPM_BUILD_ROOT/etc/gcrypt/random.conf
 %license COPYING
 
 %changelog
+* Tue Jun 30 2020 Jeff Law <law@redhat.com> 1.8.5-7
+Disable LTO
+
 * Thu Apr 23 2020 Tomáš Mráz <tmraz@redhat.com> 1.8.5-6
 - Fix regression - missing -ldl linkage
 
