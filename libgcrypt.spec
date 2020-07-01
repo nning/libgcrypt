@@ -52,7 +52,9 @@ Patch30: libgcrypt-1.8.5-fips-module.patch
 # Backported AES performance improvements
 Patch31: libgcrypt-1.8.5-aes-perf.patch
 
-%define gcrylibdir %{_libdir}
+%global gcrylibdir %{_libdir}
+%global gcrysoname libgcrypt.so.20
+%global hmackey orboDeJITITejsirpADONivirpUkvarP
 
 # Technically LGPLv2.1+, but Fedora's table doesn't draw a distinction.
 # Documentation and some utilities are GPLv2+ licensed. These files
@@ -61,7 +63,6 @@ License: LGPLv2+
 Summary: A general-purpose cryptography library
 BuildRequires: gcc
 BuildRequires: gawk, libgpg-error-devel >= 1.11, pkgconfig
-BuildRequires: fipscheck
 # This is needed only when patching the .texi doc.
 BuildRequires: texinfo
 BuildRequires: autoconf, automake, libtool
@@ -126,7 +127,8 @@ sed -i -e '/^sys_lib_dlsearch_path_spec/s,/lib /usr/lib,/usr/lib /lib64 /usr/lib
 make %{?_smp_mflags}
 
 %check
-fipshmac src/.libs/libgcrypt.so.??
+src/hmac256 %{hmackey} src/.libs/%{gcrysoname} | cut -f1 -d ' ' >src/.libs/.%{gcrysoname}.hmac
+
 make check
 
 # Add generation of HMAC checksums of the final stripped binaries 
@@ -134,7 +136,7 @@ make check
     %{?__debug_package:%{__debug_install_post}} \
     %{__arch_install_post} \
     %{__os_install_post} \
-    fipshmac $RPM_BUILD_ROOT%{gcrylibdir}/*.so.?? \
+    src/hmac256 %{hmackey} $RPM_BUILD_ROOT%{gcrylibdir}/%{gcrysoname} | cut -f1 -d ' ' >$RPM_BUILD_ROOT%{gcrylibdir}/.%{gcrysoname}.hmac \
 %{nil}
 
 %install
@@ -186,8 +188,9 @@ install -m644 %{SOURCE7} $RPM_BUILD_ROOT/etc/gcrypt/random.conf
 %files
 %dir /etc/gcrypt
 %config(noreplace) /etc/gcrypt/random.conf
-%{gcrylibdir}/libgcrypt.so.*
-%{gcrylibdir}/.libgcrypt.so.*.hmac
+%{gcrylibdir}/libgcrypt.so.*.*
+%{gcrylibdir}/%{gcrysoname}
+%{gcrylibdir}/.%{gcrysoname}.hmac
 %{!?_licensedir:%global license %%doc}
 %license COPYING.LIB
 %doc AUTHORS NEWS THANKS
@@ -208,8 +211,11 @@ install -m644 %{SOURCE7} $RPM_BUILD_ROOT/etc/gcrypt/random.conf
 %license COPYING
 
 %changelog
-* Tue Jun 30 2020 Jeff Law <law@redhat.com> 1.8.5-7
-Disable LTO
+* Wed Jul  1 2020 Tomáš Mráz <tmraz@redhat.com> 1.8.5-7
+- use the hmac256 tool to calculate the library hmac
+
+* Tue Jun 30 2020 Jeff Law <law@redhat.com>
+- Disable LTO
 
 * Thu Apr 23 2020 Tomáš Mráz <tmraz@redhat.com> 1.8.5-6
 - Fix regression - missing -ldl linkage
