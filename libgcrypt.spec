@@ -1,6 +1,6 @@
 Name: libgcrypt
-Version: 1.8.5
-Release: 7%{?dist}
+Version: 1.8.6
+Release: 1%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
@@ -45,8 +45,6 @@ Patch26: libgcrypt-1.8.3-fips-enttest.patch
 Patch27: libgcrypt-1.8.3-md-fips-enforce.patch
 # Intel CET support, in upstream master
 Patch28: libgcrypt-1.8.5-intel-cet.patch
-# Fix build on ARMv7
-Patch29: libgcrypt-1.8.5-build.patch
 # FIPS module is redefined a little bit (implicit by kernel FIPS mode)
 Patch30: libgcrypt-1.8.5-fips-module.patch
 # Backported AES performance improvements
@@ -100,7 +98,6 @@ applications using libgcrypt.
 %patch26 -p1 -b .fips-enttest
 %patch27 -p1 -b .fips-enforce
 %patch28 -p1 -b .intel-cet
-%patch29 -p1 -b .build
 %patch30 -p1 -b .fips-module
 %patch31 -p1 -b .aes-perf
 
@@ -211,6 +208,9 @@ install -m644 %{SOURCE7} $RPM_BUILD_ROOT/etc/gcrypt/random.conf
 %license COPYING
 
 %changelog
+* Mon Jul 20 2020 Tomáš Mráz <tmraz@redhat.com> 1.8.6-1
+- new upstream version 1.8.6
+
 * Wed Jul  1 2020 Tomáš Mráz <tmraz@redhat.com> 1.8.5-7
 - use the hmac256 tool to calculate the library hmac
 
