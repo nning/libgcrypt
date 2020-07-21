@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.8.6
-Release: 1%{?dist}
+Release: 2%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
@@ -121,7 +121,7 @@ autoreconf -f
      --enable-pubkey-ciphers='dsa elgamal rsa ecc' \
      --disable-O-flag-munging
 sed -i -e '/^sys_lib_dlsearch_path_spec/s,/lib /usr/lib,/usr/lib /lib64 /usr/lib64 /lib,g' libtool
-make %{?_smp_mflags}
+%make_build
 
 %check
 src/hmac256 %{hmackey} src/.libs/%{gcrysoname} | cut -f1 -d ' ' >src/.libs/.%{gcrysoname}.hmac
@@ -137,7 +137,7 @@ make check
 %{nil}
 
 %install
-make install DESTDIR=$RPM_BUILD_ROOT
+%make_install
 
 # Change /usr/lib64 back to /usr/lib.  This saves us from having to patch the
 # script to "know" that -L/usr/lib64 should be suppressed, and also removes
@@ -208,6 +208,10 @@ install -m644 %{SOURCE7} $RPM_BUILD_ROOT/etc/gcrypt/random.conf
 %license COPYING
 
 %changelog
+* Tue Jul 21 2020 Tom Stellard <tstellar@redhat.com> - 1.8.6-2
+- Use make macros
+- https://fedoraproject.org/wiki/Changes/UseMakeBuildInstallMacro
+
 * Mon Jul 20 2020 Tomáš Mráz <tmraz@redhat.com> 1.8.6-1
 - new upstream version 1.8.6
 
