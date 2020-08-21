@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.8.6
-Release: 3%{?dist}
+Release: 4%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
@@ -105,11 +105,14 @@ cp %{SOURCE4} cipher/
 cp %{SOURCE5} %{SOURCE6} tests/
 
 %build
-# configure tests try to compile code containing ASMs to a .o file
-# In an LTO world, that always works as compilation does not happen until
-# link time.  As a result we get the wrong results from configure.
-# Disable LTO.
-%define _lto_cflags %{nil}
+# This package has a configure test which uses ASMs, but does not link the
+# resultant .o files.  As such the ASM test is always successful, even on
+# architectures were the ASM is not valid when compiling with LTO.
+#
+# -ffat-lto-objects is sufficient to address this issue.  It is the default
+# for F33, but is expected to only be enabled for packages that need it in
+# F34, so we use it here explicitly
+%define _lto_cflags -flto=auto -ffat-lto-objects
 
 autoreconf -f
 %configure --disable-static \
@@ -208,6 +211,9 @@ install -m644 %{SOURCE7} $RPM_BUILD_ROOT/etc/gcrypt/random.conf
 %license COPYING
 
 %changelog
+* Fri Aug 21 2020 Jeff Law <law@redhat.com> - 1.8.6-4
+- Re-enable LTO
+
 * Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.8.6-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
 
