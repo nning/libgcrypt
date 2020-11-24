@@ -7,9 +7,9 @@ Source0: libgcrypt-%{version}-hobbled.tar.xz
 # cipher support. We have to remove it in the tarball we ship with
 # the hobble-libgcrypt script. 
 # (We replace it with RH approved ECC in Source4-5)
-# tar -xf libgcrypt-1.8.7.tar.bz2
-# pushd libgcrypt-1.8.7 && ../hobble-libgcrypt && popd
-# tar -cvJf libgcrypt-1.8.7-hobbled.tar.xz libgcrypt-1.8.7
+# tar -xf libgcrypt-x.y.z.tar.bz2
+# pushd libgcrypt-x.y.z && ../hobble-libgcrypt && popd
+# tar -cvJf libgcrypt-x.y.z-hobbled.tar.xz libgcrypt-x.y.z
 #Source0: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-{version}.tar.bz2
 #Source1: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-{version}.tar.bz2.sig
 Source2: wk@g10code.com
