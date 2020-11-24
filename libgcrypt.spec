@@ -1,12 +1,15 @@
 Name: libgcrypt
-Version: 1.8.6
-Release: 4%{?dist}
+Version: 1.8.7
+Release: 1%{?dist}
 URL: http://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
 # cipher support. We have to remove it in the tarball we ship with
 # the hobble-libgcrypt script. 
 # (We replace it with RH approved ECC in Source4-5)
+# tar -xf libgcrypt-1.8.7.tar.bz2
+# pushd libgcrypt-1.8.7 && ../hobble-libgcrypt && popd
+# tar -cvJf libgcrypt-1.8.7-hobbled.tar.xz libgcrypt-1.8.7
 #Source0: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-{version}.tar.bz2
 #Source1: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-{version}.tar.bz2.sig
 Source2: wk@g10code.com
@@ -211,6 +214,9 @@ install -m644 %{SOURCE7} $RPM_BUILD_ROOT/etc/gcrypt/random.conf
 %license COPYING
 
 %changelog
+* Tue Nov 24 2020 Jakub Jelen <jjelen@redhat.com> - 1.8.7-1
+- new upstream release (#1891123)
+
 * Fri Aug 21 2020 Jeff Law <law@redhat.com> - 1.8.6-4
 - Re-enable LTO
 
