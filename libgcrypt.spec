@@ -1,7 +1,7 @@
 Name: libgcrypt
 Version: 1.8.7
 Release: 1%{?dist}
-URL: http://www.gnupg.org/
+URL: https://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
 # cipher support. We have to remove it in the tarball we ship with
@@ -72,7 +72,7 @@ BuildRequires: autoconf, automake, libtool
 Summary: Development files for the %{name} package
 License: LGPLv2+ and GPLv2+
 Requires: libgpg-error-devel
-Requires: %{name} = %{version}-%{release}
+Requires: %{name}%{?_isa} = %{version}-%{release}
 Requires: pkgconfig
 
 %description
@@ -194,7 +194,6 @@ install -m644 %{SOURCE7} $RPM_BUILD_ROOT/etc/gcrypt/random.conf
 %{gcrylibdir}/libgcrypt.so.*.*
 %{gcrylibdir}/%{gcrysoname}
 %{gcrylibdir}/.%{gcrysoname}.hmac
-%{!?_licensedir:%global license %%doc}
 %license COPYING.LIB
 %doc AUTHORS NEWS THANKS
 
@@ -210,7 +209,6 @@ install -m644 %{SOURCE7} $RPM_BUILD_ROOT/etc/gcrypt/random.conf
 %{_mandir}/man1/*
 
 %{_infodir}/gcrypt.info*
-%{!?_licensedir:%global license %%doc}
 %license COPYING
 
 %changelog
