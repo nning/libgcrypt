@@ -67,6 +67,7 @@ BuildRequires: gawk, libgpg-error-devel >= 1.11, pkgconfig
 # This is needed only when patching the .texi doc.
 BuildRequires: texinfo
 BuildRequires: autoconf, automake, libtool
+BuildRequires: make
 
 %package devel
 Summary: Development files for the %{name} package
