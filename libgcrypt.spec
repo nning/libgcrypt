@@ -10,8 +10,8 @@ Source0: libgcrypt-%{version}-hobbled.tar.xz
 # tar -xf libgcrypt-x.y.z.tar.bz2
 # pushd libgcrypt-x.y.z && ../hobble-libgcrypt && popd
 # tar -cvJf libgcrypt-x.y.z-hobbled.tar.xz libgcrypt-x.y.z
-#Source0: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-{version}.tar.bz2
-#Source1: ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-{version}.tar.bz2.sig
+#Source0: https://www.gnupg.org/ftp/gcrypt/libgcrypt/libgcrypt-{version}.tar.bz2
+#Source1: https://www.gnupg.org/ftp/gcrypt/libgcrypt/libgcrypt-{version}.tar.bz2.sig
 Source2: wk@g10code.com
 Source3: hobble-libgcrypt
 # Approved ECC support
