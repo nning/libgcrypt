@@ -50,7 +50,7 @@ diff -up libgcrypt-1.8.3/src/global.c.fips-ctor libgcrypt-1.8.3/src/global.c
        break;
  
      case GCRYCTL_SET_ENFORCED_FIPS_FLAG:
--      if (!any_init_done)
+-      if (!_gcry_global_any_init_done)
 +      if (fips_mode ())
          {
 -          /* Not yet initialized at all.  Set the enforced fips mode flag */

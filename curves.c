@@ -32,8 +32,8 @@
 #define PGM "curves"
 #include "t-common.h"
 
-/* Number of curves defined in ../cipger/ecc.c */
-#define N_CURVES 14
+/* Number of curves defined in ../cipger/ecc-curves.c */
+#define N_CURVES 19
 
 /* A real world sample public key.  */
 static char const sample_key_1[] =
@@ -51,8 +51,6 @@ static char const sample_key_1[] =
 "  ))";
 static char const sample_key_1_curve[] = "NIST P-256";
 static unsigned int sample_key_1_nbits = 256;
-
-
 
 static void
 list_curves (void)
@@ -95,7 +93,6 @@ check_matching (void)
           sample_key_1_nbits, nbits);
 
   gcry_sexp_release (key);
-
 }
 
 
@@ -117,7 +114,6 @@ check_get_params (void)
           sample_key_1_curve, name);
 
   gcry_sexp_release (param);
-
 }
 
 
@@ -132,10 +128,10 @@ main (int argc, char **argv)
   if (!gcry_check_version (GCRYPT_VERSION))
     die ("version mismatch\n");
 
-  xgcry_control (GCRYCTL_DISABLE_SECMEM, 0);
-  xgcry_control (GCRYCTL_INITIALIZATION_FINISHED, 0);
+  xgcry_control ((GCRYCTL_DISABLE_SECMEM, 0));
+  xgcry_control ((GCRYCTL_INITIALIZATION_FINISHED, 0));
   if (debug)
-    xgcry_control (GCRYCTL_SET_DEBUG_FLAGS, 1u, 0);
+    xgcry_control ((GCRYCTL_SET_DEBUG_FLAGS, 1u, 0));
   list_curves ();
   check_matching ();
   check_get_params ();

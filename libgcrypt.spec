@@ -1,5 +1,5 @@
 Name: libgcrypt
-Version: 1.8.7
+Version: 1.9.0
 Release: 1%{?dist}
 URL: https://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
@@ -40,18 +40,12 @@ Patch18: libgcrypt-1.8.3-fips-ctor.patch
 Patch22: libgcrypt-1.7.3-fips-reqs.patch
 # Do not try to open /dev/urandom if getrandom() works
 Patch24: libgcrypt-1.8.5-getrandom.patch
-# CMAC selftest for FIPS POST
-Patch25: libgcrypt-1.8.3-cmac-selftest.patch
 # Continuous FIPS entropy test
 Patch26: libgcrypt-1.8.3-fips-enttest.patch
 # Disable non-approved FIPS hashes in the enforced FIPS mode
 Patch27: libgcrypt-1.8.3-md-fips-enforce.patch
-# Intel CET support, in upstream master
-Patch28: libgcrypt-1.8.5-intel-cet.patch
 # FIPS module is redefined a little bit (implicit by kernel FIPS mode)
 Patch30: libgcrypt-1.8.5-fips-module.patch
-# Backported AES performance improvements
-Patch31: libgcrypt-1.8.5-aes-perf.patch
 
 %global gcrylibdir %{_libdir}
 %global gcrysoname libgcrypt.so.20
@@ -98,12 +92,9 @@ applications using libgcrypt.
 %patch18 -p1 -b .fips-ctor
 %patch22 -p1 -b .fips-reqs
 %patch24 -p1 -b .getrandom
-%patch25 -p1 -b .cmac-selftest
 %patch26 -p1 -b .fips-enttest
 %patch27 -p1 -b .fips-enforce
-%patch28 -p1 -b .intel-cet
 %patch30 -p1 -b .fips-module
-%patch31 -p1 -b .aes-perf
 
 cp %{SOURCE4} cipher/
 cp %{SOURCE5} %{SOURCE6} tests/
@@ -213,6 +204,9 @@ install -m644 %{SOURCE7} $RPM_BUILD_ROOT/etc/gcrypt/random.conf
 %license COPYING
 
 %changelog
+* Wed Jan 20 2021 Jakub Jelen <jjelen@redhat.com> - 1.9.0-1
+- New upstream release (#1917878)
+
 * Tue Nov 24 2020 Jakub Jelen <jjelen@redhat.com> - 1.8.7-1
 - new upstream release (#1891123)
 
