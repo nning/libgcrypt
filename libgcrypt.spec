@@ -46,6 +46,8 @@ Patch26: libgcrypt-1.8.3-fips-enttest.patch
 Patch27: libgcrypt-1.8.3-md-fips-enforce.patch
 # FIPS module is redefined a little bit (implicit by kernel FIPS mode)
 Patch30: libgcrypt-1.8.5-fips-module.patch
+# Missing terminator in the kdf vectors causing s390x builds failing
+Patch31: libgcrypt-1.9.0-kdf-missing-terminator.patch
 
 %global gcrylibdir %{_libdir}
 %global gcrysoname libgcrypt.so.20
@@ -95,6 +97,7 @@ applications using libgcrypt.
 %patch26 -p1 -b .fips-enttest
 %patch27 -p1 -b .fips-enforce
 %patch30 -p1 -b .fips-module
+%patch31 -p1 -b .kdf-terminator
 
 cp %{SOURCE4} cipher/
 cp %{SOURCE5} %{SOURCE6} tests/

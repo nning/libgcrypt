@@ -1,0 +1,31 @@
+From: Jussi Kivilinna <jussi.kivilinna@iki.fi>
+Date: Tue, 19 Jan 2021 18:04:30 +0000 (+0200)
+Subject: kdf: add missing null-terminator for self-test test-vector array
+X-Git-Url: http://git.gnupg.org/cgi-bin/gitweb.cgi?p=libgcrypt.git;a=commitdiff_plain;h=c6425a5537294dfe2beaafc9105f7af4ceac677f
+
+kdf: add missing null-terminator for self-test test-vector array
+
+* cipher/kdf.c (selftest_pbkdf2): Add null-terminator to TV array.
+--
+
+This was causing kdf self-test to fail on s390x builds.
+
+GnuPG-bug-id: 5254
+Signed-off-by: Jussi Kivilinna <jussi.kivilinna@iki.fi>
+---
+
+diff --git a/cipher/kdf.c b/cipher/kdf.c
+index 3d707bd0..b916a3f8 100644
+--- a/cipher/kdf.c
++++ b/cipher/kdf.c
+@@ -452,7 +452,8 @@ selftest_pbkdf2 (int extended, selftest_report_func_t report)
+       "\x34\x8c\x89\xdb\xcb\xd3\x2b\x2f\x32\xd8\x14\xb8\x11\x6e\x84\xcf"
+       "\x2b\x17\x34\x7e\xbc\x18\x00\x18\x1c\x4e\x2a\x1f\xb8\xdd\x53\xe1"
+       "\xc6\x35\x51\x8c\x7d\xac\x47\xe9"
+-    }
++    },
++    { NULL }
+   };
+   const char *what;
+   const char *errtxt;
+
