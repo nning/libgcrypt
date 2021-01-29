@@ -142,7 +142,7 @@ diff -up libgcrypt-1.8.4/tests/pubkey.c.tests-fipsmode libgcrypt-1.8.4/tests/pub
       "    (use-fips186)"
       "    (transient-key)"
       "    (derive-parms"
--     "      (seed #0cb1990c1fd3626055d7a0096f8fa99807399871#))))",
+-     "      (seed #f770a4598ff756931fc529764513b103ce57d85f4ad8c5cf297c9b4d48241c5b#))))",
 +     "      (seed #8b4c4d671fff82e8ed932260206d0571e3a1c2cee8cd94cb73fe58f9b67488fa#))))",
       0, 1);
    if (rc)
