@@ -7,8 +7,8 @@ diff -up libgcrypt-1.8.4/random/rndlinux.c.use-poll libgcrypt-1.8.4/random/rndli
  #include <fcntl.h>
 +#include <poll.h>
  #if defined(__APPLE__) && defined(__MACH__)
- extern int getentropy (void *buf, size_t buflen) __attribute__ ((weak_import));
- #define HAVE_GETENTROPY
+ #include <Availability.h>
+ #ifdef __MAC_10_11
 @@ -241,9 +242,8 @@ _gcry_rndlinux_gather_random (void (*add
                   return with something we will actually use 100ms. */
    while (length)

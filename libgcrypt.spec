@@ -1,5 +1,5 @@
 Name: libgcrypt
-Version: 1.9.1
+Version: 1.9.2
 Release: 1%{?dist}
 URL: https://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
@@ -201,6 +201,9 @@ install -m644 %{SOURCE7} $RPM_BUILD_ROOT/etc/gcrypt/random.conf
 %license COPYING
 
 %changelog
+* Wed Feb 17 2021 Jakub Jelen <jjelen@redhat.com> - 1.9.2-1
+- New upstream release (#1929630)
+
 * Fri Jan 29 2021 Jakub Jelen <jjelen@redhat.com> - 1.9.1-1
 - New upstream release (#1922156, #1922097)
 
