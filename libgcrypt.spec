@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.9.2
-Release: 1%{?dist}
+Release: 2%{?dist}
 URL: https://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
@@ -204,6 +204,9 @@ install -m644 %{SOURCE7} $RPM_BUILD_ROOT/etc/gcrypt/random.conf
 %license COPYING
 
 %changelog
+* Mon Mar 29 2021 Jakub Jelen <jjelen@redhat.com> - 1.9.2-2
+- Fix OCB tag creation on s390x (failing gnupg2 tests)
+
 * Wed Feb 17 2021 Jakub Jelen <jjelen@redhat.com> - 1.9.2-1
 - New upstream release (#1929630)
 
