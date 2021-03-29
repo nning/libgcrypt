@@ -1,0 +1,253 @@
+From 56da81ac47209dc41af08a129f5e0c15538261b2 Mon Sep 17 00:00:00 2001
+From: Jussi Kivilinna <jussi.kivilinna@iki.fi>
+Date: Thu, 25 Mar 2021 19:33:44 +0200
+Subject: [PATCH 1/3] tests/basic: add decryption check to
+ check_ocb_cipher_checksum
+
+* tests/basic.c (check_ocb_cipher_checksum): Add decryption.
+--
+
+GnuPG-bug-id: T5356
+Signed-off-by: Jussi Kivilinna <jussi.kivilinna@iki.fi>
+---
+ tests/basic.c | 32 +++++++++++++++++++++++++++++++-
+ 1 file changed, 31 insertions(+), 1 deletion(-)
+
+diff --git a/tests/basic.c b/tests/basic.c
+index 9a7e33cc..b39b901a 100644
+--- a/tests/basic.c
++++ b/tests/basic.c
+@@ -6800,9 +6800,10 @@ check_ocb_cipher_checksum (int algo, int keylen)
+   const size_t buflen = 128 * 16;
+   unsigned char *inbuf, *outbuf;
+   gpg_error_t err = 0;
+-  gcry_cipher_hd_t hde, hde2;
++  gcry_cipher_hd_t hde, hde2, hdd;
+   unsigned char tag[16];
+   unsigned char tag2[16];
++  unsigned char tag3[16];
+   int i;
+ 
+   inbuf = xmalloc(buflen);
+@@ -6833,6 +6834,8 @@ check_ocb_cipher_checksum (int algo, int keylen)
+   err = gcry_cipher_open (&hde, algo, GCRY_CIPHER_MODE_OCB, 0);
+   if (!err)
+     err = gcry_cipher_open (&hde2, algo, GCRY_CIPHER_MODE_OCB, 0);
++  if (!err)
++    err = gcry_cipher_open (&hdd, algo, GCRY_CIPHER_MODE_OCB, 0);
+   if (err)
+     {
+       fail ("cipher-ocb, gcry_cipher_open failed (checksum, algo %d): %s\n",
+@@ -6843,24 +6846,30 @@ check_ocb_cipher_checksum (int algo, int keylen)
+   err = gcry_cipher_setkey (hde, key, keylen);
+   if (!err)
+     err = gcry_cipher_setkey (hde2, key, keylen);
++  if (!err)
++    err = gcry_cipher_setkey (hdd, key, keylen);
+   if (err)
+     {
+       fail ("cipher-ocb, gcry_cipher_setkey failed (checksum, algo %d): %s\n",
+ 	    algo, gpg_strerror (err));
+       gcry_cipher_close (hde);
+       gcry_cipher_close (hde2);
++      gcry_cipher_close (hdd);
+       goto out_free;
+     }
+ 
+   err = gcry_cipher_setiv (hde, nonce, 12);
+   if (!err)
+     err = gcry_cipher_setiv (hde2, nonce, 12);
++  if (!err)
++    err = gcry_cipher_setiv (hdd, nonce, 12);
+   if (err)
+     {
+       fail ("cipher-ocb, gcry_cipher_setiv failed (checksum, algo %d): %s\n",
+ 	    algo, gpg_strerror (err));
+       gcry_cipher_close (hde);
+       gcry_cipher_close (hde2);
++      gcry_cipher_close (hdd);
+       goto out_free;
+     }
+ 
+@@ -6876,6 +6885,14 @@ check_ocb_cipher_checksum (int algo, int keylen)
+       if (!err)
+ 	err = gcry_cipher_encrypt (hde2, outbuf + i, 16, inbuf + i, 16);
+     }
++  if (!err)
++    {
++      err = gcry_cipher_final (hdd);
++    }
++  if (!err)
++    {
++      err = gcry_cipher_decrypt (hdd, outbuf, buflen, outbuf, buflen);
++    }
+ 
+   if (err)
+     {
+@@ -6883,6 +6900,7 @@ check_ocb_cipher_checksum (int algo, int keylen)
+ 	    algo, gpg_strerror (err));
+       gcry_cipher_close (hde);
+       gcry_cipher_close (hde2);
++      gcry_cipher_close (hdd);
+       goto out_free;
+     }
+ 
+@@ -6899,14 +6917,26 @@ check_ocb_cipher_checksum (int algo, int keylen)
+       fail ("cipher_ocb, gcry_cipher_gettag failed (checksum2, algo %d): %s\n",
+ 	    algo, gpg_strerror (err));
+     }
++  err = gcry_cipher_gettag (hdd, tag3, 16);
++  if (err)
++    {
++      fail ("cipher_ocb, gcry_cipher_gettag failed (checksum3, algo %d): %s\n",
++	    algo, gpg_strerror (err));
++    }
+   if (memcmp (tag, tag2, 16))
+     {
+       mismatch (tag, 16, tag2, 16);
+       fail ("cipher-ocb, encrypt tag mismatch (checksum, algo %d)\n", algo);
+     }
++  if (memcmp (tag, tag3, 16))
++    {
++      mismatch (tag, 16, tag3, 16);
++      fail ("cipher-ocb, decrypt tag mismatch (checksum, algo %d)\n", algo);
++    }
+ 
+   gcry_cipher_close (hde);
+   gcry_cipher_close (hde2);
++  gcry_cipher_close (hdd);
+ 
+ out_free:
+   xfree(inbuf);
+-- 
+2.27.0
+
+From 21c273cecfd58408b8d3287f5bc8c246c3010313 Mon Sep 17 00:00:00 2001
+From: Jussi Kivilinna <jussi.kivilinna@iki.fi>
+Date: Thu, 25 Mar 2021 19:43:41 +0200
+Subject: [PATCH 2/3] tests/basic: OCB large buffer check: make input buffer
+ non-repeatable
+
+* tests/basic.c (check_ocb_cipher_largebuf_split): Use SHA1 to
+initialize input buffer.
+(check_ocb_cipher): Update largebuf test vectors.
+--
+
+GnuPG-bug-id: T5356
+Signed-off-by: Jussi Kivilinna <jussi.kivilinna@iki.fi>
+---
+ tests/basic.c | 36 +++++++++++++++++++++++-------------
+ 1 file changed, 23 insertions(+), 13 deletions(-)
+
+diff --git a/tests/basic.c b/tests/basic.c
+index b39b901a..f9ada8ef 100644
+--- a/tests/basic.c
++++ b/tests/basic.c
+@@ -6630,8 +6630,18 @@ check_ocb_cipher_largebuf_split (int algo, int keylen, const char *tagexpect,
+       return;
+     }
+ 
+-  for (i = 0; i < buflen; i++)
+-    inbuf[i] = (unsigned int)(i + 181081) * 5039U;
++  for (i = 0; i < buflen; i += 16)
++    {
++      unsigned char hash[20];
++      unsigned char ctr[4];
++
++      ctr[0] = (i >> 0) & 0xff;
++      ctr[1] = (i >> 8) & 0xff;
++      ctr[2] = (i >> 16) & 0xff;
++      ctr[3] = (i >> 24) & 0xff;
++      gcry_md_hash_buffer (GCRY_MD_SHA1, hash, ctr, sizeof(ctr));
++      memcpy(inbuf + i, hash, 16);
++    }
+ 
+   err = gcry_cipher_open (&hde, algo, GCRY_CIPHER_MODE_OCB, 0);
+   if (!err)
+@@ -7200,27 +7210,27 @@ check_ocb_cipher (void)
+ 
+   /* Check large buffer encryption/decryption. */
+   check_ocb_cipher_largebuf(GCRY_CIPHER_AES, 16,
+-    "\xc1\x5b\xf1\x80\xa4\xd5\xea\xfd\xae\x17\xa6\xcd\x6b\x10\xa8\xea");
++    "\x4a\x00\x7f\x8d\xbe\x38\x32\x48\xb2\x2f\x7f\x27\xd8\x15\x7f\xb0");
+   check_ocb_cipher_largebuf(GCRY_CIPHER_AES256, 32,
+-    "\x2b\xb7\x25\x6b\x77\xc7\xfb\x21\x5c\xc9\x6c\x36\x17\x1a\x1a\xd5");
++    "\xec\xc5\xe9\x2b\x24\x91\xba\x64\xbc\xe3\x62\xb6\x83\x20\xad\xbd");
+   check_ocb_cipher_largebuf(GCRY_CIPHER_CAMELLIA128, 16,
+-    "\xe0\xae\x3f\x29\x3a\xee\xd8\xe3\xf2\x20\xc1\xa2\xd8\x72\x12\xd9");
++    "\xd5\xbd\x76\xec\x75\x4a\xab\x6c\x13\xec\x87\x95\x11\xd4\xf0\x3d");
+   check_ocb_cipher_largebuf(GCRY_CIPHER_CAMELLIA192, 24,
+-    "\xd7\x98\x71\xcf\x19\x5c\xa3\x3d\x6c\xfc\xc9\xbe\x9f\x13\x6b\xbd");
++    "\xde\xdd\x6b\xbf\xce\x15\x01\x39\x7c\xc5\x69\x19\x72\xa2\x67\x23");
+   check_ocb_cipher_largebuf(GCRY_CIPHER_CAMELLIA256, 32,
+-    "\x03\xf6\xec\x1a\x0e\xae\x66\x24\x2b\xba\x26\x0f\xb3\xb3\x1f\xb9");
++    "\x0c\xf3\xd5\x82\x20\x73\xee\x0f\xbd\x6b\x32\x38\xf9\x10\xef\xe5");
+   check_ocb_cipher_largebuf(GCRY_CIPHER_TWOFISH, 16,
+-    "\x1c\xf9\xc7\xfc\x3a\x32\xac\xc7\x5e\x0a\xc2\x5c\x90\xd6\xf6\xf9");
++    "\x54\x87\x68\xb6\x17\xe6\xd7\xa6\x76\x0d\x7e\x9f\x57\x8b\xec\x88");
+   check_ocb_cipher_largebuf(GCRY_CIPHER_TWOFISH, 32,
+-    "\x53\x02\xc8\x0d\x4e\x9a\x44\x9e\x43\xd4\xaa\x06\x30\x93\xcc\x16");
++    "\x0b\xc3\x93\x52\xfa\x97\x22\xe6\x88\x6e\x29\x4d\x77\x35\x48\x84");
+   check_ocb_cipher_largebuf(GCRY_CIPHER_SERPENT128, 16,
+-    "\xd3\x64\xac\x40\x48\x88\x77\xe2\x41\x26\x4c\xde\x21\x29\x21\x8d");
++    "\x7e\x49\x3b\xd6\xde\x6e\x9e\x53\x67\xcd\x00\xad\xc9\xd9\xa5\xbc");
+   check_ocb_cipher_largebuf(GCRY_CIPHER_SERPENT192, 24,
+-    "\x99\xeb\x35\xb0\x62\x4e\x7b\xf1\x5e\x9f\xed\x32\x78\x90\x0b\xd0");
++    "\x1e\x33\x0e\x06\xc8\x27\x6a\x0b\x41\x5e\x93\xae\x39\xf4\x50\x12");
+   check_ocb_cipher_largebuf(GCRY_CIPHER_SERPENT256, 32,
+-    "\x71\x66\x2f\x68\xbf\xdd\xcc\xb1\xbf\x81\x56\x5f\x01\x73\xeb\x44");
++    "\x6b\x4c\x3f\x8f\x77\x75\xf2\x4d\xaf\xde\x2c\x5f\x1a\x80\xb8\x4d");
+   check_ocb_cipher_largebuf(GCRY_CIPHER_SM4, 16,
+-    "\x2c\x0b\x31\x0b\xf4\x71\x9b\x01\xf4\x18\x5d\xf1\xe9\x3d\xed\x6b");
++    "\x3c\x32\x54\x5d\xc5\x17\xa1\x16\x3f\x8e\xc7\x1d\x8d\x8b\x2d\xb0");
+ 
+   /* Check that the AAD data is correctly buffered.  */
+   check_ocb_cipher_splitaad ();
+-- 
+2.27.0
+
+From 68bb0ddc5504c9c0f3f52259a4085bb2fc1a02ad Mon Sep 17 00:00:00 2001
+From: Jussi Kivilinna <jussi.kivilinna@iki.fi>
+Date: Thu, 25 Mar 2021 19:52:23 +0200
+Subject: [PATCH 3/3] rijndael-s390x: fix checksum calculation in OCB
+ decryption
+
+* cipher/rijndael-s390x.c (aes_s390x_ocb_dec): Calculate checksum
+after decryption instead of inlining.
+--
+
+OCB decryption was missing checksum inlining in 64 block loop.
+
+GnuPG-bug-id: T5356
+Signed-off-by: Jussi Kivilinna <jussi.kivilinna@iki.fi>
+---
+ cipher/rijndael-s390x.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/cipher/rijndael-s390x.c b/cipher/rijndael-s390x.c
+index aea65c5a..c3da9fb2 100644
+--- a/cipher/rijndael-s390x.c
++++ b/cipher/rijndael-s390x.c
+@@ -777,9 +777,7 @@ aes_s390x_ocb_dec (gcry_cipher_hd_t c, void *outbuf_arg,
+       OCB_INPUT_4((n) + 12);
+ 
+ #define OCB_OUTPUT(n) \
+-      cipher_block_xor_1 (&blocks[n], outbuf + (n) * BLOCKSIZE, BLOCKSIZE); \
+-      cipher_block_xor_1 (c->u_ctr.ctr, &blocks[n], BLOCKSIZE); \
+-      cipher_block_cpy (outbuf + (n) * BLOCKSIZE, &blocks[n], BLOCKSIZE);
++      cipher_block_xor_1 (outbuf + (n) * BLOCKSIZE, &blocks[n], BLOCKSIZE);
+ 
+ #define OCB_OUTPUT_4(n) \
+       OCB_OUTPUT((n) + 0); OCB_OUTPUT((n) + 1); OCB_OUTPUT((n) + 2); \
+@@ -895,6 +893,8 @@ aes_s390x_ocb_dec (gcry_cipher_hd_t c, void *outbuf_arg,
+   if (max_blocks_used)
+     wipememory (&blocks, max_blocks_used * BLOCKSIZE);
+ 
++  aes_s390x_ocb_checksum (c->u_ctr.ctr, outbuf_arg, nblocks_arg);
++
+   return 0;
+ }
+ 
+-- 
+2.27.0
+
