@@ -1,6 +1,6 @@
 Name: libgcrypt
-Version: 1.9.2
-Release: 3%{?dist}
+Version: 1.9.3
+Release: 1%{?dist}
 URL: https://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
@@ -19,6 +19,7 @@ Source4: ecc-curves.c
 Source5: curves.c
 Source6: t-mpi-point.c
 Source7: random.conf
+Source8: keygrip.c
 # make FIPS hmac compatible with fipscheck - non upstreamable
 # update on soname bump
 Patch2: libgcrypt-1.8.5-use-fipscheck.patch
@@ -44,10 +45,6 @@ Patch26: libgcrypt-1.8.3-fips-enttest.patch
 Patch27: libgcrypt-1.8.3-md-fips-enforce.patch
 # FIPS module is redefined a little bit (implicit by kernel FIPS mode)
 Patch30: libgcrypt-1.8.5-fips-module.patch
-# Unbreak gnupg2 build on s390x: https://dev.gnupg.org/T5356
-Patch31: libgcrypt-1.9.2-s390x-ocb.patch
-# Coverity reported issues https://dev.gnupg.org/T5385
-Patch32: libgcrypt-1.9.2-coverity.patch
 
 %global gcrylibdir %{_libdir}
 %global gcrysoname libgcrypt.so.20
@@ -96,11 +93,9 @@ applications using libgcrypt.
 %patch26 -p1 -b .fips-enttest
 %patch27 -p1 -b .fips-enforce
 %patch30 -p1 -b .fips-module
-%patch31 -p1 -b .s390x-ocb
-%patch32 -p1 -b .coverity
 
 cp %{SOURCE4} cipher/
-cp %{SOURCE5} %{SOURCE6} tests/
+cp %{SOURCE5} %{SOURCE6} %{SOURCE8} tests/
 
 %build
 # This package has a configure test which uses ASMs, but does not link the
@@ -207,6 +202,9 @@ install -m644 %{SOURCE7} $RPM_BUILD_ROOT/etc/gcrypt/random.conf
 %license COPYING
 
 %changelog
+* Tue Apr 20 2021 Jakub Jelen <jjelen@redhat.com> - 1.9.3-1
+- New upstream release (#1951325)
+
 * Thu Apr 15 2021 Jakub Jelen <jjelen@redhat.com> - 1.9.2-3
 - Fix issues reported by coverity
 
