@@ -44,6 +44,8 @@ Patch24: libgcrypt-1.8.5-getrandom.patch
 Patch26: libgcrypt-1.8.3-fips-enttest.patch
 # Disable non-approved FIPS hashes in the enforced FIPS mode
 Patch27: libgcrypt-1.8.3-md-fips-enforce.patch
+# Missing Intel CET support in the library (#1954049)
+Patch28: libgcrypt-1.8.5-intel-cet.patch
 # FIPS module is redefined a little bit (implicit by kernel FIPS mode)
 Patch30: libgcrypt-1.8.5-fips-module.patch
 
@@ -93,6 +95,7 @@ applications using libgcrypt.
 %patch24 -p1 -b .getrandom
 %patch26 -p1 -b .fips-enttest
 %patch27 -p1 -b .fips-enforce
+%patch28 -p1 -b .intel-cet
 %patch30 -p1 -b .fips-module
 
 cp %{SOURCE4} cipher/
