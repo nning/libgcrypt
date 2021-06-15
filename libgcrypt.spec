@@ -48,6 +48,8 @@ Patch27: libgcrypt-1.8.3-md-fips-enforce.patch
 Patch28: libgcrypt-1.8.5-intel-cet.patch
 # FIPS module is redefined a little bit (implicit by kernel FIPS mode)
 Patch30: libgcrypt-1.8.5-fips-module.patch
+# Fix for CVE-2021-33560
+Patch31: libgcrypt-1.9.3-CVE-2021-33560.patch
 
 %global gcrylibdir %{_libdir}
 %global gcrysoname libgcrypt.so.20
@@ -97,6 +99,7 @@ applications using libgcrypt.
 %patch27 -p1 -b .fips-enforce
 %patch28 -p1 -b .intel-cet
 %patch30 -p1 -b .fips-module
+%patch31 -p1 -b .CVE-2021-33560
 
 cp %{SOURCE4} cipher/
 cp %{SOURCE5} %{SOURCE6} %{SOURCE8} tests/
