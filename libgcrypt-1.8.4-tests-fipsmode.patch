@@ -160,6 +160,19 @@ diff -up libgcrypt-1.8.4/tests/t-cv25519.c.tests-fipsmode libgcrypt-1.8.4/tests/
  
    start_timer ();
    check_cv25519 ();
+diff -up libgcrypt-1.8.4/tests/t-x448.c.tests-fipsmode libgcrypt-1.8.4/tests/t-x448.c
+--- libgcrypt-1.8.4/tests/t-x448.c.tests-fipsmode	2017-11-23 19:16:58.000000000 +0100
++++ libgcrypt-1.8.4/tests/t-x448.c	2019-02-12 14:02:35.935705390 +0100
+@@ -560,6 +560,9 @@ main (int argc, char **argv)
+     xgcry_control ((GCRYCTL_SET_DEBUG_FLAGS, 1u , 0));
+   xgcry_control ((GCRYCTL_ENABLE_QUICK_RANDOM, 0));
+   xgcry_control ((GCRYCTL_INITIALIZATION_FINISHED, 0));
++  /* x448 isn't supported in fips mode */
++  if (gcry_fips_mode_active())
++    return 77;
+ 
+   start_timer ();
+   check_x448 ();
 diff -up libgcrypt-1.8.4/tests/t-secmem.c.tests-fipsmode libgcrypt-1.8.4/tests/t-secmem.c
 --- libgcrypt-1.8.4/tests/t-secmem.c.tests-fipsmode	2017-11-23 19:19:54.000000000 +0100
 +++ libgcrypt-1.8.4/tests/t-secmem.c	2019-02-12 11:51:02.462190538 +0100
