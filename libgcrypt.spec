@@ -27,15 +27,13 @@ Patch2: libgcrypt-1.8.5-use-fipscheck.patch
 # modify FIPS RSA and DSA keygen to comply with requirements
 Patch5: libgcrypt-1.8.4-fips-keygen.patch
 # fix the tests to work correctly in the FIPS mode
-Patch6: libgcrypt-1.8.4-tests-fipsmode.patch
+Patch6: libgcrypt-1.9.3-fips-tests.patch
 # update the CAVS tests
 Patch7: libgcrypt-1.7.3-fips-cavs.patch
 # use poll instead of select when gathering randomness
 Patch11: libgcrypt-1.8.4-use-poll.patch
 # slight optimalization of mpicoder.c to silence Valgrind (#968288)
 Patch13: libgcrypt-1.6.1-mpicoder-gccopt.patch
-# fix tests to work with approved ECC
-Patch14: libgcrypt-1.7.3-ecc-test-fix.patch
 # Run the FIPS mode initialization in the shared library constructor
 Patch18: libgcrypt-1.8.3-fips-ctor.patch
 # Do not try to open /dev/urandom if getrandom() works
@@ -92,7 +90,6 @@ applications using libgcrypt.
 %patch7 -p1 -b .cavs
 %patch11 -p1 -b .use-poll
 %patch13 -p1 -b .gccopt
-%patch14 -p1 -b .eccfix
 %patch18 -p1 -b .fips-ctor
 %patch24 -p1 -b .getrandom
 %patch26 -p1 -b .fips-enttest
