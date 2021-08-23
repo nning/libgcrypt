@@ -55,6 +55,11 @@ static const struct
     { "Ed448",      "1.3.101.113" },         /* rfc8410 */
     { "X448",       "1.3.101.111" },         /* rfc8410 */
 
+    { "NIST P-192", "1.2.840.10045.3.1.1" }, /* X9.62 OID  */
+    { "NIST P-192", "prime192v1" },          /* X9.62 name.  */
+    { "NIST P-192", "secp192r1"  },          /* SECP name.  */
+    { "NIST P-192", "nistp192"   },          /* rfc5656.  */
+
     { "NIST P-224", "secp224r1" },
     { "NIST P-224", "1.3.132.0.33" },        /* SECP OID.  */
     { "NIST P-224", "nistp224"   },          /* rfc5656.  */
@@ -193,6 +198,35 @@ static const ecc_domain_parms_t domain_parms[] =
       "0x7D235D1295F5B1F66C98AB6E58326FCECBAE5D34F55545D060F75DC2"
       "8DF3F6EDB8027E2346430D211312C4B150677AF76FD7223D457B5B1A",
       4,
+    },
+#if 0 /* No real specs yet found.  */
+    {
+      /* x^2 + y^2 = 1 + 3617x^2y^2 mod 2^414 - 17 */
+      "Curve3617",
+      "0x3FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+      "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEF",
+      MPI_EC_EDWARDS, 0,
+      "0x01",
+      "0x0e21",
+      "0x07FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEB3CC92414CF"
+      "706022B36F1C0338AD63CF181B0E71A5E106AF79",
+      "0x1A334905141443300218C0631C326E5FCD46369F44C03EC7F57FF35498A4AB4D"
+      "6D6BA111301A73FAA8537C64C4FD3812F3CBC595",
+      "0x22",
+      8
+    },
+#endif /*0*/
+    {
+      "NIST P-192", 192, 0,
+      MPI_EC_WEIERSTRASS, ECC_DIALECT_STANDARD,
+      "0xfffffffffffffffffffffffffffffffeffffffffffffffff",
+      "0xfffffffffffffffffffffffffffffffefffffffffffffffc",
+      "0x64210519e59c80e70fa7e9ab72243049feb8deecc146b9b1",
+      "0xffffffffffffffffffffffff99def836146bc9b1b4d22831",
+
+      "0x188da80eb03090f67cbf20eb43a18800f4ff0afd82ff1012",
+      "0x07192b95ffc8da78631011ed6b24cdd573f977a11e794811",
+      1
     },
     {
       "NIST P-224", 224, 1,
@@ -1243,45 +1277,27 @@ _gcry_mpi_ec_new (gcry_ctx_t *r_ctx,
 gcry_sexp_t
 _gcry_ecc_get_param_sexp (const char *name)
 {
-  unsigned int nbits;
   elliptic_curve_t E;
-  mpi_ec_t ctx;
-  gcry_mpi_t g_x, g_y;
   gcry_mpi_t pkey[5];
   gcry_sexp_t result;
-  int i;
 
   memset (&E, 0, sizeof E);
-  if (_gcry_ecc_fill_in_curve (0, name, &E, &nbits))
+  if (_gcry_ecc_fill_in_curve (0, name, &E, NULL))
     return NULL;
-
-  g_x = mpi_new (0);
-  g_y = mpi_new (0);
-  ctx = _gcry_mpi_ec_p_internal_new (E.model,
-                                     E.dialect,
-                                     0,
-                                     E.p, E.a, E.b);
-  if (_gcry_mpi_ec_get_affine (g_x, g_y, &E.G, ctx))
-    log_fatal ("ecc get param: Failed to get affine coordinates\n");
-  _gcry_mpi_ec_free (ctx);
-  _gcry_mpi_point_free_parts (&E.G);
 
   pkey[0] = E.p;
   pkey[1] = E.a;
   pkey[2] = E.b;
-  pkey[3] = _gcry_ecc_ec2os (g_x, g_y, E.p);
+  pkey[3] = _gcry_ecc_ec2os (E.G.x, E.G.y, E.p);
   pkey[4] = E.n;
-
-  mpi_free (g_x);
-  mpi_free (g_y);
 
   if (sexp_build (&result, NULL,
                   "(public-key(ecc(p%m)(a%m)(b%m)(g%m)(n%m)(h%u)))",
                   pkey[0], pkey[1], pkey[2], pkey[3], pkey[4], E.h))
     result = NULL;
 
-  for (i=0; i < DIM (pkey); i++)
-    _gcry_mpi_release (pkey[i]);
+  _gcry_ecc_curve_free (&E);
+  _gcry_mpi_release (pkey[3]);
 
   return result;
 }
