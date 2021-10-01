@@ -21,7 +21,7 @@ URL: https://www.gnupg.org/
 Source0: https://www.gnupg.org/ftp/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2
 Source1: https://www.gnupg.org/ftp/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2.sig
 Source2: wk@g10code.com
-Patch1: libgcrypt-1.10.0-disable-brainpool.patch
+# Patch1: libgcrypt-1.10.0-disable-brainpool.patch
 
 %global gcrylibdir %{_libdir}
 %global gcrysoname libgcrypt.so.20
@@ -57,7 +57,7 @@ applications using libgcrypt.
 
 %prep
 %setup -q
-%patch1 -p1
+# %patch1 -p1
 
 %build
 # This package has a configure test which uses ASMs, but does not link the
@@ -83,7 +83,6 @@ autoreconf -f
 %endif
      --enable-noexecstack \
      --enable-hmac-binary-check=%{hmackey} \
-     --disable-brainpool \
      --enable-digests="$DIGESTS" \
      --enable-ciphers="$CIPHERS" \
      --with-fips-module-version="$FIPS_MODULE_NAME %{version}-%{srpmhash}"
