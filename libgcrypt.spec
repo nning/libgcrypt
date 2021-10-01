@@ -2,7 +2,7 @@ Name: libgcrypt
 Version: 1.9.4
 Release: 1%{?dist}
 URL: https://www.gnupg.org/
-Source0: libgcrypt-%{version}-hobbled.tar.xz
+# Source0: libgcrypt-{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
 # cipher support. We have to remove it in the tarball we ship with
 # the hobble-libgcrypt script. 
@@ -11,15 +11,15 @@ Source0: libgcrypt-%{version}-hobbled.tar.xz
 # tar -xf libgcrypt-x.y.z.tar.bz2
 # pushd libgcrypt-x.y.z && ../hobble-libgcrypt && popd
 # tar -cvJf libgcrypt-x.y.z-hobbled.tar.xz libgcrypt-x.y.z
-#Source0: https://www.gnupg.org/ftp/gcrypt/libgcrypt/libgcrypt-{version}.tar.bz2
-#Source1: https://www.gnupg.org/ftp/gcrypt/libgcrypt/libgcrypt-{version}.tar.bz2.sig
+Source0: https://www.gnupg.org/ftp/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2
+Source1: https://www.gnupg.org/ftp/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2.sig
 Source2: wk@g10code.com
-Source3: hobble-libgcrypt
+# Source3: hobble-libgcrypt
 # Approved ECC support
-Source4: ecc-curves.c
-Source5: curves.c
+# Source4: ecc-curves.c
+# Source5: curves.c
 Source7: random.conf
-Source8: keygrip.c
+# Source8: keygrip.c
 # make FIPS hmac compatible with fipscheck - non upstreamable
 # update on soname bump
 Patch2: libgcrypt-1.8.5-use-fipscheck.patch
@@ -80,7 +80,7 @@ applications using libgcrypt.
 
 %prep
 %setup -q
-%{SOURCE3}
+# {SOURCE3}
 %patch2 -p1 -b .use-fipscheck
 %patch5 -p1 -b .fips-keygen
 %patch6 -p1 -b .tests-fipsmode
@@ -94,8 +94,8 @@ applications using libgcrypt.
 %patch28 -p1 -b .intel-cet
 %patch30 -p1 -b .fips-module
 
-cp %{SOURCE4} cipher/
-cp %{SOURCE5} %{SOURCE8} tests/
+# cp {SOURCE4} cipher/
+# cp {SOURCE5} {SOURCE8} tests/
 
 %build
 # This package has a configure test which uses ASMs, but does not link the
