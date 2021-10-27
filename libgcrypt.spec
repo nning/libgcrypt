@@ -27,8 +27,6 @@ Patch2: libgcrypt-1.8.5-use-fipscheck.patch
 Patch5: libgcrypt-1.8.4-fips-keygen.patch
 # fix the tests to work correctly in the FIPS mode
 Patch6: libgcrypt-1.9.3-fips-tests.patch
-# update the CAVS tests
-Patch7: libgcrypt-1.7.3-fips-cavs.patch
 # use poll instead of select when gathering randomness
 Patch11: libgcrypt-1.8.4-use-poll.patch
 # slight optimalization of mpicoder.c to silence Valgrind (#968288)
@@ -82,7 +80,6 @@ applications using libgcrypt.
 %patch2 -p1 -b .use-fipscheck
 %patch5 -p1 -b .fips-keygen
 %patch6 -p1 -b .tests-fipsmode
-%patch7 -p1 -b .cavs
 %patch11 -p1 -b .use-poll
 %patch13 -p1 -b .gccopt
 %patch18 -p1 -b .fips-ctor
