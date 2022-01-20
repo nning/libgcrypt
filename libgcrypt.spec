@@ -1,6 +1,6 @@
 Name: libgcrypt
 Version: 1.9.4
-Release: 1%{?dist}
+Release: 2%{?dist}
 URL: https://www.gnupg.org/
 Source0: libgcrypt-%{version}-hobbled.tar.xz
 # The original libgcrypt sources now contain potentially patented ECC
@@ -196,6 +196,9 @@ install -m644 %{SOURCE7} $RPM_BUILD_ROOT/etc/gcrypt/random.conf
 %license COPYING
 
 %changelog
+* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.9.4-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
 * Mon Aug 23 2021 Jakub Jelen <jjelen@redhat.com> - 1.9.4-1
 - New upstream release (#1996467)
 
