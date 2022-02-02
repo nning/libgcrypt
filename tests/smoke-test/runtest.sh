@@ -26,8 +26,6 @@
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# Include rhts environment
-#. /usr/bin/rhts-environment.sh
 . /usr/share/beakerlib/beakerlib.sh
 
 PACKAGE="libgcrypt"
@@ -35,36 +33,118 @@ PACKAGE="libgcrypt"
 rlJournalStart
 
     rlPhaseStartSetup
+        rlImport distribution/fips || rlFail "FIPS library needed for some phases"
         TmpDir=`mktemp -d`
         rlAssertRpm $PACKAGE
-        rlFileBackup --clean "/etc/gcrypt/fips_enabled"
+        rlRun "rlFileBackup --clean /etc/gcrypt/fips_enabled"
+        if [[ -r /etc/gcrypt/hwf.deny ]]; then
+            rlRun "rlFileBackup /etc/gcrypt/hwf.deny"
+            rlRun "rm -f /etc/gcrypt/hwf.deny"
+        fi
         rlRun "pushd $TmpDir" 0
-        rlFetchSrcForInstalled $PACKAGE
+        rlRun "rlFetchSrcForInstalled $PACKAGE"
         rlRun "rpm -ihv `ls *.rpm`" 0
         if grep '1' /proc/sys/crypto/fips_enabled; then
             rlRun "echo '1' > /etc/gcrypt/fips_enabled" 0
         fi
     rlPhaseEnd
 
-    rlPhaseStartTest
+    rlPhaseStartTest "Package build"
         TOPDIR=`rpm --eval %_topdir`
         rlRun "pushd $TOPDIR" 0
         rlRun "rm -rf BUILD/libgcrypt-*" 0-255
         rlRun "rpmbuild -vv -bc SPECS/libgcrypt.spec" 0
         rlRun "pushd BUILD/libgcrypt-*" 0
         rlRun "fipshmac src/.libs/libgcrypt.so.??" 0
-        rlRun "make check > $TmpDir/make_check.out" 0
-        rlRun "popd" 0
-        rlRun "popd" 0
-        rlRun "grep \"All [0-9]\+ tests passed\" $TmpDir/make_check.out" 0 \
-            "All tests passed"
-        rlRun "cat $TmpDir/make_check.out" 0
+        rlRun "popd"
+        rlRun "popd"
     rlPhaseEnd
 
+    rlPhaseStartTest "Upstream testsuite"
+        rlRun "pushd $TOPDIR/BUILD/libgcrypt-*" 0
+        exp_fails=()
+        if [[ $fipsMode = 'enabled' ]]; then
+            if rlIsFedora 33; then
+                exp_fails+=("basic")
+                exp_fails+=("basic-disable-all-hwf")
+                exp_fails+=("t-kdf")
+                exp_fails+=("t-secmem")
+            elif rlIsFedora 34; then
+                exp_fails+=("basic")
+                exp_fails+=("basic-disable-all-hwf")
+                exp_fails+=("t-kdf")
+                exp_fails+=("t-secmem")
+                exp_fails+=("t-x448")
+            elif rlIsFedora 35; then # Fedora-35
+                exp_fails+=("curves")
+            fi
+        fi
+        rlRun "echo 'Expecting ${#exp_fails[@]} fails'"
+        exp_exitcode=0
+        if [[ ${#exp_fails[@]} -gt 0 ]]; then exp_exitcode=2; fi
+        rlRun "make check &> $TmpDir/make_check.out" $exp_exitcode
+        rlRun "grep ^FAIL: $TmpDir/make_check.out" 0,1 "Print fails"
+        if [[ ${#exp_fails[@]} -gt 0 ]]; then
+            for f in "${exp_fails[@]}"; do
+                rlAssertGrep "^FAIL: $f\$" $TmpDir/make_check.out
+            done
+            [[ $(grep -c '^FAIL:' $TmpDir/make_check.out) -eq ${#exp_fails[@]} ]] || rlFail "Unexpected fails present"
+        else
+            rlRun "grep \"All [0-9]\+ tests passed\" $TmpDir/make_check.out" 0 \
+                "All tests passed"
+        fi
+        rlRun "cat $TmpDir/make_check.out"
+        rlRun "popd"
+    rlPhaseEnd
+
+    if ! (rlIsRHEL '<=8.4' || ([[ $fipsMode = "enabled" ]] &&  rlIsFedora '<37')); then
+    # (we are ~expecting to fix HW optimization problem around Fedora-37)
+    rlPhaseStartTest "Performance with HW optimizations disabled - bz1990059"
+        # we are gathering more samples, so that this test is robust in shared environments
+        N_SAMPLES=5
+        N_MEDIAN=$(echo "$N_SAMPLES/2+1" |bc)
+        HWF_DENY_FILE="/etc/gcrypt/hwf.deny"
+        # Disabling via cmdline arguments would need either handpicking
+        # all the algorithms (variant with ":"), or making "all" work.
+        # "--disable-hwf all" does not work: https://dev.gnupg.org/T5636
+        #dis_arg="--disable-hwf all"
+        dis_arg=""
+
+        for x in "cipher:aes256:CBC enc" "hash:sha256:SHA256" "mac:hmac_sha256:HMAC_SHA256"; do
+            alg_type=$(echo $x |cut -d: -f1)
+            algorithm=$(echo $x |cut -d: -f2)
+            alg_line=$(echo $x |cut -d: -f3)
+            rlRun "rm -f $algorithm.ena $algorithm.dis"
+            rlLogInfo "Performance measurements started ..."
+            for i in `seq 1 $N_SAMPLES`; do
+                # run with HW optimizations ENAbled
+                rm -f $HWF_DENY_FILE
+                $TOPDIR/BUILD/libgcrypt-*/tests/bench-slope $alg_type $algorithm |grep "$alg_line" >>$algorithm.ena
+
+                # run with HW optimizations DISabled
+                # this looks idiotic, but I wasn't able to make --disable-hwf work
+                echo "all" >$HWF_DENY_FILE
+                $TOPDIR/BUILD/libgcrypt-*/tests/bench-slope $dis_arg $alg_type $algorithm |grep "$alg_line" >>$algorithm.dis
+            done
+            rlLogInfo "Performance measurements finished"
+            rlRun "cat $algorithm.ena"
+            rlRun "cat $algorithm.dis"
+            dis=$(cat $algorithm.dis |cut -d'|' -f2 |awk '{ print $1 }' |sort -n |sed -n "$N_MEDIAN p")
+            ena=$(cat $algorithm.ena |cut -d'|' -f2 |awk '{ print $1 }' |sort -n |sed -n "$N_MEDIAN p")
+            rlRun "echo '$algorithm Time: disabled $dis enabled $ena'"
+            if (( $(echo "$dis > $ena" |bc -l) )); then
+                rlPass "HW optimizations work for $algorithm"
+            else
+                rlFail "HW optimizations DO NOT work for $algorithm"
+            fi
+        done
+    rlPhaseEnd
+    fi
+
     rlPhaseStartCleanup
-        rlRun "popd" 0
+        rlRun "popd"
         rlRun "rm -r $TmpDir" 0
-        rlFileRestore
+        rlRun "rlFileRestore"
     rlPhaseEnd
 
 rlJournalPrintText
