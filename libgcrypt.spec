@@ -1,46 +1,11 @@
 Name: libgcrypt
-Version: 1.9.4
-Release: 2%{?dist}
+Version: 1.10.0
+Release: 1%{?dist}
 URL: https://www.gnupg.org/
-Source0: libgcrypt-%{version}-hobbled.tar.xz
-# The original libgcrypt sources now contain potentially patented ECC
-# cipher support. We have to remove it in the tarball we ship with
-# the hobble-libgcrypt script. 
-# (We replace it with RH approved ECC in Source4-5)
-# rm -rf libgcrypt-x.y.z # make sure there are no leftover files
-# tar -xf libgcrypt-x.y.z.tar.bz2
-# pushd libgcrypt-x.y.z && ../hobble-libgcrypt && popd
-# tar -cvJf libgcrypt-x.y.z-hobbled.tar.xz libgcrypt-x.y.z
-#Source0: https://www.gnupg.org/ftp/gcrypt/libgcrypt/libgcrypt-{version}.tar.bz2
-#Source1: https://www.gnupg.org/ftp/gcrypt/libgcrypt/libgcrypt-{version}.tar.bz2.sig
+Source0: https://www.gnupg.org/ftp/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2
+Source1: https://www.gnupg.org/ftp/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2.sig
 Source2: wk@g10code.com
-Source3: hobble-libgcrypt
-# Approved ECC support
-Source4: ecc-curves.c
-Source5: curves.c
-Source7: random.conf
-Source8: keygrip.c
-# make FIPS hmac compatible with fipscheck - non upstreamable
-# update on soname bump
-Patch2: libgcrypt-1.8.5-use-fipscheck.patch
-# modify FIPS RSA and DSA keygen to comply with requirements
-Patch5: libgcrypt-1.8.4-fips-keygen.patch
-# fix the tests to work correctly in the FIPS mode
-Patch6: libgcrypt-1.9.3-fips-tests.patch
-# use poll instead of select when gathering randomness
-Patch11: libgcrypt-1.8.4-use-poll.patch
-# slight optimalization of mpicoder.c to silence Valgrind (#968288)
-Patch13: libgcrypt-1.6.1-mpicoder-gccopt.patch
-# Run the FIPS mode initialization in the shared library constructor
-Patch18: libgcrypt-1.8.3-fips-ctor.patch
-# Do not try to open /dev/urandom if getrandom() works
-Patch24: libgcrypt-1.8.5-getrandom.patch
-# Disable non-approved FIPS hashes in the enforced FIPS mode
-Patch27: libgcrypt-1.8.3-md-fips-enforce.patch
-# Missing Intel CET support in the library (#1954049)
-Patch28: libgcrypt-1.8.5-intel-cet.patch
-# FIPS module is redefined a little bit (implicit by kernel FIPS mode)
-Patch30: libgcrypt-1.8.5-fips-module.patch
+Patch1: libgcrypt-1.10.0-disable-brainpool.patch
 
 %global gcrylibdir %{_libdir}
 %global gcrysoname libgcrypt.so.20
@@ -76,20 +41,7 @@ applications using libgcrypt.
 
 %prep
 %setup -q
-%{SOURCE3}
-%patch2 -p1 -b .use-fipscheck
-%patch5 -p1 -b .fips-keygen
-%patch6 -p1 -b .tests-fipsmode
-%patch11 -p1 -b .use-poll
-%patch13 -p1 -b .gccopt
-%patch18 -p1 -b .fips-ctor
-%patch24 -p1 -b .getrandom
-%patch27 -p1 -b .fips-enforce
-%patch28 -p1 -b .intel-cet
-%patch30 -p1 -b .fips-module
-
-cp %{SOURCE4} cipher/
-cp %{SOURCE5} %{SOURCE8} tests/
+%patch1 -p1
 
 %build
 # This package has a configure test which uses ASMs, but does not link the
@@ -101,29 +53,48 @@ cp %{SOURCE5} %{SOURCE8} tests/
 # F34, so we use it here explicitly
 %define _lto_cflags -flto=auto -ffat-lto-objects
 
+grep "Red Hat" /etc/system-release && \
+export FIPS_SWITCH="--with-fips-module-version=RHEL%{?rhel}-%{name}-%{version}-$(date +%Y%m%d)"
+grep "Fedora" /etc/system-release && \
+export FIPS_SWITCH="--with-fips-module-version=Fedora%{?fedora}-%{name}-%{version}-$(date +%Y%m%d)"
+grep "CentOS" /etc/system-release && \
+export FIPS_SWITCH="--with-fips-module-version=CentOS%{?centos}-%{name}-%{version}-$(date +%Y%m%d)"
+
+# should be all algorithms except SM3 and SM4
+export DIGESTS='crc gostr3411-94 md4 md5 rmd160 sha1 sha256 sha512 sha3 tiger whirlpool stribog blake2'
+export CIPHERS='arcfour blowfish cast5 des aes twofish serpent rfc2268 seed camellia idea salsa20 gost28147 chacha20'
+
 autoreconf -f
 %configure --disable-static \
 %ifarch sparc64
      --disable-asm \
 %endif
      --enable-noexecstack \
-     --enable-hmac-binary-check \
-     --enable-pubkey-ciphers='dsa elgamal rsa ecc' \
-     --disable-O-flag-munging
+     --enable-hmac-binary-check=%{hmackey} \
+     --disable-brainpool \
+     --enable-digests="$DIGESTS" \
+     --enable-ciphers="$CIPHERS" \
+     $FIPS_SWITCH
 sed -i -e '/^sys_lib_dlsearch_path_spec/s,/lib /usr/lib,/usr/lib /lib64 /usr/lib64 /lib,g' libtool
 %make_build
 
 %check
-src/hmac256 %{hmackey} src/.libs/%{gcrysoname} | cut -f1 -d ' ' >src/.libs/.%{gcrysoname}.hmac
-
 make check
+# try in faked FIPS mode too
+LIBGCRYPT_FORCE_FIPS_MODE=1 make check
 
 # Add generation of HMAC checksums of the final stripped binaries 
+%define libpath $RPM_BUILD_ROOT%{gcrylibdir}/%{gcrysoname}.?.?
 %define __spec_install_post \
     %{?__debug_package:%{__debug_install_post}} \
     %{__arch_install_post} \
     %{__os_install_post} \
-    src/hmac256 %{hmackey} $RPM_BUILD_ROOT%{gcrylibdir}/%{gcrysoname} | cut -f1 -d ' ' >$RPM_BUILD_ROOT%{gcrylibdir}/.%{gcrysoname}.hmac \
+    dd if=/dev/zero of=%{libpath}.hmac bs=32 count=1 \
+    objcopy --update-section .rodata1=%{libpath}.hmac %{libpath} %{libpath}.empty \
+    src/hmac256 --binary %{hmackey} %{libpath}.empty > %{libpath}.hmac \
+    objcopy --update-section .rodata1=%{libpath}.hmac %{libpath}.empty %{libpath}.new \
+    mv -f %{libpath}.new %{libpath} \
+    rm -f %{libpath}.hmac %{libpath}.empty
 %{nil}
 
 %install
@@ -168,16 +139,13 @@ popd
 # Create /etc/gcrypt (hardwired, not dependent on the configure invocation) so
 # that _someone_ owns it.
 mkdir -p -m 755 $RPM_BUILD_ROOT/etc/gcrypt
-install -m644 %{SOURCE7} $RPM_BUILD_ROOT/etc/gcrypt/random.conf
 
 %ldconfig_scriptlets
 
 %files
 %dir /etc/gcrypt
-%config(noreplace) /etc/gcrypt/random.conf
 %{gcrylibdir}/libgcrypt.so.*.*
 %{gcrylibdir}/%{gcrysoname}
-%{gcrylibdir}/.%{gcrysoname}.hmac
 %license COPYING.LIB
 %doc AUTHORS NEWS THANKS
 
@@ -196,6 +164,9 @@ install -m644 %{SOURCE7} $RPM_BUILD_ROOT/etc/gcrypt/random.conf
 %license COPYING
 
 %changelog
+* Wed Feb 02 2022 Jakub Jelen <jjelen@redhat.com> - 1.10.0-1
+- New upstream release (#2049322)
+
 * Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.9.4-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
 
