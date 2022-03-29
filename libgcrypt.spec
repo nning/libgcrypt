@@ -1,5 +1,5 @@
 Name: libgcrypt
-Version: 1.10.0
+Version: 1.10.1
 Release: 1%{?dist}
 URL: https://www.gnupg.org/
 Source0: https://www.gnupg.org/ftp/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2
@@ -90,9 +90,9 @@ LIBGCRYPT_FORCE_FIPS_MODE=1 make check
     %{__arch_install_post} \
     %{__os_install_post} \
     dd if=/dev/zero of=%{libpath}.hmac bs=32 count=1 \
-    objcopy --update-section .rodata1=%{libpath}.hmac %{libpath} %{libpath}.empty \
+    objcopy --update-section .note.fdo.integrity=%{libpath}.hmac %{libpath} %{libpath}.empty \
     src/hmac256 --binary %{hmackey} %{libpath}.empty > %{libpath}.hmac \
-    objcopy --update-section .rodata1=%{libpath}.hmac %{libpath}.empty %{libpath}.new \
+    objcopy --update-section .note.fdo.integrity=%{libpath}.hmac %{libpath}.empty %{libpath}.new \
     mv -f %{libpath}.new %{libpath} \
     rm -f %{libpath}.hmac %{libpath}.empty
 %{nil}
@@ -164,6 +164,9 @@ mkdir -p -m 755 $RPM_BUILD_ROOT/etc/gcrypt
 %license COPYING
 
 %changelog
+* Tue Mar 29 2022 Jakub Jelen <jjelen@redhat.com> - 1.10.1-1
+- Final release (#2069263)
+
 * Wed Feb 02 2022 Jakub Jelen <jjelen@redhat.com> - 1.10.0-1
 - New upstream release (#2049322)
 

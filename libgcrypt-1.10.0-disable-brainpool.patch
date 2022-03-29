@@ -1,4 +1,4 @@
-From d651e25be0bc0c11f4d3d7c72be8cfbbe82b3874 Mon Sep 17 00:00:00 2001
+From f778433dd29fe07aa1791a0137f6f14febcce607 Mon Sep 17 00:00:00 2001
 From: Jakub Jelen <jjelen@redhat.com>
 Date: Fri, 10 Sep 2021 18:39:00 +0200
 Subject: [PATCH] Allow building libgcrypt without Brainpool curves
@@ -8,6 +8,7 @@ Subject: [PATCH] Allow building libgcrypt without Brainpool curves
 * configure.ac: Implement possibility to build without brainpool curves
 * tests/curves.c: Skip brainpool curves if they are not built-in
 * tests/keygrip.c: Skip brainpool curves if they are not built-in
+* tests/bench-slope.c: Skip brainpoll curves in they are not built-in
 
 --
 
@@ -16,15 +17,16 @@ Signed-off-by: Jakub Jelen <jjelen@redhat.com>
  README              |  3 +++
  cipher/ecc-curves.c |  4 ++++
  configure.ac        | 13 +++++++++++++
+ tests/bench-slope.c | 12 ++++++++++++
  tests/curves.c      | 46 ++++++++++++++++++++++++++++++---------------
  tests/keygrip.c     |  2 ++
- 5 files changed, 53 insertions(+), 15 deletions(-)
+ 6 files changed, 65 insertions(+), 15 deletions(-)
 
 diff --git a/README b/README
-index 436b6cd4..1044109c 100644
+index 4d7697dd..b290d01e 100644
 --- a/README
 +++ b/README
-@@ -127,6 +127,9 @@
+@@ -121,6 +121,9 @@
                       the list used with the current build the program
                       tests/version may be used.
  
@@ -71,10 +73,10 @@ index 7c86e12c..8fd95a9c 100644
        "GOST2001-test", 256, 0,
        MPI_EC_WEIERSTRASS, ECC_DIALECT_STANDARD,
 diff --git a/configure.ac b/configure.ac
-index 6efbf139..f4ac1887 100644
+index 0e67baf9..a63f7360 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -614,6 +614,14 @@ AC_ARG_WITH(fips-module-version,
+@@ -595,6 +595,14 @@ AC_ARG_WITH(fips-module-version,
  AC_DEFINE_UNQUOTED(FIPS_MODULE_VERSION, "$fips_module_version",
                     [Define FIPS module version for certification])
  
@@ -89,7 +91,7 @@ index 6efbf139..f4ac1887 100644
  # Implementation of the --disable-jent-support switch.
  AC_MSG_CHECKING([whether jitter entropy support is requested])
  AC_ARG_ENABLE(jent-support,
-@@ -2466,6 +2474,10 @@ if test x"$ppccryptosupport" = xyes ; then
+@@ -2459,6 +2467,10 @@ if test x"$ppccryptosupport" = xyes ; then
    AC_DEFINE(ENABLE_PPC_CRYPTO_SUPPORT,1,
              [Enable support for POWER 8 (PowerISA 2.07) crypto extension.])
  fi
@@ -100,7 +102,7 @@ index 6efbf139..f4ac1887 100644
  if test x"$jentsupport" = xyes ; then
    AC_DEFINE(ENABLE_JENT_SUPPORT, 1,
              [Enable support for the jitter entropy collector.])
-@@ -3296,6 +3308,7 @@ GCRY_MSG_WRAP([Enabled digest algorithms:],[$enabled_digests])
+@@ -3294,6 +3306,7 @@ GCRY_MSG_WRAP([Enabled digest algorithms:],[$enabled_digests])
  GCRY_MSG_WRAP([Enabled kdf algorithms:   ],[$enabled_kdfs])
  GCRY_MSG_WRAP([Enabled pubkey algorithms:],[$enabled_pubkey_ciphers])
  GCRY_MSG_SHOW([Random number generator:  ],[$random])
@@ -108,6 +110,79 @@ index 6efbf139..f4ac1887 100644
  GCRY_MSG_SHOW([Try using jitter entropy: ],[$jentsupport])
  GCRY_MSG_SHOW([Using linux capabilities: ],[$use_capabilities])
  GCRY_MSG_SHOW([FIPS module version:      ],[$fips_module_version])
+diff --git a/tests/bench-slope.c b/tests/bench-slope.c
+index 5c49ac25..1b5941af 100644
+--- a/tests/bench-slope.c
++++ b/tests/bench-slope.c
+@@ -2316,7 +2316,9 @@ enum bench_ecc_algo
+   ECC_ALGO_NIST_P384,
+   ECC_ALGO_NIST_P521,
+   ECC_ALGO_SECP256K1,
++#ifdef ENABLE_BRAINPOOL
+   ECC_ALGO_BRAINP256R1,
++#endif /* ENABLE_BRAINPOOL */
+   __MAX_ECC_ALGO
+ };
+ 
+@@ -2366,7 +2368,9 @@ ecc_algo_fips_allowed (int algo)
+       case ECC_ALGO_NIST_P521:
+ 	return 1;
+       case ECC_ALGO_SECP256K1:
++#ifdef ENABLE_BRAINPOOL
+       case ECC_ALGO_BRAINP256R1:
++#endif /* ENABLE_BRAINPOOL */
+       case ECC_ALGO_ED25519:
+       case ECC_ALGO_ED448:
+       case ECC_ALGO_X25519:
+@@ -2402,8 +2406,10 @@ ecc_algo_name (int algo)
+ 	return "NIST-P521";
+       case ECC_ALGO_SECP256K1:
+ 	return "secp256k1";
++#ifdef ENABLE_BRAINPOOL
+       case ECC_ALGO_BRAINP256R1:
+ 	return "brainpoolP256r1";
++#endif /* ENABLE_BRAINPOOL */
+       default:
+ 	return NULL;
+     }
+@@ -2434,8 +2440,10 @@ ecc_algo_curve (int algo)
+ 	return "NIST P-521";
+       case ECC_ALGO_SECP256K1:
+ 	return "secp256k1";
++#ifdef ENABLE_BRAINPOOL
+       case ECC_ALGO_BRAINP256R1:
+ 	return "brainpoolP256r1";
++#endif /* ENABLE_BRAINPOOL */
+       default:
+ 	return NULL;
+     }
+@@ -2466,8 +2474,10 @@ ecc_nbits (int algo)
+ 	return 521;
+       case ECC_ALGO_SECP256K1:
+ 	return 256;
++#ifdef ENABLE_BRAINPOOL
+       case ECC_ALGO_BRAINP256R1:
+ 	return 256;
++#endif /* ENABLE_BRAINPOOL */
+       default:
+ 	return 0;
+     }
+@@ -2665,6 +2675,7 @@ bench_ecc_init (struct bench_obj *obj)
+         err = gcry_sexp_build (&hd->data, NULL,
+ 			       "(data (flags raw) (value %m))", x);
+ 	break;
++#ifdef ENABLE_BRAINPOOL
+       case ECC_ALGO_BRAINP256R1:
+         err = gcry_sexp_build (&hd->key_spec, NULL,
+                                "(genkey (ECDSA (curve brainpoolP256r1)))");
+@@ -2673,6 +2684,7 @@ bench_ecc_init (struct bench_obj *obj)
+         err = gcry_sexp_build (&hd->data, NULL,
+ 			       "(data (flags raw) (value %m))", x);
+ 	break;
++#endif /* ENABLE_BRAINPOOL */
+     }
+ 
+   gcry_mpi_release (x);
 diff --git a/tests/curves.c b/tests/curves.c
 index 3c738171..8eb79565 100644
 --- a/tests/curves.c
