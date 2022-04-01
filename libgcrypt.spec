@@ -1,3 +1,19 @@
+# This is taken from gnutls.spec
+%define srpmhash() %{lua:
+local files = rpm.expand("%_specdir/libgcrypt.spec")
+for i, p in ipairs(patches) do
+   files = files.." "..p
+end
+for i, p in ipairs(sources) do
+   files = files.." "..p
+end
+local sha256sum = assert(io.popen("cat "..files.."| sha256sum"))
+local hash = sha256sum:read("*a")
+sha256sum:close()
+print(string.sub(hash, 0, 16))
+}
+
+
 Name: libgcrypt
 Version: 1.10.1
 Release: 1%{?dist}
@@ -53,16 +69,12 @@ applications using libgcrypt.
 # F34, so we use it here explicitly
 %define _lto_cflags -flto=auto -ffat-lto-objects
 
-grep "Red Hat" /etc/system-release && \
-export FIPS_SWITCH="--with-fips-module-version=RHEL%{?rhel}-%{name}-%{version}-$(date +%Y%m%d)"
-grep "Fedora" /etc/system-release && \
-export FIPS_SWITCH="--with-fips-module-version=Fedora%{?fedora}-%{name}-%{version}-$(date +%Y%m%d)"
-grep "CentOS" /etc/system-release && \
-export FIPS_SWITCH="--with-fips-module-version=CentOS%{?centos}-%{name}-%{version}-$(date +%Y%m%d)"
-
 # should be all algorithms except SM3 and SM4
 export DIGESTS='crc gostr3411-94 md4 md5 rmd160 sha1 sha256 sha512 sha3 tiger whirlpool stribog blake2'
 export CIPHERS='arcfour blowfish cast5 des aes twofish serpent rfc2268 seed camellia idea salsa20 gost28147 chacha20'
+
+eval $(sed -n 's/^\(\(NAME\|VERSION_ID\)=.*\)/OS_\1/p' /etc/os-release)
+export FIPS_MODULE_NAME="$OS_NAME ${OS_VERSION_ID%%.*} %name"
 
 autoreconf -f
 %configure --disable-static \
@@ -74,7 +86,7 @@ autoreconf -f
      --disable-brainpool \
      --enable-digests="$DIGESTS" \
      --enable-ciphers="$CIPHERS" \
-     $FIPS_SWITCH
+     --with-fips-module-version="$FIPS_MODULE_NAME %{version}-%{srpmhash}"
 sed -i -e '/^sys_lib_dlsearch_path_spec/s,/lib /usr/lib,/usr/lib /lib64 /usr/lib64 /lib,g' libtool
 %make_build
 
