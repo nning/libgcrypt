@@ -101,12 +101,12 @@ LIBGCRYPT_FORCE_FIPS_MODE=1 make check
     %{?__debug_package:%{__debug_install_post}} \
     %{__arch_install_post} \
     %{__os_install_post} \
-    dd if=/dev/zero of=%{libpath}.hmac bs=32 count=1 \
-    objcopy --update-section .note.fdo.integrity=%{libpath}.hmac %{libpath} %{libpath}.empty \
-    src/hmac256 --binary %{hmackey} %{libpath}.empty > %{libpath}.hmac \
-    objcopy --update-section .note.fdo.integrity=%{libpath}.hmac %{libpath}.empty %{libpath}.new \
-    mv -f %{libpath}.new %{libpath} \
-    rm -f %{libpath}.hmac %{libpath}.empty
+    pushd src \
+    sed -i -e 's|FILE=.*|FILE=\\\$1|' gen-note-integrity.sh \
+    READELF=readelf AWK=awk ECHO_N="-n" bash gen-note-integrity.sh %{libpath} > %{libpath}.hmac \
+    objcopy --update-section .note.fdo.integrity=%{libpath}.hmac %{libpath} new \
+    mv -f new %{libpath} \
+    rm -f %{libpath}.hmac \
 %{nil}
 
 %install
