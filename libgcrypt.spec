@@ -16,7 +16,7 @@ print(string.sub(hash, 0, 16))
 
 Name: libgcrypt
 Version: 1.10.1
-Release: 1%{?dist}
+Release: 2%{?dist}
 URL: https://www.gnupg.org/
 Source0: https://www.gnupg.org/ftp/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2
 Source1: https://www.gnupg.org/ftp/gcrypt/libgcrypt/libgcrypt-%{version}.tar.bz2.sig
@@ -176,6 +176,9 @@ mkdir -p -m 755 $RPM_BUILD_ROOT/etc/gcrypt
 %license COPYING
 
 %changelog
+* Fri Apr 08 2022 Jakub Jelen <jjelen@redhat.com> - 1.10.1-2
+- Adjust integrity check creation to match upstream (#2073018)
+
 * Tue Mar 29 2022 Jakub Jelen <jjelen@redhat.com> - 1.10.1-1
 - Final release (#2069263)
 
