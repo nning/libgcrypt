@@ -6,6 +6,8 @@ Fedora disabled Brainpool curves in libgcrypt for legal reasons. They patch
 libgcrypt before building the RPM package, so it is not a solution to allow
 Brainpool curves in the system-wide crypto policy.
 
+See https://lists.fedoraproject.org/archives/list/legal@lists.fedoraproject.org/thread/WUQNAB4EPWSJMMVECL2TZGKB5KIDESII/
+
 ## Upstream
 
     https://src.fedoraproject.org/rpms/libgcrypt.git
