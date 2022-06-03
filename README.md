@@ -26,3 +26,12 @@ See https://lists.fedoraproject.org/archives/list/legal@lists.fedoraproject.org/
     newgrp -
     mock -r fedora-36-i386 ~/rpmbuild/SRPMS/libgcrypt-1.10.1-2.fc36.src.rpm
     sudo dnf install /var/lib/mock/fedora-36-i686/result/libgcrypt-1.10.1-2.fc36.i686.rpm ~/rpmbuild/RPMS/x86_64/libgcrypt-1.10.1-2.fc36.x86_64.rpm
+
+## Build after e1fe961
+
+Brainpool curves are an option, now.
+
+    sudo yum-builddep libgcrypt.spec
+    spectool -gR libgcrypt.spec --define "_sourcedir $PWD"
+    rpmbuild -ba libgcrypt.spec --define "_sourcedir $PWD" --with brainpool
+    sudo dnf reinstall ~/rpmbuild/RPMS/x86_64/libgcrypt-1.10.1-3.fc35.x86_64.rpm
